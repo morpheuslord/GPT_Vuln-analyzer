@@ -41,4 +41,8 @@ def profile(ip):
     return response
 ```
 
+## Advantages
 
+- Can be used in developing a more advanced systems completly made of the API and scanner combination
+- Can increase the effectiveness of the final system
+- Highly productive when working with models such as GPT3
