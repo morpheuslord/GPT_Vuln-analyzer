@@ -7,6 +7,16 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 - All the packages mentioned in the requirements.txt file
 - OpenAi api
 
+## Usage
+
+- First
+- - Change the "__API__KEY__" part of the code with OpenAI api key
+- second install the packages
+- - run pip install -r requirements.txt
+- run the code python3 gpt_vuln.py <<Target>> or if windows run python gpt_vuln.py <<Target>>
+
+Supported in both windows and linux
+    
 ## Understanding the code
 
 Profiles:
