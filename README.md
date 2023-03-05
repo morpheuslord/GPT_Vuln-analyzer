@@ -3,9 +3,9 @@
 This is a Proof Of Concept application that demostrates how AI can be used to generate accurate results for vulnerability analysis and also allows further utilization of the already super useful ChatGPT.
 
 ## Requirements
-Python 3.10
-All the packages mentioned in the requirements.txt file
-OpenAi api
+- Python 3.10
+- All the packages mentioned in the requirements.txt file
+- OpenAi api
 
 ## Understanding the code
 
