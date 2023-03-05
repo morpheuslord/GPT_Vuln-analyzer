@@ -8,8 +8,20 @@ All the packages mentioned in the requirements.txt file
 OpenAi api
 
 ## Understanding the code
+
+Profiles:
+
+| Parameter | Return data     | Description | Nmap Command |
+| :-------- | :------- | :-------------------------------- | :---------|
+| `p1`      | `json` | Effective  Scan | `-Pn -sV -T4 -O -F`|
+| `p2`      | `json` | Simple  Scan | `-Pn -T4 -A -v`|
+| `p3`      | `json` | Low Power  Scan | `-Pn -sS -sU -T4 -A -v`|
+| `p4`      | `json` | Partial Intense  Scan | `-Pn -p- -T4 -A -v`|
+| `p5`      | `json` | Complete Intense  Scan | `-Pn -sS -sU -T4 -A -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --script=vuln`|
+
 The profile is the type of scan that will be executed by the nmap subprocess. The Ip or target will be provided via argparse. At first the custom nmap scan is run which has all the curcial arguments for the scan to continue. nextly the scan data is extracted from the huge pile of data which has been driven by nmap. the "scan" object has a list of sub data under "tcp" each labled according to the ports opened. once the data is extracted the data is sent to openai API davenci model via a prompt. the prompt specifically asks for an JSON output and the data also to be used in a certain manner. 
 
+The entire structure of request that has to be sent to the openai API is designed in the completion section of the Program.
 ```python
 def profile(ip):
     nm.scan('{}'.format(ip), arguments='-Pn -sS -sU -T4 -A -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --script=vuln')
@@ -28,3 +40,5 @@ def profile(ip):
     response = completion.choices[0].text
     return response
 ```
+
+
