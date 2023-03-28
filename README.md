@@ -59,51 +59,53 @@ def profile(ip):
 ### Output
 
 ```json
+ _______ _     _ _______
+(_______|_)   (_|_______)
+ _   ___ _     _ _______
+| | (_  | |   | |  ___  |
+| |___) |\ \ / /| |   | |
+ \_____/  \___/ |_|   |_|
+
+
+
+
 {
-    "vulnerabilities": [
-        {
-            "name": "Port 135 Open",
-            "type": "network",
-            "severity": "low",
-            "description": "TCP port 135 is open, which suggests that Microsoft Windows RPC might be running on this system and could potentially be vulnerable to exploitation."
+    "Vulnerability Report": {
+        "Target IP": "127.0.0.1",
+        "OS Detected": {
+            "Name": "Microsoft Windows 10 1607",
+            "Accuracy": "100",
+            "CPE": [
+                "cpe:/o:microsoft:windows_10:1607"
+            ]
         },
-        {
-            "name": "Port 445 Open",
-            "type": "network",
-            "severity": "low",
-            "description": "TCP port 445 is open, which suggests that Microsoft Windows File Share might be running on this system and could potentially be vulnerable to exploitation."
+        "Open Ports": {
+            "Port 135": {
+                "State": "open",
+                "Reason": "syn-ack",
+                "Name": "msrpc",
+                "Product": "Microsoft Windows RPC",
+                "Version": "",
+                "Extra Info": "",
+                "Conf": "10",
+                "CPE": "cpe:/o:microsoft:windows"
+            },
+            "Port 445": {
+                "State": "open",
+                "Reason": "syn-ack",
+                "Name": "microsoft-ds",
+                "Product": "",
+                "Version": "",
+                "Extra Info": "",
+                "Conf": "3",
+                "CPE": ""
+            }
         },
-        {
-            "name": "Port 902 Open",
-            "type": "network",
-            "severity": "low",
-            "description": "TCP port 902 is open, which suggests that VMware Authentication Daemon might be running on this system and could potentially be vulnerable to exploitation."
-        },
-        {
-            "name": "Port 912 Open",
-            "type": "network",
-            "severity": "low",
-            "description": "TCP port 912 is open, which suggests that VMware Authentication Daemon might be running on this system and could potentially be vulnerable to exploitation."
-        },
-        {
-            "name": "Port 20000 Open",
-            "type": "network",
-            "severity": "low",
-            "description": "TCP port 20000 is open, which suggests that the system could potentially be vulnerable to exploitation."
-        },
-        {
-            "name": "Clock Skew Detected",
-            "type": "system",
-            "severity": "low",
-            "description": "A clock skew of -1 second has been detected, which may indicate an incorrect system configuration or an attack on the system clock."
-        },
-        {
-            "name": "Outdated OS Version Detected",
-            "type": "system",
-            "severity": "medium",
-            "description": "Microsoft Windows 10 Version 1607 is detected, which is no longer supported and is known to contain vulnerabilities."
+        "Vulnerabilities": {
+            "Port 135": [],
+            "Port 445": []
         }
-    ]
+    }
 }
 ```
 
