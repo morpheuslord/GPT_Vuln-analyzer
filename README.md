@@ -28,7 +28,7 @@ python gpt_vuln.py --help
 python gpt_vuln.py --target <IP>
 
 # Specify target and profile
-python get_vuln.py --target <<IP>> --profile <<1-5>> 
+python get_vuln.py --target <IP> --profile <1-5> 
 (Default:1)
 ```
 
