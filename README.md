@@ -9,7 +9,7 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 
 ## Usage
 
-- First Change the "__API__KEY__" part of the code with OpenAI api key
+- First Change the "API__KEY" part of the code with OpenAI api key
 ```python
 openai.api_key = "__API__KEY" # Enter your API key
 ```
