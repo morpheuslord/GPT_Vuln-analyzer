@@ -25,7 +25,7 @@ pip install -r requirements.txt
 python gpt_vuln.py --help
 
 # Specify target without anything else
-python gpt_vuln.py --target <<IP>>
+python gpt_vuln.py --target <IP>
 
 # Specify target and profile
 python get_vuln.py --target <<IP>> --profile <<1-5>> 
