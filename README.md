@@ -19,7 +19,17 @@ pip3 install -r requirements.txt
 or
 pip install -r requirements.txt
 ```
-- run the code python3 gpt_vuln.py <<Target>> or if windows run python gpt_vuln.py <<Target>>
+- run the code python3 gpt_vuln.py
+```bash
+# Help Menu
+python gpt_vuln.py --help
+
+# Specify target without anything else
+python gpt_vuln.py --target <<IP>>
+
+# Specify target and profile (Default : 1)
+python get_vuln.py --target <<IP>> --profile <<1-5>> 
+```
 
 Supported in both windows and linux
     
