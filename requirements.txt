@@ -14,3 +14,5 @@ tqdm==4.65.0
 urllib3==1.26.14
 yarl==1.8.2
 dnspython
+rich
+cowsay
