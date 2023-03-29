@@ -33,6 +33,9 @@ python get_vuln.py --target <IP> --attack nmap --profile <1-5>
 
 # Specify target for DNS no profile needed
 python get_vuln.py --target <IP or HOSTNAME> --attack dns
+
+# Specify target for Subdomain Enumeration no profile needed
+python get_vuln.py --target <HOSTNAME> --attack sub
 ```
 
 Supported in both windows and linux
