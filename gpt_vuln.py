@@ -152,6 +152,7 @@ def p5(ip):
 
 def dnsr(target):
     analize = ''
+    # Records for analysis
     record_types = ['A', 'AAAA', 'NS', 'CNAME', 'MX', 'PTR', 'SOA', 'TXT']
     for records in record_types:
         try:
