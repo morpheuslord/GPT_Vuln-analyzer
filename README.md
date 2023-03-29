@@ -68,6 +68,7 @@ def profile(ip):
     return response
 ```
 ### Output
+nmap output:
 ```json
 {
     "Vulnerability Report": {
@@ -108,7 +109,8 @@ def profile(ip):
     }
 }
 ```
-DNS Output
+DNS Output:
+target is google.com
 ```json
 
 {
