@@ -171,4 +171,5 @@ target is google.com
 - Can be used in developing a more advanced systems completly made of the API and scanner combination
 - Has the capability to analize DNS information and reslove Mustiple records it a more better format.
 - Can increase the effectiveness of the final system
+- Can also perform subdomain enumeration
 - Highly productive when working with models such as GPT3
