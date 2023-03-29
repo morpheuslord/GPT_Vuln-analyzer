@@ -14,7 +14,11 @@ parser.add_argument('--target', metavar='target', type=str,
 parser.add_argument('--profile', metavar='profile', type=int, default=1,
                     help='Enter Profile of scan 1-5 (Default: 1)', required=False)
 parser.add_argument('--attack', metavar='attack', type=str,
-                    help='Enter Attack type nmap, dns or sub', required=False)
+                    help='''
+                    Enter Attack type nmap, dns or sub. 
+                    sub - Subdomain Enumeration using the default array. 
+                    dns - to perform DNS Enumeration and get openion from Chat-GPT
+                    ''', required=False)
 args = parser.parse_args()
 
 target = args.target
