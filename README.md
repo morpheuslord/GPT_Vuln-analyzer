@@ -24,12 +24,15 @@ pip install -r requirements.txt
 # Help Menu
 python gpt_vuln.py --help
 
-# Specify target without anything else
-python gpt_vuln.py --target <IP>
+# Specify target with the attack 
+python gpt_vuln.py --target <IP> --attack dns/nmap
 
-# Specify target and profile
-python get_vuln.py --target <IP> --profile <1-5> 
+# Specify target and profile for nmap
+python get_vuln.py --target <IP> --attack nmap --profile <1-5> 
 (Default:1)
+
+# Specify target for DNS no profile needed
+python get_vuln.py --target <IP or HOSTNAME> --attack dns
 ```
 
 Supported in both windows and linux
