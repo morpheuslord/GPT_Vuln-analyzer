@@ -21,8 +21,11 @@ pip install -r requirements.txt
 ```
 - run the code python3 gpt_vuln.py
 ```bash
-# Help Menu
+# Regular Help Menu
 python gpt_vuln.py --help
+
+# Rich Help Menu
+python get_vuln.py --r help
 
 # Specify target with the attack 
 python gpt_vuln.py --target <IP> --attack dns/nmap
