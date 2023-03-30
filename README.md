@@ -179,13 +179,13 @@ python GVA_gui.py
 ```
 
 ### main window
-![main](https://github.com/morpheuslord/GPT_Vuln-analyzer/blob/a2b11f51ca8a79a82ff046b364864a742259a211/output/dns_output.jpeg)
+![main](https://github.com/morpheuslord/GPT_Vuln-analyzer/blob/a2b11f51ca8a79a82ff046b364864a742259a211/output/dns_output.png)
 
 ### output_DNS
-![dns_out](https://github.com/morpheuslord/GPT_Vuln-analyzer/blob/a2b11f51ca8a79a82ff046b364864a742259a211/output/dns_output.jpeg)
+![dns_out](https://github.com/morpheuslord/GPT_Vuln-analyzer/blob/a2b11f51ca8a79a82ff046b364864a742259a211/output/dns_output.png)
 
 ### output_nmap
-![nmap_out](https://github.com/morpheuslord/GPT_Vuln-analyzer/blob/a2b11f51ca8a79a82ff046b364864a742259a211/output/nmap_output.jpeg)
+![nmap_out](https://github.com/morpheuslord/GPT_Vuln-analyzer/blob/a2b11f51ca8a79a82ff046b364864a742259a211/output/nmap_output.png)
 
 ## Advantages
 
