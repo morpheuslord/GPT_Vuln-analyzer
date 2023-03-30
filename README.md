@@ -7,7 +7,7 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 - All the packages mentioned in the requirements.txt file
 - OpenAi api
 
-## Usage
+## Usage CLI
 
 - First Change the "__API__KEY__" part of the code with OpenAI api key
 ```python
@@ -169,6 +169,17 @@ target is google.com
   }
 }
 ```
+
+# Usage GUI
+The GUI uses customtkinter for the running of the code. The interface is straight forward the only thing required to remember is:
+- When using dns attack dont specify the profile
+
+### main window
+
+### output_DNS
+
+### output_nmap
+
 ## Advantages
 
 - Can be used in developing a more advanced systems completly made of the API and scanner combination
