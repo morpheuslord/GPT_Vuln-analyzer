@@ -16,3 +16,5 @@ yarl==1.8.2
 dnspython
 rich
 cowsay
+tk
+customtkinter
