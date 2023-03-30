@@ -179,15 +179,15 @@ python GVA_gui.py
 ```
 
 ### main window
-![main](https://github.com/morpheuslord/GPT_Vuln-analyzer/blob/a2b11f51ca8a79a82ff046b364864a742259a211/output/dns_output.png)
+![main](https://user-images.githubusercontent.com/70637311/228863455-993e0a21-c06c-44c7-87e6-68d758a78e2c.jpeg)
 
 ### output_DNS
-![dns_out](https://github.com/morpheuslord/GPT_Vuln-analyzer/blob/a2b11f51ca8a79a82ff046b364864a742259a211/output/dns_output.png)
+![dns_output](https://user-images.githubusercontent.com/70637311/228863540-553f8560-fdf5-48f7-96e8-1f831ab3a8f2.png)
 
 ### output_nmap
-![nmap_out](https://github.com/morpheuslord/GPT_Vuln-analyzer/blob/a2b11f51ca8a79a82ff046b364864a742259a211/output/nmap_output.png)
+![nmap_output](https://user-images.githubusercontent.com/70637311/228863611-5d8380f0-28d5-4925-9ad3-62cd28a1ecd4.png)
 
-## Advantages
+## Advantage
 
 - Can be used in developing a more advanced systems completly made of the API and scanner combination
 - Has the capability to analize DNS information and reslove Mustiple records it a more better format.
