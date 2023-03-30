@@ -179,7 +179,7 @@ python GVA_gui.py
 ```
 
 ### main window
-
+![main](https://github.com/morpheuslord/GPT_Vuln-analyzer/blob/483b114ec8107af4f8856e8c7a34d02f376039ab/output/main.png)
 ### output_DNS
 
 ### output_nmap
