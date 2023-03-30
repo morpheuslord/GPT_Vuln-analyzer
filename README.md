@@ -174,6 +174,10 @@ target is google.com
 The GUI uses customtkinter for the running of the code. The interface is straight forward the only thing required to remember is:
 - When using dns attack dont specify the profile
 
+```bash
+python GVA_gui.py
+```
+
 ### main window
 
 ### output_DNS
