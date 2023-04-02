@@ -11,7 +11,7 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 
 - First Change the "__API__KEY__" part of the code with OpenAI api key
 ```python
-openai.api_key = "__API__KEY__" # Enter your API key
+akey = "__API__KEY__" # Enter your API key
 ```
 - second install the packages
 ```bash
