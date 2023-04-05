@@ -1,0 +1,3 @@
+include GVA/*.py
+include GVA/commands/*.py
+include GVA/*.txt
