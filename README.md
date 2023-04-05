@@ -7,6 +7,28 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 - All the packages mentioned in the requirements.txt file
 - OpenAi api
 
+## Usage Package
+
+### Import packages 
+```bash
+cd package && pip3/pip install .
+```
+
+Simple import any of the 3 packages and then add define the variables accordingly
+```python
+from GVA import profile
+from GVA import dns
+from GVA import subdomain
+
+key = "__API__KEY__"
+profile.openai.api_key = key
+dns.openai.api_key = key
+
+print(profile.p1("<IP>"))
+print(dns.dnsr("<DOMAIN>"))
+subdomain.sub("<DOMAIN>")
+```
+
 ## Usage CLI
 
 - First Change the "__API__KEY__" part of the code with OpenAI api key
