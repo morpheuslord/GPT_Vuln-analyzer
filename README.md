@@ -19,6 +19,7 @@ Simple import any of the 3 packages and then add define the variables accordingl
 from GVA import profile
 from GVA import dns
 from GVA import subdomain
+from GVA import gui
 
 key = "__API__KEY__"
 profile.openai.api_key = key
@@ -27,6 +28,7 @@ dns.openai.api_key = key
 print(profile.p1("<IP>"))
 print(dns.dnsr("<DOMAIN>"))
 subdomain.sub("<DOMAIN>")
+gui.application()
 ```
 
 ## Usage CLI
