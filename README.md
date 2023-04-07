@@ -203,7 +203,7 @@ target is google.com
 GEO Location output:
 ```json
 {
-  "ip": "157.45.183.61",
+  "ip": "█████████████",
   "continent_code": "AS",
   "continent_name": "Asia",
   "country_code2": "IN",
