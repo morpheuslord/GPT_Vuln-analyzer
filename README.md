@@ -20,7 +20,9 @@ from GVA import profile
 from GVA import dns
 from GVA import subdomain
 from GVA import gui
+from GVA.geo import geoip
 
+GeoIP_key = "__API__KEY__"
 key = "__API__KEY__"
 profile.openai.api_key = key
 dns.openai.api_key = key
@@ -28,7 +30,7 @@ dns.openai.api_key = key
 print(profile.p1("<IP>"))
 print(dns.dnsr("<DOMAIN>"))
 subdomain.sub("<DOMAIN>")
-gui.application()
+print(gui.application(GeoIP_key, "<TARGET>"))
 ```
 
 ## Usage CLI
