@@ -35,9 +35,10 @@ print(gui.application(GeoIP_key, "<TARGET>"))
 
 ## Usage CLI
 
-- First Change the "__API__KEY__" part of the code with OpenAI api key
+- First Change the "__API__KEY__" part of the code with OpenAI api key and the IPGeolocation API key
 ```python
-akey = "__API__KEY__" # Enter your API key
+gkey = "__API__KEY__" # Enter your IPGeolocation API key
+akey = "__API__KEY__" # Enter your OpenAI API key
 ```
 - second install the packages
 ```bash
