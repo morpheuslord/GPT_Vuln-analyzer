@@ -2,10 +2,9 @@ import customtkinter
 import openai
 import nmap
 import dns.resolver
-
+from subprocess import run
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
-
 
 root = customtkinter.CTk()
 root.title("GVA - GUI")
@@ -16,42 +15,60 @@ model_engine = "text-davinci-003"
 
 
 def application():
-    apikey = entry1.get()
-    openai.api_key = apikey
-    target = entry2.get()
-    attack = entry5.get()
-    outputf = str(entry4.get())
-    match attack:
-        case "nmap":
-            p = int(entry3.get())
-            match p:
-                case 1:
-                    val = p1(target)
-                    print(val)
-                    output_save(val, outputf)
-                case 2:
-                    val = p2(target)
-                    print(val)
-                    output_save(val, outputf)
-                case 3:
-                    val = p3(target)
-                    print(val)
-                    output_save(val, outputf)
-                case 4:
-                    val = p4(target)
-                    print(val)
-                    output_save(val, outputf)
-                case 5:
-                    val = p5(target)
-                    print(val)
-                    output_save(val, outputf)
-        case "dns":
-            val = dnsr(target)
-            output_save(val, outputf)
+    try:
+        apikey = entry1.get()
+        openai.api_key = apikey
+        target = entry2.get()
+        attack = entry5.get()
+        outputf = str(entry4.get())
+        match attack:
+            case 'geo':
+                val = geoip(apikey, target)
+                print(val)
+                output_save(val, outputf)
+            case "nmap":
+                p = int(entry3.get())
+                match p:
+                    case 1:
+                        val = p1(target)
+                        print(val)
+                        output_save(val, outputf)
+                    case 2:
+                        val = p2(target)
+                        print(val)
+                        output_save(val, outputf)
+                    case 3:
+                        val = p3(target)
+                        print(val)
+                        output_save(val, outputf)
+                    case 4:
+                        val = p4(target)
+                        print(val)
+                        output_save(val, outputf)
+                    case 5:
+                        val = p5(target)
+                        print(val)
+                        output_save(val, outputf)
+            case "dns":
+                val = dnsr(target)
+                output_save(val, outputf)
+            case "subd":
+                val = sub(target)
+                output_save(val, outputf)
+    except KeyboardInterrupt:
+        print("Keyboard Interrupt detected ...")
+
+
+def geoip(key, target):
+    url = "https://api.ipgeolocation.io/ipgeo?apiKey={a}&ip={b}".format(
+        a=key, b=target)
+    content = run("curl {}".format(url))
+    return content
 
 
 def output_save(output, outf):
     top = customtkinter.CTkToplevel(root)
+    top.title("GVA Output")
     top.grid_rowconfigure(0, weight=1)
     top.grid_columnconfigure(0, weight=1)
     top.textbox = customtkinter.CTkTextbox(
@@ -65,6 +82,34 @@ def output_save(output, outf):
     file.write(str(output))
     file.close
     top.textbox.insert("0.0", text=output)
+
+
+def sub(target):
+    s_array = ['www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'hod', 'butterfly', 'ckp',
+               'tele2', 'receiver', 'reality', 'panopto', 't7', 'thot', 'wien', 'uat-online', 'Footer']
+
+    ss = []
+    out = ""
+    for subd in s_array:
+        try:
+            ip_value = dns.resolver.resolve(f'{subd}.{target}', 'A')
+            if ip_value:
+                ss.append(f'{subd}.{target}')
+                if f"{subd}.{target}" in ss:
+                    print(f'{subd}.{target} | Found')
+                    out += f'{subd}.{target}'
+                    out += "\n"
+                    out += ""
+                else:
+                    pass
+        except dns.resolver.NXDOMAIN:
+            pass
+        except dns.resolver.NoAnswer:
+            pass
+        except KeyboardInterrupt:
+            print('Ended')
+            quit()
+    return out
 
 
 def dnsr(target):
