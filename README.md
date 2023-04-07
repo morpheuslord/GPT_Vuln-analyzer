@@ -201,7 +201,43 @@ target is google.com
 ```
 GEO Location output:
 ```json
-{"ip":"157.45.183.61","continent_code":"AS","continent_name":"Asia","country_code2":"IN","country_code3":"IND","country_name":"India","country_capital":"New Delhi","state_prov":"Maharashtra","district":"","city":"Navi Mumbai","zipcode":"400701","latitude":"19.12418","longitude":"73.00551","is_eu":false,"calling_code":"+91","country_tld":".in","languages":"en-IN,hi,bn,te,mr,ta,ur,gu,kn,ml,or,pa,as,bh,sat,ks,ne,sd,kok,doi,mni,sit,sa,fr,lus,inc","country_flag":"https://ipgeolocation.io/static/flags/in_64.png","geoname_id":"10128846","isp":"Reliance Jio Infocomm Limited","connection_type":"","organization":"Reliance Jio Infocomm Limited","currency":{"code":"INR","name":"Indian Rupee","symbol":"₹"},"time_zone":{"name":"Asia/Kolkata","offset":5.5,"current_time":"2023-04-07 15:17:57.031+0530","current_time_unix":1680860877.031,"is_dst":false,"dst_savings":0}}
+{
+  "ip": "157.45.183.61",
+  "continent_code": "AS",
+  "continent_name": "Asia",
+  "country_code2": "IN",
+  "country_code3": "IND",
+  "country_name": "India",
+  "country_capital": "New Delhi",
+  "state_prov": "Maharashtra",
+  "district": "",
+  "city": "Navi Mumbai",
+  "zipcode": "400701",
+  "latitude": "19.12418",
+  "longitude": "73.00551",
+  "is_eu": false,
+  "calling_code": "+91",
+  "country_tld": ".in",
+  "languages": "en-IN,hi,bn,te,mr,ta,ur,gu,kn,ml,or,pa,as,bh,sat,ks,ne,sd,kok,doi,mni,sit,sa,fr,lus,inc",
+  "country_flag": "https://ipgeolocation.io/static/flags/in_64.png",
+  "geoname_id": "10128846",
+  "isp": "Reliance Jio Infocomm Limited",
+  "connection_type": "",
+  "organization": "Reliance Jio Infocomm Limited",
+  "currency": {
+    "code": "INR",
+    "name": "Indian Rupee",
+    "symbol": "₹"
+  },
+  "time_zone": {
+    "name": "Asia/Kolkata",
+    "offset": 5.5,
+    "current_time": "2023-04-07 15:17:57.031+0530",
+    "current_time_unix": 1680860877.031,
+    "is_dst": false,
+    "dst_savings": 0
+  }
+}
 ```
 
 # Usage GUI
