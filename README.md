@@ -258,6 +258,10 @@ python GVA_gui.py
 ### output_nmap
 ![nmap_output](https://user-images.githubusercontent.com/70637311/228863611-5d8380f0-28d5-4925-9ad3-62cd28a1ecd4.png)
 
+### oytput_geo
+![GEO_output](https://user-images.githubusercontent.com/70637311/230589239-b11c39df-b047-4fbb-bb68-61d30fe2b3c9.png)
+
+
 ## Advantage
 
 - Can be used in developing a more advanced systems completly made of the API and scanner combination
