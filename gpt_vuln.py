@@ -2,13 +2,16 @@ import argparse
 import cowsay
 import commands.p as p
 import commands.d as d
+from subprocess import run
 from rich.console import Console
 from rich.table import Table
 from commands.p import p1, p2, p3, p4, p5
 from commands.d import dnsr
+from commands.geo import geoip, key
 from commands.subdomain import sub
 
 console = Console()
+gkey = "__API__KEY__"
 akey = "__API__KEY__"
 p.openai.api_key = akey
 d.openai.api_key = akey
@@ -21,8 +24,8 @@ parser.add_argument('--profile', metavar='profile', type=int, default=1,
                     help='Enter Profile of scan 1-5 (Default: 1)', required=False)
 parser.add_argument('--attack', metavar='attack', type=str,
                     help='''
-                    Enter Attack type nmap, dns or sub. 
-                    sub - Subdomain Enumeration using the default array. 
+                    Enter Attack type nmap, dns or sub.
+                    sub - Subdomain Enumeration using the default array.
                     dns - to perform DNS Enumeration and get openion from Chat-GPT
                     ''', required=False)
 parser.add_argument('--r', metavar='r', type=str,
@@ -43,7 +46,7 @@ def rt():
     table.add_column("Discription")
     table.add_column("Other internal options")
     table.add_row("Attack", "--attack", "TXT/STRING",
-                  "The Attack the user whats to run", "sub / dns")
+                  "The Attack the user whats to run", "sub / dns / nmap / geo")
     table.add_row("Target", "--target", "IP/HOSTNAME",
                   "The target of the user", "None")
     table.add_row("Profile", "--profile", "INT (1-5)",
@@ -60,6 +63,9 @@ def main(target):
             rt()
         else:
             match attack:
+                case 'geo':
+                    final = geoip(gkey, target)
+                    print(final)
                 case 'nmap':
                     match profile:
                         case 1:
