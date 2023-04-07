@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.table import Table
 from commands.p import p1, p2, p3, p4, p5
 from commands.d import dnsr
-from commands.geo import geoip, key
+from commands.geo import geoip
 from commands.subdomain import sub
 
 console = Console()
