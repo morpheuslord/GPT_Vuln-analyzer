@@ -2,6 +2,10 @@
 
 This is a Proof Of Concept application that demostrates how AI can be used to generate accurate results for vulnerability analysis and also allows further utilization of the already super useful ChatGPT made using openai-api, python-nmap, dnsresolver python modules and also use customtkinter and tkinter for the GUI version of the code. This project also has a CLI and a GUI interface, It is capable of doing network vulnerability analysis, DNS enumeration and also subdomain enumeration.
 
+### Note
+If intrested view my Nmap-API-GPT project that intigrates the GPT section into a custom RestAPI for network recon
+link: https://github.com/morpheuslord/Nmap-API-GPT
+
 ## Requirements
 - Python 3.10
 - All the packages mentioned in the requirements.txt file
