@@ -1,1 +1,0 @@
-Anyone can contribute

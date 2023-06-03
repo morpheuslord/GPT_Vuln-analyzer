@@ -1,7 +1,7 @@
 import nmap
 import openai
 
-openai.api_key = ""
+openai.api_key = "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"
 model_engine = "text-davinci-003"
 nm = nmap.PortScanner()
 

@@ -3,6 +3,8 @@ import openai
 import nmap
 import dns.resolver
 from subprocess import run
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table
+from reportlab.lib.styles import getSampleStyleSheet
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
@@ -284,3 +286,5 @@ button = customtkinter.CTkButton(
 button.pack(pady=12, padx=10)
 
 root.mainloop()
+
+# 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
