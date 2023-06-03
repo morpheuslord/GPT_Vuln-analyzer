@@ -1,11 +1,15 @@
 import argparse
 import cowsay
-import commands.p as p
-import commands.d as d
+import commands.domain as domain
+import commands.port_scanner as ports
 from rich.console import Console
 from rich.table import Table
-from commands.p import p1, p2, p3, p4, p5
-from commands.d import dnsr
+from commands.port_scanner import p1
+from commands.port_scanner import p2
+from commands.port_scanner import p3
+from commands.port_scanner import p4
+from commands.port_scanner import p5
+from commands.domain import dnsr
 from commands.geo import geoip
 from commands.subdomain import sub
 
@@ -13,8 +17,8 @@ from commands.subdomain import sub
 console = Console()
 gkey = "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"
 akey = "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"
-p.openai.api_key = akey
-d.openai.api_key = akey
+ports.openai.api_key = akey
+domain.openai.api_key = akey
 
 parser = argparse.ArgumentParser(
     description='Python-Nmap and chatGPT intigrated Vulnerability scanner')

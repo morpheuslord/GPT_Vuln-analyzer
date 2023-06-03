@@ -2,7 +2,7 @@ import openai
 import dns.resolver
 from rich.progress import track
 
-openai.api_key = ''
+openai.api_key = ""
 model_engine = "text-davinci-003"
 
 
