@@ -6,7 +6,7 @@ openai.api_key = ""
 model_engine = "text-davinci-003"
 
 
-def dnsr(target):
+def dnsr(target: str):
     analize = ''
     record_types = ['A', 'AAAA', 'NS', 'CNAME', 'MX', 'PTR', 'SOA', 'TXT']
     for records in track(record_types):
