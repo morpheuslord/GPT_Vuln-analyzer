@@ -4,7 +4,7 @@ from rich.progress import track
 
 def sub(target: str) -> str:
     sd_data = []
-
+    # Subdomain lists basic subdomains that can be enumerated
     s_array = ['www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'hod', 'butterfly', 'ckp',
                'tele2', 'receiver', 'reality', 'panopto', 't7', 'thot', 'wien', 'uat-online', 'Footer']
     for subd in track(s_array):

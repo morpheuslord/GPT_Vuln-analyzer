@@ -9,6 +9,7 @@ model_engine = "text-davinci-003"
 
 def dnsr(target: str) -> Any:
     analyze = ''
+    # The DNS Records to be enumerated
     record_types = ['A', 'AAAA', 'NS', 'CNAME', 'MX', 'PTR', 'SOA', 'TXT']
     for records in track(record_types):
         try:
