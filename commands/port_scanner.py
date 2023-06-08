@@ -22,11 +22,11 @@ def scanner(ip: str, profile: int) -> str:
         raise ValueError(f"Invalid Argument: {profile}")
     nm.scan('{}'.format(ip), arguments='{}'.format(profile_argument))
     json_data = nm.analyse_nmap_xml_scan()
-    analize = json_data["scan"]
+    analyze = json_data["scan"]
     try:
         # Prompt about what the quary is all about
         prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
-            analize)
+            analyze)
         # A structure for the request
         completion = openai.Completion.create(
             engine=model_engine,

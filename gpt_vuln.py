@@ -12,8 +12,9 @@ from typing import Any
 
 
 console = Console()
-gkey = "__API__KEY__"
-akey = "__API__KEY__"
+# The API Keys
+gkey = "__API__KEY__"  # GeoIP API
+akey = "__API__KEY__"  # OpenAI API
 ports.openai.api_key = akey
 domain.openai.api_key = akey
 
@@ -39,7 +40,7 @@ attack = args.attack
 choice = args.r
 
 
-def rt() -> None:
+def help_menu() -> None:
     table = Table(title="Help Menu for GVA")
     table.add_column("Options")
     table.add_column("Input Type")
@@ -61,35 +62,35 @@ def main(target: Any) -> None:
     cowsay.cow('GVA Usage in progress...')
     try:
         if choice == "help":
-            rt()
+            help_menu()
         else:
             match attack:
                 case 'geo':
-                    final = geoip(gkey, target)
-                    print(final)
+                    geo_output = geoip(gkey, target)
+                    print(geo_output)
                 case 'nmap':
                     match profile:
                         case 1:
-                            final = scanner(target, 1)
-                            print(final)
+                            scan_output = scanner(target, 1)
+                            print(scan_output)
                         case 2:
-                            final = scanner(target, 2)
-                            print(final)
+                            scan_output = scanner(target, 2)
+                            print(scan_output)
                         case 3:
-                            final = scanner(target, 3)
-                            print(final)
+                            scan_output = scanner(target, 3)
+                            print(scan_output)
                         case 4:
-                            final = scanner(target, 4)
-                            print(final)
+                            scan_output = scanner(target, 4)
+                            print(scan_output)
                         case 5:
-                            final = scanner(target, 5)
-                            print(final)
+                            scan_output = scanner(target, 5)
+                            print(scan_output)
                 case 'dns':
-                    final = dnsr(target)
-                    print(final)
+                    dns_output = dnsr(target)
+                    print(dns_output)
                 case 'sub':
-                    final = sub(target)
-                    console.print(final, style="bold underline")
+                    sub_output = sub(target)
+                    console.print(sub_output, style="bold underline")
     except KeyboardInterrupt:
         console.print_exception("Bye")
         quit()

@@ -3,7 +3,7 @@ from rich.progress import track
 
 
 def sub(target: str) -> str:
-    ss = []
+    sd_data = []
 
     s_array = ['www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'hod', 'butterfly', 'ckp',
                'tele2', 'receiver', 'reality', 'panopto', 't7', 'thot', 'wien', 'uat-online', 'Footer']
@@ -11,8 +11,8 @@ def sub(target: str) -> str:
         try:
             ip_value = dns.resolver.resolve(f'{subd}.{target}', 'A')
             if ip_value:
-                ss.append(f'{subd}.{target}')
-                if f"{subd}.{target}" in ss:
+                sd_data.append(f'{subd}.{target}')
+                if f"{subd}.{target}" in sd_data:
                     print(f'{subd}.{target} | Found')
                 else:
                     pass
