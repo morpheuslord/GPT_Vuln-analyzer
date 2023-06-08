@@ -2,7 +2,7 @@ import dns.resolver
 from rich.progress import track
 
 
-def sub(target):
+def sub(target: str) -> str:
     ss = []
 
     s_array = ['www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'hod', 'butterfly', 'ckp',
@@ -23,3 +23,4 @@ def sub(target):
         except KeyboardInterrupt:
             print('Ended')
             quit()
+    return 'Done'

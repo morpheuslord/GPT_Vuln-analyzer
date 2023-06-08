@@ -4,19 +4,16 @@ import commands.domain as domain
 import commands.port_scanner as ports
 from rich.console import Console
 from rich.table import Table
-from commands.port_scanner import p1
-from commands.port_scanner import p2
-from commands.port_scanner import p3
-from commands.port_scanner import p4
-from commands.port_scanner import p5
+from commands.port_scanner import scanner
 from commands.domain import dnsr
 from commands.geo import geoip
 from commands.subdomain import sub
+from typing import Any
 
 
 console = Console()
-gkey = "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"
-akey = "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"
+gkey = "__API__KEY__"
+akey = "__API__KEY__"
 ports.openai.api_key = akey
 domain.openai.api_key = akey
 
@@ -42,7 +39,7 @@ attack = args.attack
 choice = args.r
 
 
-def rt():
+def rt() -> None:
     table = Table(title="Help Menu for GVA")
     table.add_column("Options")
     table.add_column("Input Type")
@@ -60,7 +57,7 @@ def rt():
     console.print(table)
 
 
-def main(target):
+def main(target: Any) -> None:
     cowsay.cow('GVA Usage in progress...')
     try:
         if choice == "help":
@@ -73,19 +70,19 @@ def main(target):
                 case 'nmap':
                     match profile:
                         case 1:
-                            final = p1(target)
+                            final = scanner(target, 1)
                             print(final)
                         case 2:
-                            final = p2(target)
+                            final = scanner(target, 2)
                             print(final)
                         case 3:
-                            final = p3(target)
+                            final = scanner(target, 3)
                             print(final)
                         case 4:
-                            final = p4(target)
+                            final = scanner(target, 4)
                             print(final)
                         case 5:
-                            final = p5(target)
+                            final = scanner(target, 5)
                             print(final)
                 case 'dns':
                     final = dnsr(target)
