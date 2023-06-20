@@ -23,6 +23,9 @@ def dnsr(target: str) -> Any:
         except dns.resolver.NoAnswer:
             print('No record Found')
             pass
+        except dns.resolver.NXDOMAIN:
+            print('NXDOMAIN record NOT Found')
+            pass
         except KeyboardInterrupt:
             print("Bye")
             quit()
