@@ -17,29 +17,33 @@ cd package && pip3/pip install .
 
 Simple import any of the 3 packages and then add define the variables accordingly
 ```python
-from GVA import profile
-from GVA import dns
+from GVA import scanner
+from GVA import dns_recon
 from GVA import subdomain
-from GVA import gui
-from GVA.geo import geoip
+from GVA import geo
 
-GeoIP_key = "__API__KEY__"
-key = "__API__KEY__"
-profile.openai.api_key = key
-dns.openai.api_key = key
+openai_key = '__API__KEY__'
+geoIP_key = '__API__KEY__'
 
-print(profile.p1("<IP>"))
-print(dns.dnsr("<DOMAIN>"))
-subdomain.sub("<DOMAIN>")
-print(gui.application(GeoIP_key, "<TARGET>"))
+sub_domain_list = ['admin', 'whateveryouwant']
+
+# scanner(target: str, profile: int, api_key: str)
+# dns_recon(target: str, api_key: str)
+# domain(target: str, domain_list: List[str)
+# geo(api_key: str, target: str)
+
+print(scanner.scanner('127.0.0.1', 1, openai_key))
+print(dns_recon.dns_recon('127.0.0.1', openai_key))
+print(subdomain.domain('127.0.0.1', sub_domain_list))
+print(geo.geo(geoIP_key, '127.0.0.1'))
 ```
 
 ## Usage CLI
 
 - First Change the "__API__KEY__" part of the code with OpenAI api key and the IPGeolocation API key
 ```python
-gkey = "__API__KEY__" # Enter your IPGeolocation API key
-akey = "__API__KEY__" # Enter your OpenAI API key
+openai_key = '__API__KEY__'
+geoIP_key = '__API__KEY__'
 ```
 - second install the packages
 ```bash
@@ -84,9 +88,9 @@ Profiles:
 | `p2`      | `json` | Simple  Scan | `-Pn -T4 -A -v`|
 | `p3`      | `json` | Low Power  Scan | `-Pn -sS -sU -T4 -A -v`|
 | `p4`      | `json` | Partial Intense  Scan | `-Pn -p- -T4 -A -v`|
-| `p5`      | `json` | Complete Intense  Scan | `-Pn -sS -sU -T4 -A -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --script=vuln`|
+| `p5`      | `json` | Complete Intense  Scan | `-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln`|
 
-The profile is the type of scan that will be executed by the nmap subprocess. The Ip or target will be provided via argparse. At first the custom nmap scan is run which has all the curcial arguments for the scan to continue. nextly the scan data is extracted from the huge pile of data which has been driven by nmap. the "scan" object has a list of sub data under "tcp" each labled according to the ports opened. once the data is extracted the data is sent to openai API davenci model via a prompt. the prompt specifically asks for an JSON output and the data also to be used in a certain manner. 
+The profile is the type of scan that will be executed by the nmap subprocess. The Ip or target will be provided via argparse. At first the custom nmap scan is run which has all the curcial arguments for the scan to continue. Next, the scan data is extracted from the huge pile of data driven by nmap. the "scan" object has a list of sub-data under "tcp" each labled according to the ports opened. once the data is extracted the data is sent to openai API davenci model via a prompt. the prompt specifically asks for a JSON output and the data also to be used in a certain manner. 
 
 The entire structure of request that has to be sent to the openai API is designed in the completion section of the Program.
 ```python
