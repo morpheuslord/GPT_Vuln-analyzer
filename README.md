@@ -59,23 +59,23 @@ pip install -r requirements.txt
 python gpt_vuln.py --help
 
 # Rich Help Menu
-python get_vuln.py --r help
+python gpt_vuln.py --r help
 
 # Specify target with the attack 
 python gpt_vuln.py --target <IP> --attack dns/nmap
 
 # Specify target and profile for nmap
-python get_vuln.py --target <IP> --attack nmap --profile <1-5> 
+python gpt_vuln.py --target <IP> --attack nmap --profile <1-5> 
 (Default:1)
 
 # Specify target for DNS no profile needed
-python get_vuln.py --target <IP or HOSTNAME> --attack dns
+python gpt_vuln.py --target <IP or HOSTNAME> --attack dns
 
 # Specify target for Subdomain Enumeration no profile needed
-python get_vuln.py --target <HOSTNAME> --attack sub
+python gpt_vuln.py --target <HOSTNAME> --attack sub
 
 # Specify target for geolocation lookup
-python get_vuln.py --target <IP> --attack geo
+python gpt_vuln.py --target <IP> --attack geo
 ```
 
 Supported in both windows and linux
