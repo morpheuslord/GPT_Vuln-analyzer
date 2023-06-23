@@ -17,29 +17,35 @@ cd package && pip3/pip install .
 
 Simple import any of the 3 packages and then add define the variables accordingly
 ```python
-from GVA import profile
-from GVA import dns
+from GVA import scanner
+from GVA import dns_recon
 from GVA import subdomain
+from GVA import geo
 from GVA import gui
-from GVA.geo import geoip
 
-GeoIP_key = "__API__KEY__"
-key = "__API__KEY__"
-profile.openai.api_key = key
-dns.openai.api_key = key
+openai_key = '__API__KEY__'
+geoIP_key = '__API__KEY__'
 
-print(profile.p1("<IP>"))
-print(dns.dnsr("<DOMAIN>"))
-subdomain.sub("<DOMAIN>")
-print(gui.application(GeoIP_key, "<TARGET>"))
+sub_domain_list = ['admin', 'whateveryouwant']
+
+# scanner(target: str, profile: int, api_key: str)
+# dns_recon(target: str, api_key: str)
+# domain(target: str, domain_list: List[str)
+# geo(api_key: str, target: str)
+
+print(scanner.scanner('127.0.0.1', 1, openai_key))
+print(dns_recon.dns_recon('127.0.0.1', openai_key))
+print(subdomain.domain('127.0.0.1', sub_domain_list))
+print(geo.geo(geoIP_key, '127.0.0.1'))
+gui.application()
 ```
 
 ## Usage CLI
 
 - First Change the "__API__KEY__" part of the code with OpenAI api key and the IPGeolocation API key
 ```python
-gkey = "__API__KEY__" # Enter your IPGeolocation API key
-akey = "__API__KEY__" # Enter your OpenAI API key
+openai_key = '__API__KEY__'
+geoIP_key = '__API__KEY__'
 ```
 - second install the packages
 ```bash
@@ -53,23 +59,23 @@ pip install -r requirements.txt
 python gpt_vuln.py --help
 
 # Rich Help Menu
-python get_vuln.py --r help
+python gpt_vuln.py --r help
 
 # Specify target with the attack 
 python gpt_vuln.py --target <IP> --attack dns/nmap
 
 # Specify target and profile for nmap
-python get_vuln.py --target <IP> --attack nmap --profile <1-5> 
+python gpt_vuln.py --target <IP> --attack nmap --profile <1-5> 
 (Default:1)
 
 # Specify target for DNS no profile needed
-python get_vuln.py --target <IP or HOSTNAME> --attack dns
+python gpt_vuln.py --target <IP or HOSTNAME> --attack dns
 
 # Specify target for Subdomain Enumeration no profile needed
-python get_vuln.py --target <HOSTNAME> --attack sub
+python gpt_vuln.py --target <HOSTNAME> --attack sub
 
 # Specify target for geolocation lookup
-python get_vuln.py --target <IP> --attack geo
+python gpt_vuln.py --target <IP> --attack geo
 ```
 
 Supported in both windows and linux
@@ -84,28 +90,49 @@ Profiles:
 | `p2`      | `json` | Simple  Scan | `-Pn -T4 -A -v`|
 | `p3`      | `json` | Low Power  Scan | `-Pn -sS -sU -T4 -A -v`|
 | `p4`      | `json` | Partial Intense  Scan | `-Pn -p- -T4 -A -v`|
-| `p5`      | `json` | Complete Intense  Scan | `-Pn -sS -sU -T4 -A -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --script=vuln`|
+| `p5`      | `json` | Complete Intense  Scan | `-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln`|
 
-The profile is the type of scan that will be executed by the nmap subprocess. The Ip or target will be provided via argparse. At first the custom nmap scan is run which has all the curcial arguments for the scan to continue. nextly the scan data is extracted from the huge pile of data which has been driven by nmap. the "scan" object has a list of sub data under "tcp" each labled according to the ports opened. once the data is extracted the data is sent to openai API davenci model via a prompt. the prompt specifically asks for an JSON output and the data also to be used in a certain manner. 
+The profile is the type of scan that will be executed by the nmap subprocess. The Ip or target will be provided via argparse. At first the custom nmap scan is run which has all the curcial arguments for the scan to continue. Next, the scan data is extracted from the huge pile of data driven by nmap. the "scan" object has a list of sub-data under "tcp" each labled according to the ports opened. once the data is extracted the data is sent to openai API davenci model via a prompt. the prompt specifically asks for a JSON output and the data also to be used in a certain manner. 
 
 The entire structure of request that has to be sent to the openai API is designed in the completion section of the Program.
 ```python
-def profile(ip):
-    nm.scan('{}'.format(ip), arguments='-Pn -sS -sU -T4 -A -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --script=vuln')
+def scanner(ip: str, profile: int) -> str:
+    profile_argument = ""
+    # The port profiles or scan types user can choose
+    if profile == 1:
+        profile_argument = '-Pn -sV -T4 -O -F'
+    elif profile == 2: 
+        profile_argument = '-Pn -T4 -A -v'
+    elif profile == 3:
+        profile_argument = '-Pn -sS -sU -T4 -A -v'
+    elif profile == 4:
+        profile_argument = '-Pn -p- -T4 -A -v'
+    elif profile == 5:
+        profile_argument = '-Pn -sS -sU -T4 -A -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --script=vuln'
+    else:
+        raise ValueError(f"Invalid Argument: {profile}")
+    # The scanner with GPT Implemented
+    nm.scan('{}'.format(ip), arguments='{}'.format(profile_argument))
     json_data = nm.analyse_nmap_xml_scan()
-    analize = json_data["scan"]
-    # Prompt about what the quary is all about
-    prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(analize)
-    # A structure for the request
-    completion = openai.Completion.create(
-        engine=model_engine,
-        prompt=prompt,
-        max_tokens=1024,
-        n=1,
-        stop=None,
-    )
-    response = completion.choices[0].text
-    return response
+    analyze = json_data["scan"]
+    try:
+        # Prompt about what the quary is all about
+        prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
+            analyze)
+        # A structure for the request
+        completion = openai.Completion.create(
+            engine=model_engine,
+            prompt=prompt,
+            max_tokens=1024,
+            n=1,
+            stop=None,
+        )
+        response = completion.choices[0].text
+    except KeyboardInterrupt:
+        print("Bye")
+        quit()
+    print(response)
+    return 'Done'
 ```
 ### Output
 nmap output:

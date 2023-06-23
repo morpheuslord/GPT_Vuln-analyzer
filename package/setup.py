@@ -8,6 +8,7 @@ with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
     long_description = "\n" + fh.read()
 
 VERSION = '0.1.1'
+VERSION = '0.1.1'
 DESCRIPTION = 'Python Project for GPT-Vuln_analyzer'
 LONG_DESCRIPTION = 'This is a Proof Of Concept application that demostrates how AI can be used to generate accurate results for vulnerability analysis and also allows further utilization of the already super useful ChatGPT made using openai-api, python-nmap, dnsresolver python modules and also use customtkinter and tkinter for the GUI version of the code. This project also has a CLI and a GUI interface, It is capable of doing network vulnerability analysis, DNS enumeration and also subdomain enumeration.'
 
@@ -21,6 +22,12 @@ setup(
     long_description_content_type="text/markdown",
     long_description=long_description,
     packages=find_packages(),
+    install_requires=['aiohttp == 3.8.4',
+                      'aiosignal == 1.3.1',
+                      'async-timeout == 4.0.2',
+                      'attrs == 22.2.0',
+                      'certifi == 2022.12.7',
+                      'charset-normalizer == 3.0.1', 'frozenlist == 1.3.3', 'idna == 3.4',
     install_requires=['aiohttp == 3.8.4',
                       'aiosignal == 1.3.1',
                       'async-timeout == 4.0.2',
