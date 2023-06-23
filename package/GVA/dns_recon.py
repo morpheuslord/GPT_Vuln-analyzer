@@ -1,10 +1,31 @@
 import dns.resolver
-from typing import Any
+import openai
 from rich.progress import track
-from commands.ai import ai
+
+model_engine = "text-davinci-003"
 
 
-def dnsr(target: str, key: str) -> Any:
+def AI(key: str, data) -> str:
+    openai.api_key = key
+    try:
+        prompt = "do a DNS analysis of {} and return proper clues for an attack in json".format(
+            data)
+        # A structure for the request
+        completion = openai.Completion.create(
+            engine=model_engine,
+            prompt=prompt,
+            max_tokens=1024,
+            n=1,
+            stop=None,
+        )
+        response = completion.choices[0].text
+        return str(response)
+    except KeyboardInterrupt:
+        print("Bye")
+        quit()
+
+
+def dns_recon(target: str, key: str) -> str:
     analyze = ''
     # The DNS Records to be enumeratee
     record_types = ['A', 'AAAA', 'NS', 'CNAME', 'MX', 'PTR', 'SOA', 'TXT']
@@ -26,5 +47,9 @@ def dnsr(target: str, key: str) -> Any:
         except KeyboardInterrupt:
             print("Bye")
             quit()
-    response = ai(analyze, key)
+    try:
+        response = AI(key, analyze)
+    except KeyboardInterrupt:
+        print("Bye")
+        quit()
     return response

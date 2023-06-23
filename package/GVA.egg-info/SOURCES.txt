@@ -5,10 +5,11 @@ pyproject.toml
 setup.cfg
 setup.py
 GVA/__init__.py
-GVA/dns.py
+GVA/dns_recon.py
 GVA/geo.py
-GVA/profile.py
+GVA/gui.py
 GVA/requirements.txt
+GVA/scanner.py
 GVA/subdomain.py
 GVA.egg-info/PKG-INFO
 GVA.egg-info/SOURCES.txt

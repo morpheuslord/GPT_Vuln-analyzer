@@ -2,6 +2,7 @@ import customtkinter
 import openai
 import nmap
 import dns.resolver
+from typing import Any
 from subprocess import run
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -14,7 +15,7 @@ nm = nmap.PortScanner()
 model_engine = "text-davinci-003"
 
 
-def application():
+def application() -> None:
     try:
         apikey = entry1.get()
         openai.api_key = apikey
@@ -30,23 +31,23 @@ def application():
                 p = int(entry3.get())
                 match p:
                     case 1:
-                        val = p1(target)
+                        val = scanner(target, 1)
                         print(val)
                         output_save(val, outputf)
                     case 2:
-                        val = p2(target)
+                        val = scanner(target, 2)
                         print(val)
                         output_save(val, outputf)
                     case 3:
-                        val = p3(target)
+                        val = scanner(target, 3)
                         print(val)
                         output_save(val, outputf)
                     case 4:
-                        val = p4(target)
+                        val = scanner(target, 4)
                         print(val)
                         output_save(val, outputf)
                     case 5:
-                        val = p5(target)
+                        val = scanner(target, 5)
                         print(val)
                         output_save(val, outputf)
             case "dns":
@@ -59,14 +60,14 @@ def application():
         print("Keyboard Interrupt detected ...")
 
 
-def geoip(key, target):
+def geoip(key: str, target: str) -> Any:
     url = "https://api.ipgeolocation.io/ipgeo?apiKey={a}&ip={b}".format(
         a=key, b=target)
     content = run("curl {}".format(url))
     return content
 
 
-def output_save(output, outf):
+def output_save(output: Any, outf: Any):
     top = customtkinter.CTkToplevel(root)
     top.title("GVA Output")
     top.grid_rowconfigure(0, weight=1)
@@ -84,7 +85,7 @@ def output_save(output, outf):
     top.textbox.insert("0.0", text=output)
 
 
-def sub(target):
+def sub(target: str) -> Any:
     s_array = ['www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'hod', 'butterfly', 'ckp',
                'tele2', 'receiver', 'reality', 'panopto', 't7', 'thot', 'wien', 'uat-online', 'Footer']
 
@@ -112,7 +113,7 @@ def sub(target):
     return out
 
 
-def dnsr(target):
+def dnsr(target: str) -> Any:
     analize = ''
     record_types = ['A', 'AAAA', 'NS', 'CNAME', 'MX', 'PTR', 'SOA', 'TXT']
     for records in record_types:
@@ -148,115 +149,43 @@ def dnsr(target):
     return response
 
 
-def p1(ip):
-    nm.scan('{}'.format(ip), arguments='-Pn -sV -T4 -O -F')
+def scanner(ip: str, profile: int) -> str:
+    profile_argument = ""
+    # The port profiles or scan types user can choose
+    if profile == 1:
+        profile_argument = '-Pn -sV -T4 -O -F'
+    elif profile == 2: 
+        profile_argument = '-Pn -T4 -A -v'
+    elif profile == 3:
+        profile_argument = '-Pn -sS -sU -T4 -A -v'
+    elif profile == 4:
+        profile_argument = '-Pn -p- -T4 -A -v'
+    elif profile == 5:
+        profile_argument = '-Pn -sS -sU -T4 -A -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --script=vuln'
+    else:
+        raise ValueError(f"Invalid Argument: {profile}")
+    # The scanner with GPT Implemented
+    nm.scan('{}'.format(ip), arguments='{}'.format(profile_argument))
     json_data = nm.analyse_nmap_xml_scan()
-    analize = json_data["scan"]
+    analyze = json_data["scan"]
     try:
         # Prompt about what the quary is all about
         prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
-            analize)
+            analyze)
         # A structure for the request
         completion = openai.Completion.create(
             engine=model_engine,
             prompt=prompt,
             max_tokens=1024,
-            n=1
+            n=1,
+            stop=None,
         )
         response = completion.choices[0].text
     except KeyboardInterrupt:
         print("Bye")
         quit()
-    return response
-
-
-def p2(ip):
-    nm.scan('{}'.format(ip), arguments='-Pn -T4 -A -v')
-    json_data = nm.analyse_nmap_xml_scan()
-    analize = json_data["scan"]
-    try:
-        # Prompt about what the quary is all about
-        prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
-            analize)
-        # A structure for the request
-        completion = openai.Completion.create(
-            engine=model_engine,
-            prompt=prompt,
-            max_tokens=1024,
-            n=1
-        )
-        response = completion.choices[0].text
-    except KeyboardInterrupt:
-        print("Bye")
-        quit()
-    return response
-
-
-def p3(ip):
-    nm.scan('{}'.format(ip), arguments='-Pn -sS -sU -T4 -A -v')
-    json_data = nm.analyse_nmap_xml_scan()
-    analize = json_data["scan"]
-    try:
-        # Prompt about what the quary is all about
-        prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
-            analize)
-        # A structure for the request
-        completion = openai.Completion.create(
-            engine=model_engine,
-            prompt=prompt,
-            max_tokens=1024,
-            n=1
-        )
-        response = completion.choices[0].text
-    except KeyboardInterrupt:
-        print("Bye")
-        quit()
-    return response
-
-
-def p4(ip):
-    nm.scan('{}'.format(ip), arguments='-Pn -p- -T4 -A -v')
-    json_data = nm.analyse_nmap_xml_scan()
-    analize = json_data["scan"]
-    try:
-        # Prompt about what the quary is all about
-        prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
-            analize)
-        # A structure for the request
-        completion = openai.Completion.create(
-            engine=model_engine,
-            prompt=prompt,
-            max_tokens=1024,
-            n=1
-        )
-        response = completion.choices[0].text
-    except KeyboardInterrupt:
-        print("Bye")
-        quit()
-    return response
-
-
-def p5(ip):
-    nm.scan('{}'.format(
-        ip), arguments='-Pn -sS -sU -T4 -A -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --script=vuln')
-    json_data = nm.analyse_nmap_xml_scan()
-    analize = json_data["scan"]
-    try:
-        # Prompt about what the quary is all about
-        prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
-            analize)
-        # A structure for the request
-        completion = openai.Completion.create(
-            engine=model_engine,
-            prompt=prompt,
-            max_tokens=1024,
-            n=1
-        )
-        response = completion.choices[0].text
-    except KeyboardInterrupt:
-        print("Bye")
-        quit()
-    return response
+    print(response)
+    return 'Done'
 
 
 frame = customtkinter.CTkFrame(master=root)
@@ -284,5 +213,3 @@ button = customtkinter.CTkButton(
 button.pack(pady=12, padx=10)
 
 root.mainloop()
-
-# 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
