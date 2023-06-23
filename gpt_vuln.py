@@ -1,7 +1,6 @@
 import argparse
 import cowsay
-import commands.domain as domain
-import commands.port_scanner as ports
+import os
 from rich.console import Console
 from rich.table import Table
 from commands.port_scanner import scanner
@@ -9,14 +8,14 @@ from commands.domain import dnsr
 from commands.geo import geoip
 from commands.subdomain import sub
 from typing import Any
-
+from dotenv import load_dotenv
 
 console = Console()
+load_dotenv()
+
 # The API Keys
-gkey = "__API__KEY__"  # GeoIP API
-akey = "__API__KEY__"  # OpenAI API
-ports.openai.api_key = akey
-domain.openai.api_key = akey
+gkey = os.getenv('GEOIP_API_KEY')  # GeoIP API
+akey = os.getenv('OPENAI_API_KEY')  # OpenAI API
 
 parser = argparse.ArgumentParser(
     description='Python-Nmap and chatGPT intigrated Vulnerability scanner')
@@ -71,22 +70,22 @@ def main(target: Any) -> None:
                 case 'nmap':
                     match profile:
                         case 1:
-                            scan_output = scanner(target, 1)
+                            scan_output = scanner(target, 1, akey)
                             print(scan_output)
                         case 2:
-                            scan_output = scanner(target, 2)
+                            scan_output = scanner(target, 2, akey)
                             print(scan_output)
                         case 3:
-                            scan_output = scanner(target, 3)
+                            scan_output = scanner(target, 3, akey)
                             print(scan_output)
                         case 4:
-                            scan_output = scanner(target, 4)
+                            scan_output = scanner(target, 4, akey)
                             print(scan_output)
                         case 5:
-                            scan_output = scanner(target, 5)
+                            scan_output = scanner(target, 5, akey)
                             print(scan_output)
                 case 'dns':
-                    dns_output = dnsr(target)
+                    dns_output = dnsr(target, akey)
                     print(dns_output)
                 case 'sub':
                     sub_output = sub(target)
