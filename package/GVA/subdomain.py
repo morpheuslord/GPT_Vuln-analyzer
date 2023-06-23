@@ -1,27 +1,18 @@
 import dns.resolver
 import json
-import json
 from rich.progress import track
 from typing import Any
-from typing import Any
 
 
 def domain(target: str, s_array: list[str]) -> Any:
     subdomain_list: dict[str, Any] = {
         "Subdomain_found": [],
     }
-def domain(target: str, s_array: list[str]) -> Any:
-    subdomain_list: dict[str, Any] = {
-        "Subdomain_found": [],
-    }
 
-    for subdomain in track(s_array):
     for subdomain in track(s_array):
         try:
             ip_value = dns.resolver.resolve(f'{subdomain}.{target}', 'A')
-            ip_value = dns.resolver.resolve(f'{subdomain}.{target}', 'A')
             if ip_value:
-                subdomain_list['Subdomain_found'].append(subdomain)
                 subdomain_list['Subdomain_found'].append(subdomain)
         except dns.resolver.NXDOMAIN:
             pass
@@ -30,5 +21,4 @@ def domain(target: str, s_array: list[str]) -> Any:
         except KeyboardInterrupt:
             print('Ended')
             quit()
-    return json.dumps(subdomain_list)
     return json.dumps(subdomain_list)
