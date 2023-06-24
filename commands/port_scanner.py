@@ -1,15 +1,44 @@
-import nmap
-from commands.ai import ai
+from typing import Any
+from typing import Optional
 
+import nmap
+import openai
+
+model_engine = "text-davinci-003"
 nm = nmap.PortScanner()
 
 
-def scanner(ip: str, profile: int, key: str) -> str:
+def AI(key: str, data: Any) -> str:
+    openai.api_key = key
+    try:
+        prompt = "do a DNS analysis of {} and return proper clues for an attack in json".format(
+            data)
+        # A structure for the request
+        completion = openai.Completion.create(
+            engine=model_engine,
+            prompt=prompt,
+            max_tokens=1024,
+            n=1,
+            stop=None,
+        )
+        response = completion.choices[0].text
+        return str(response)
+    except KeyboardInterrupt:
+        print("Bye")
+        quit()
+
+
+def p_scanner(ip: Optional[str], profile: int, key: Optional[str]) -> str:
+    if key is not None:
+        pass
+    else:
+        raise ValueError("KeyNotFound: Key Not Provided")
+    # Handle the None case
     profile_argument = ""
     # The port profiles or scan types user can choose
     if profile == 1:
         profile_argument = '-Pn -sV -T4 -O -F'
-    elif profile == 2: 
+    elif profile == 2:
         profile_argument = '-Pn -T4 -A -v'
     elif profile == 3:
         profile_argument = '-Pn -sS -sU -T4 -A -v'
@@ -23,6 +52,9 @@ def scanner(ip: str, profile: int, key: str) -> str:
     nm.scan('{}'.format(ip), arguments='{}'.format(profile_argument))
     json_data = nm.analyse_nmap_xml_scan()
     analyze = json_data["scan"]
-    response = ai(analyze, key)
-    print(response)
-    return 'Done'
+    try:
+        response = AI(key, analyze)
+    except KeyboardInterrupt:
+        print("Bye")
+        quit()
+    return str(response)

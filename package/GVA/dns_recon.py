@@ -1,18 +1,17 @@
+from typing import Any
+from typing import Optional
+
 import dns.resolver
-import openai
 import openai
 from rich.progress import track
 
 model_engine = "text-davinci-003"
 
 
-def AI(key: str, data) -> str:
-    openai.api_key = key
-def AI(key: str, data) -> str:
+def AI(key: str, data: Any) -> str:
     openai.api_key = key
     try:
         prompt = "do a DNS analysis of {} and return proper clues for an attack in json".format(
-            data)
             data)
         # A structure for the request
         completion = openai.Completion.create(
@@ -29,7 +28,15 @@ def AI(key: str, data) -> str:
         quit()
 
 
-def dns_recon(target: str, key: str) -> str:
+def dns_recon(target: Optional[str], key: str) -> str:
+    if key is not None:
+        pass
+    else:
+        raise ValueError("KeyNotFound: Key Not Provided")
+    if target is not None:
+        pass
+    else:
+        raise ValueError("InvalidTarget: Target Not Provided")
     analyze = ''
     # The DNS Records to be enumeratee
     record_types = ['A', 'AAAA', 'NS', 'CNAME', 'MX', 'PTR', 'SOA', 'TXT']
@@ -57,33 +64,3 @@ def dns_recon(target: str, key: str) -> str:
     except KeyboardInterrupt:
         print("Bye")
         quit()
-
-
-def dns_recon(target: str, key: str) -> str:
-    analyze = ''
-    # The DNS Records to be enumeratee
-    record_types = ['A', 'AAAA', 'NS', 'CNAME', 'MX', 'PTR', 'SOA', 'TXT']
-    for records in track(record_types):
-        try:
-            answer = dns.resolver.resolve(target, records)
-            for server in answer:
-                st = server.to_text()
-                analyze += "\n"
-                analyze += records
-                analyze += " : "
-                analyze += st
-        except dns.resolver.NoAnswer:
-            print('No record Found')
-            pass
-        except dns.resolver.NXDOMAIN:
-            print('NXDOMAIN record NOT Found')
-            pass
-        except KeyboardInterrupt:
-            print("Bye")
-            quit()
-    try:
-        response = AI(key, analyze)
-    except KeyboardInterrupt:
-        print("Bye")
-        quit()
-    return response

@@ -1,9 +1,10 @@
-import customtkinter
-import openai
-import nmap
-import dns.resolver
-from typing import Any
 from subprocess import run
+from typing import Any
+
+import customtkinter
+import dns.resolver
+import nmap
+import openai
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
@@ -67,7 +68,7 @@ def geoip(key: str, target: str) -> Any:
     return content
 
 
-def output_save(output: Any, outf: Any):
+def output_save(output: Any, outf: Any) -> Any:
     top = customtkinter.CTkToplevel(root)
     top.title("GVA Output")
     top.grid_rowconfigure(0, weight=1)
@@ -154,7 +155,7 @@ def scanner(ip: str, profile: int) -> str:
     # The port profiles or scan types user can choose
     if profile == 1:
         profile_argument = '-Pn -sV -T4 -O -F'
-    elif profile == 2: 
+    elif profile == 2:
         profile_argument = '-Pn -T4 -A -v'
     elif profile == 3:
         profile_argument = '-Pn -sS -sU -T4 -A -v'

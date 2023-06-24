@@ -1,28 +1,21 @@
 import dns.resolver
-import json
-import json
 from rich.progress import track
-from typing import Any
-from typing import Any
 
 
-def domain(target: str, s_array: list[str]) -> Any:
-    subdomain_list: dict[str, Any] = {
-        "Subdomain_found": [],
-    }
-def domain(target: str, s_array: list[str]) -> Any:
-    subdomain_list: dict[str, Any] = {
-        "Subdomain_found": [],
-    }
-
-    for subdomain in track(s_array):
-    for subdomain in track(s_array):
+def sub(target: str) -> str:
+    sd_data = []
+    # Subdomain lists basic subdomains that can be enumerated
+    s_array = ['www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'hod', 'butterfly', 'ckp',
+               'tele2', 'receiver', 'reality', 'panopto', 't7', 'thot', 'wien', 'uat-online', 'Footer']
+    for subd in track(s_array):
         try:
-            ip_value = dns.resolver.resolve(f'{subdomain}.{target}', 'A')
-            ip_value = dns.resolver.resolve(f'{subdomain}.{target}', 'A')
+            ip_value = dns.resolver.resolve(f'{subd}.{target}', 'A')
             if ip_value:
-                subdomain_list['Subdomain_found'].append(subdomain)
-                subdomain_list['Subdomain_found'].append(subdomain)
+                sd_data.append(f'{subd}.{target}')
+                if f"{subd}.{target}" in sd_data:
+                    print(f'{subd}.{target} | Found')
+                else:
+                    pass
         except dns.resolver.NXDOMAIN:
             pass
         except dns.resolver.NoAnswer:
@@ -30,5 +23,4 @@ def domain(target: str, s_array: list[str]) -> Any:
         except KeyboardInterrupt:
             print('Ended')
             quit()
-    return json.dumps(subdomain_list)
-    return json.dumps(subdomain_list)
+    return 'Done'
