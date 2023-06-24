@@ -8,7 +8,7 @@ from rich.progress import track
 model_engine = "text-davinci-003"
 
 
-def AI(key: str, data: Any) -> str:
+def AI(key: str, data) -> str:
     openai.api_key = key
     try:
         prompt = "do a DNS analysis of {} and return proper clues for an attack in json".format(

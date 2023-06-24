@@ -22,9 +22,11 @@ from GVA import dns_recon
 from GVA import subdomain
 from GVA import geo
 from GVA import gui
+from dotenv import load_dotenv()
 
-openai_key = '__API__KEY__'
-geoIP_key = '__API__KEY__'
+load_dotenv()
+openai_key = os.getenv('OPENAI_API_KEY')
+geoIP_key = os.getenv('GEOIP_API_KEY')
 
 sub_domain_list = ['admin', 'whateveryouwant']
 
@@ -42,10 +44,10 @@ gui.application()
 
 ## Usage CLI
 
-- First Change the "__API__KEY__" part of the code with OpenAI api key and the IPGeolocation API key
+- First Change the "__API__KEY__" part of the code with OpenAI api key and the IPGeolocation API key in the `.env` file
 ```python
-openai_key = '__API__KEY__'
-geoIP_key = '__API__KEY__'
+GEOIP_API_KEY = ''
+OPENAI_API_KEY = ''
 ```
 - second install the packages
 ```bash
