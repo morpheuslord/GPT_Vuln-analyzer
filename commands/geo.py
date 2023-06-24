@@ -1,10 +1,15 @@
 from subprocess import run
 from typing import Any
+from typing import Optional
 
 
-def geoip(key: str, target: str) -> Any:
-    # The IP Geolocator API
-    API_url = "https://api.ipgeolocation.io/ipgeo?apiKey={a}&ip={b}".format(
+def geoip(key: Optional[str], target: str) -> Any:
+    if key is None:
+        raise ValueError("KeyNotFound: Key Not Provided")
+    assert key is not None  # This will help the type checker
+    if target is None:
+        raise ValueError("InvalidTarget: Target Not Provided")
+    url = "https://api.ipgeolocation.io/ipgeo?apiKey={a}&ip={b}".format(
         a=key, b=target)
-    IP_content = run("curl {}".format(API_url))
-    return IP_content
+    content = run("curl {}".format(url))
+    return content

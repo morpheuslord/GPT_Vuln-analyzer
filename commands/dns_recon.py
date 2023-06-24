@@ -8,11 +8,12 @@ from rich.progress import track
 model_engine = "text-davinci-003"
 
 
-def AI(key: str, data) -> str:
+def gpt_ai(analyze: str, key: Optional[str]) -> str:
     openai.api_key = key
     try:
-        prompt = "do a DNS analysis of {} and return proper clues for an attack in json".format(
-            data)
+        # Prompt about what the quary is all about
+        prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
+            analyze)
         # A structure for the request
         completion = openai.Completion.create(
             engine=model_engine,
@@ -28,7 +29,7 @@ def AI(key: str, data) -> str:
         quit()
 
 
-def dns_recon(target: Optional[str], key: str) -> str:
+def dnsr(target: str, key: Optional[str]) -> Any:
     if key is not None:
         pass
     else:
@@ -58,9 +59,5 @@ def dns_recon(target: Optional[str], key: str) -> str:
         except KeyboardInterrupt:
             print("Bye")
             quit()
-    try:
-        response = AI(key, analyze)
-        return str(response)
-    except KeyboardInterrupt:
-        print("Bye")
-        quit()
+    response = gpt_ai(analyze, key)
+    return response

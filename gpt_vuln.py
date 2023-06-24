@@ -1,14 +1,16 @@
 import argparse
-import cowsay
 import os
+from typing import Any
+
+import cowsay
+from dotenv import load_dotenv
 from rich.console import Console
 from rich.table import Table
-from commands.port_scanner import scanner
-from commands.domain import dnsr
+
+from commands.dns_recon import dnsr
 from commands.geo import geoip
+from commands.port_scanner import p_scanner
 from commands.subdomain import sub
-from typing import Any
-from dotenv import load_dotenv
 
 console = Console()
 load_dotenv()
@@ -30,7 +32,9 @@ parser.add_argument('--attack', metavar='attack', type=str,
                     dns - to perform DNS Enumeration and get openion from Chat-GPT
                     ''', required=False)
 parser.add_argument('--r', metavar='r', type=str,
-                    help='Shows a more clean help manu using rich only argument-input is help', default=help, required=False)
+                    help='Shows a more clean help manu using rich only argument-input is help',
+                    default=help,
+                    required=False)
 args = parser.parse_args()
 
 target = args.target
@@ -59,36 +63,40 @@ def help_menu() -> None:
 
 def main(target: Any) -> None:
     cowsay.cow('GVA Usage in progress...')
+    if target is not None:
+        pass
+    else:
+        target = '127.0.0.1'
     try:
         if choice == "help":
             help_menu()
         else:
             match attack:
                 case 'geo':
-                    geo_output = geoip(gkey, target)
+                    geo_output: str = geoip(gkey, target)
                     print(geo_output)
                 case 'nmap':
                     match profile:
                         case 1:
-                            scan_output = scanner(target, 1, akey)
-                            print(scan_output)
+                            p1_out: str = p_scanner(target, 1, akey)
+                            print(p1_out)
                         case 2:
-                            scan_output = scanner(target, 2, akey)
-                            print(scan_output)
+                            p2_out: str = p_scanner(target, 2, akey)
+                            print(p2_out)
                         case 3:
-                            scan_output = scanner(target, 3, akey)
-                            print(scan_output)
+                            p3_out: str = p_scanner(target, 3, akey)
+                            print(p3_out)
                         case 4:
-                            scan_output = scanner(target, 4, akey)
-                            print(scan_output)
+                            p4_out: str = p_scanner(target, 4, akey)
+                            print(p4_out)
                         case 5:
-                            scan_output = scanner(target, 5, akey)
-                            print(scan_output)
+                            p5_out: str = p_scanner(target, 5, akey)
+                            print(p5_out)
                 case 'dns':
-                    dns_output = dnsr(target, akey)
+                    dns_output: str = dnsr(target, akey)
                     print(dns_output)
                 case 'sub':
-                    sub_output = sub(target)
+                    sub_output: str = sub(target)
                     console.print(sub_output, style="bold underline")
     except KeyboardInterrupt:
         console.print_exception("Bye")

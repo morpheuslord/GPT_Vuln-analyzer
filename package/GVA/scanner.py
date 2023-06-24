@@ -1,3 +1,6 @@
+from typing import Any
+from typing import Optional
+
 import nmap
 import openai
 
@@ -5,7 +8,7 @@ model_engine = "text-davinci-003"
 nm = nmap.PortScanner()
 
 
-def AI(key: str, data) -> str:
+def AI(key: str, data: Any) -> str:
     openai.api_key = key
     try:
         prompt = "do a DNS analysis of {} and return proper clues for an attack in json".format(
@@ -25,12 +28,17 @@ def AI(key: str, data) -> str:
         quit()
 
 
-def scanner(ip: str, profile: int, key: str) -> str:
+def scanner(ip: Optional[str], profile: int, key: str) -> str:
+    if key is not None:
+        pass
+    else:
+        raise ValueError("KeyNotFound: Key Not Provided")
+    # Handle the None case
     profile_argument = ""
     # The port profiles or scan types user can choose
     if profile == 1:
         profile_argument = '-Pn -sV -T4 -O -F'
-    elif profile == 2: 
+    elif profile == 2:
         profile_argument = '-Pn -T4 -A -v'
     elif profile == 3:
         profile_argument = '-Pn -sS -sU -T4 -A -v'

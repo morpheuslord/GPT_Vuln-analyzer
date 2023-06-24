@@ -9,7 +9,7 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 
 ## Usage Package
 
-### Import packages 
+### Import packages
 `pip install GVA`
 or
 `pip3 install GVA`
@@ -49,11 +49,11 @@ python gpt_vuln.py --help
 # Rich Help Menu
 python get_vuln.py --r help
 
-# Specify target with the attack 
+# Specify target with the attack
 python gpt_vuln.py --target <IP> --attack dns/nmap
 
 # Specify target and profile for nmap
-python get_vuln.py --target <IP> --attack nmap --profile <1-5> 
+python get_vuln.py --target <IP> --attack nmap --profile <1-5>
 (Default:1)
 
 # Specify target for DNS no profile needed
@@ -64,7 +64,7 @@ python get_vuln.py --target <HOSTNAME> --attack sub
 ```
 
 Supported in both windows and linux
-    
+
 ## Understanding the code
 
 Profiles:
@@ -77,7 +77,7 @@ Profiles:
 | `p4`      | `json` | Partial Intense  Scan | `-Pn -p- -T4 -A -v`|
 | `p5`      | `json` | Complete Intense  Scan | `-Pn -sS -sU -T4 -A -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --script=vuln`|
 
-The profile is the type of scan that will be executed by the nmap subprocess. The Ip or target will be provided via argparse. At first the custom nmap scan is run which has all the curcial arguments for the scan to continue. nextly the scan data is extracted from the huge pile of data which has been driven by nmap. the "scan" object has a list of sub data under "tcp" each labled according to the ports opened. once the data is extracted the data is sent to openai API davenci model via a prompt. the prompt specifically asks for an JSON output and the data also to be used in a certain manner. 
+The profile is the type of scan that will be executed by the nmap subprocess. The Ip or target will be provided via argparse. At first the custom nmap scan is run which has all the curcial arguments for the scan to continue. nextly the scan data is extracted from the huge pile of data which has been driven by nmap. the "scan" object has a list of sub data under "tcp" each labled according to the ports opened. once the data is extracted the data is sent to openai API davenci model via a prompt. the prompt specifically asks for an JSON output and the data also to be used in a certain manner.
 
 The entire structure of request that has to be sent to the openai API is designed in the completion section of the Program.
 ```python
@@ -145,15 +145,15 @@ target is google.com
 ```json
 
 {
-  "A" : { 
+  "A" : {
     "ip": "142.250.195.174",
   },
-  "AAAA": { 
+  "AAAA": {
     "ip": "2404:6800:4007:826::200e"
   },
   "NS": {
     "nameservers": [
-      "ns2.google.com.", 
+      "ns2.google.com.",
       "ns1.google.com.",
       "ns3.google.com.",
       "ns4.google.com."
@@ -173,14 +173,14 @@ target is google.com
   },
   "TXT": {
     "onetrust-domain-verification": "de01ed21f2fa4d8781cbc3ffb89cf4ef",
-    "webexdomainverification.8YX6G": "6e6922db-e3e6-4a36-904e-a805c28087fa", 
+    "webexdomainverification.8YX6G": "6e6922db-e3e6-4a36-904e-a805c28087fa",
     "globalsign-smime-dv": "CDYX+XFHUw2wml6/Gb8+59BsH31KzUr6c1l2BPvqKX8=",
     "google-site-verification": [
-      "wD8N7i1JTNTkezJ49swvWW48f8_9xveREV4oB-0Hf5o", 
+      "wD8N7i1JTNTkezJ49swvWW48f8_9xveREV4oB-0Hf5o",
       "TV9-DBe4R80X4v0M4U_bd_J9cpOJM0nikft0jAgjmsQ"
     ],
     "docusign": [
-      "05958488-4752-4ef2-95eb-aa7ba8a3bd0e", 
+      "05958488-4752-4ef2-95eb-aa7ba8a3bd0e",
       "1b0a6754-49b1-4db5-8540-d2c12664b289"
     ],
     "atlassian-domain-verification":  "5YjTmWmjI92ewqkx2oXmBaD60Td9zWon9r6eakvHX6B77zzkFQto8PQ9QsKnbf4I",

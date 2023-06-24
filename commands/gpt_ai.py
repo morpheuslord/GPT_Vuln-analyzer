@@ -4,7 +4,6 @@ model_engine = "text-davinci-003"
 
 
 def ai(analyze: str, key: str) -> str:
-    openai.api_key = key
     try:
         # Prompt about what the quary is all about
         prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
