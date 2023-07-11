@@ -1,10 +1,18 @@
 ---
-name: Code Improments
+name: Code Improvements
 about: Suggest Improvements and how
-title: "[Improve]"
+title: "[Improve This section]"
 labels: 'improvements'
 assignees: ''
 
 ---
 
-Suggest The improvements and the code section that can be improved.
+I would suggest the improvements and the code section that can be improved.
+
+```python
+the current code
+```
+and
+```python
+the suggested Improvement code
+```
