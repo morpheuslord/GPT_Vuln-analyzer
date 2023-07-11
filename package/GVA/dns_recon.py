@@ -1,15 +1,16 @@
+import json
+import re
+from typing import Any
 from typing import Optional
 
 import dns.resolver
 import openai
-import json
-import re
 from rich.progress import track
 
 model_engine = "text-davinci-003"
 
 
-def extract_data(json_string):
+def extract_data(json_string: str) -> Any:
     # Define the regular expression patterns for individual values
     A_pattern = r'"A": \["(.*?)"\]'
     AAA_pattern = r'"AAA: \["(.*?)"\]'

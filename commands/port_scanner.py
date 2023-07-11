@@ -1,10 +1,10 @@
+import json
+import re
 from typing import Any
 from typing import Optional
 
 import nmap
 import openai
-import json
-import re
 model_engine = "text-davinci-003"
 nm = nmap.PortScanner()
 
@@ -32,7 +32,7 @@ nm = nmap.PortScanner()
 
 # NMAP Data to be analyzed: {data}
 
-def extract_data(json_string):
+def extract_data(json_string: str) -> Any:
     # Define the regular expression patterns for individual values
     critical_score_pattern = r'"critical score": \["(.*?)"\]'
     os_information_pattern = r'"os information": \["(.*?)"\]'
