@@ -1,14 +1,13 @@
+import json
+import re
 from typing import Any
 from typing import Optional
-
 
 import customtkinter
 import dns.resolver
 import nmap
 import openai
-import json
 import requests
-import re
 from rich.progress import track
 
 customtkinter.set_appearance_mode("dark")
@@ -38,27 +37,27 @@ def application() -> None:
                 p = int(entry3.get())
                 match p:
                     case 1:
-                        val = scanner(target, 1)
+                        val = scanner(target, 1, apikey)
                         print(val)
                         output_save(val, outputf)
                     case 2:
-                        val = scanner(target, 2)
+                        val = scanner(target, 2, apikey)
                         print(val)
                         output_save(val, outputf)
                     case 3:
-                        val = scanner(target, 3)
+                        val = scanner(target, 3, apikey)
                         print(val)
                         output_save(val, outputf)
                     case 4:
-                        val = scanner(target, 4)
+                        val = scanner(target, 4, apikey)
                         print(val)
                         output_save(val, outputf)
                     case 5:
-                        val = scanner(target, 5)
+                        val = scanner(target, 5, apikey)
                         print(val)
                         output_save(val, outputf)
             case "dns":
-                val = dns_recon(target)
+                val = dns_recon(target, apikey)
                 output_save(val, outputf)
             case "subd":
                 val = sub(target)

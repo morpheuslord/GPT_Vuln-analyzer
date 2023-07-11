@@ -1,6 +1,6 @@
 import argparse
-import os
 import json
+import os
 from typing import Any
 
 import cowsay
@@ -74,14 +74,14 @@ def print_output(attack_type: str, data: Any) -> Any:
     console.print(table)
 
 
-def GEOIP_to_table(json_data):
+def GEOIP_to_table(json_data: str) -> Any:
     data = json.loads(json_data)
 
     table = Table(title="GVA Report for GeoIP", show_header=True, header_style="bold magenta")
     table.add_column("Identifiers", style="cyan")
     table.add_column("Data", style="green")
 
-    flattened_data = flatten_json(data, separator='.')
+    flattened_data: dict = flatten_json(data, separator='.')
 
     for key, value in flattened_data.items():
         value_str = str(value)
@@ -91,7 +91,7 @@ def GEOIP_to_table(json_data):
     console.print(table)
 
 
-def flatten_json(data, separator='.'):
+def flatten_json(data: Any, separator: Any = '.') -> Any:
     flattened_data = {}
     for key, value in data.items():
         if isinstance(value, dict):

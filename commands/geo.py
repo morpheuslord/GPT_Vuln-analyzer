@@ -1,6 +1,7 @@
-import requests
 from typing import Any
 from typing import Optional
+
+import requests
 
 
 def geoip(key: Optional[str], target: str) -> Any:
