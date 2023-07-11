@@ -74,6 +74,35 @@ def print_output(attack_type: str, data: Any) -> Any:
     console.print(table)
 
 
+def GEOIP_to_table(json_data):
+    data = json.loads(json_data)
+
+    table = Table(title="GVA Report for GeoIP", show_header=True, header_style="bold magenta")
+    table.add_column("Identifiers", style="cyan")
+    table.add_column("Data", style="green")
+
+    flattened_data = flatten_json(data, separator='.')
+
+    for key, value in flattened_data.items():
+        value_str = str(value)
+        table.add_row(key, value_str)
+
+    console = Console()
+    console.print(table)
+
+
+def flatten_json(data, separator='.'):
+    flattened_data = {}
+    for key, value in data.items():
+        if isinstance(value, dict):
+            nested_data = flatten_json(value, separator)
+            for nested_key, nested_value in nested_data.items():
+                flattened_data[key + separator + nested_key] = nested_value
+        else:
+            flattened_data[key] = value
+    return flattened_data
+
+
 def main(target: Any) -> None:
     cowsay.cow('GVA Usage in progress...')
     if target is not None:
@@ -87,7 +116,7 @@ def main(target: Any) -> None:
             match attack:
                 case 'geo':
                     geo_output: str = geoip(gkey, target)
-                    print(geo_output)
+                    GEOIP_to_table(str(geo_output))
                 case 'nmap':
                     match profile:
                         case 1:
