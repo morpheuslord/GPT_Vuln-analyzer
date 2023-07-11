@@ -107,7 +107,12 @@ The profile is the type of scan that will be executed by the nmap subprocess. Th
 The entire structure of request that has to be sent to the openai API is designed in the completion section of the Program.
 
 ```python
-def scanner(ip: str, profile: int) -> str:
+def scanner(ip: Optional[str], profile: int, key: str) -> str:
+    if key is not None:
+        pass
+    else:
+        raise ValueError("KeyNotFound: Key Not Provided")
+    # Handle the None case
     profile_argument = ""
     # The port profiles or scan types user can choose
     if profile == 1:
@@ -127,9 +132,104 @@ def scanner(ip: str, profile: int) -> str:
     json_data = nm.analyse_nmap_xml_scan()
     analyze = json_data["scan"]
     try:
-        # Prompt about what the quary is all about
-        prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
-            analyze)
+        response = PortAI(key, analyze)
+    except KeyboardInterrupt:
+        print("Bye")
+        quit()
+    return str(response)
+
+```
+
+# Regex
+
+We use Regex to extract only the important information from the custom prompt provided this reduces the total amount of unwanted
+data
+
+```python
+def extract_data(json_string):
+    # Define the regular expression patterns for individual values
+    critical_score_pattern = r'"critical score": \["(.*?)"\]'
+    os_information_pattern = r'"os information": \["(.*?)"\]'
+    open_ports_pattern = r'"open ports": \["(.*?)"\]'
+    open_services_pattern = r'"open services": \["(.*?)"\]'
+    vulnerable_service_pattern = r'"vulnerable service": \["(.*?)"\]'
+    found_cve_pattern = r'"found cve": \["(.*?)"\]'
+
+    # Initialize variables for extracted data
+    critical_score = None
+    os_information = None
+    open_ports = None
+    open_services = None
+    vulnerable_service = None
+    found_cve = None
+
+    # Extract individual values using patterns
+    match = re.search(critical_score_pattern, json_string)
+    if match:
+        critical_score = match.group(1)
+
+    match = re.search(os_information_pattern, json_string)
+    if match:
+        os_information = match.group(1)
+
+    match = re.search(open_ports_pattern, json_string)
+    if match:
+        open_ports = match.group(1)
+
+    match = re.search(open_services_pattern, json_string)
+    if match:
+        open_services = match.group(1)
+
+    match = re.search(vulnerable_service_pattern, json_string)
+    if match:
+        vulnerable_service = match.group(1)
+
+    match = re.search(found_cve_pattern, json_string)
+    if match:
+        found_cve = match.group(1)
+
+    # Create a dictionary to store the extracted data
+    data = {
+        "critical score": critical_score,
+        "os information": os_information,
+        "open ports": open_ports,
+        "open services": open_services,
+        "vulnerable service": vulnerable_service,
+        "found cve": found_cve
+    }
+
+    # Convert the dictionary to JSON format
+    json_output = json.dumps(data)
+
+    return json_output
+
+
+def AI(key: str, data: Any) -> str:
+    openai.api_key = key
+    try:
+        prompt = f"""
+        Do a NMAP scan analysis on the provided NMAP scan information
+        The NMAP output must return in a JSON format accorging to the provided
+        output format. The data must be accurate in regards towards a pentest report.
+        The data must follow the following rules:
+        1) The NMAP scans must be done from a pentester point of view
+        2) The final output must be minimal according to the format given.
+        3) The final output must be kept to a minimal.
+        4) If a value not found in the scan just mention an empty string.
+        5) Analyze everything even the smallest of data.
+
+        The output format:
+        {{
+            "critical score": [""],
+            "os information": [""],
+            "open ports": [""],
+            "open services": [""],
+            "vulnerable service": [""],
+            "found cve": [""]
+        }}
+
+        NMAP Data to be analyzed: {data}
+        """
         # A structure for the request
         completion = openai.Completion.create(
             engine=model_engine,
@@ -139,12 +239,15 @@ def scanner(ip: str, profile: int) -> str:
             stop=None,
         )
         response = completion.choices[0].text
+        return extract_data(str(response))
     except KeyboardInterrupt:
         print("Bye")
         quit()
-    print(response)
-    return 'Done'
 ```
+
+The AI code defines an output format and commands the AI to follow a few pre dertermined rules to increase accuracy.
+
+The regex extraction code does the extraction and further the main function arranges them into tables.
 
 ### Output
 
@@ -183,44 +286,43 @@ target is jainuniversity.ac.in
 
 GEO Location output:
 
-```json
-{
-  "ip": "█████████████",
-  "continent_code": "AS",
-  "continent_name": "Asia",
-  "country_code2": "IN",
-  "country_code3": "IND",
-  "country_name": "India",
-  "country_capital": "New Delhi",
-  "state_prov": "Maharashtra",
-  "district": "",
-  "city": "Navi Mumbai",
-  "zipcode": "400701",
-  "latitude": "19.12418",
-  "longitude": "73.00551",
-  "is_eu": false,
-  "calling_code": "+91",
-  "country_tld": ".in",
-  "languages": "en-IN,hi,bn,te,mr,ta,ur,gu,kn,ml,or,pa,as,bh,sat,ks,ne,sd,kok,doi,mni,sit,sa,fr,lus,inc",
-  "country_flag": "https://ipgeolocation.io/static/flags/in_64.png",
-  "geoname_id": "10128846",
-  "isp": "Reliance Jio Infocomm Limited",
-  "connection_type": "",
-  "organization": "Reliance Jio Infocomm Limited",
-  "currency": {
-    "code": "INR",
-    "name": "Indian Rupee",
-    "symbol": "₹"
-  },
-  "time_zone": {
-    "name": "Asia/Kolkata",
-    "offset": 5.5,
-    "current_time": "2023-04-07 15:17:57.031+0530",
-    "current_time_unix": 1680860877.031,
-    "is_dst": false,
-    "dst_savings": 0
-  }
-}
+```table
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Identifiers                 ┃ Data                                                                    ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ ip                          │ █████████████                                                           │
+│ continent_code              │ AS                                                                      │
+│ continent_name              │ Asia                                                                    │
+│ country_code2               │ IN                                                                      │
+│ country_code3               │ IND                                                                     │
+│ country_name                │ India                                                                   │
+│ country_capital             │ New Delhi                                                               │
+│ state_prov                  │ Haryana                                                                 │
+│ state_code                  │ IN-HR                                                                   │
+│ district                    │                                                                         │
+│ city                        │ Gurugram                                                                │
+│ zipcode                     │ 122003                                                                  │
+│ latitude                    │ 28.44324                                                                │
+│ longitude                   │ 77.05501                                                                │
+│ is_eu                       │ False                                                                   │
+│ calling_code                │ +91                                                                     │
+│ country_tld                 │ .in                                                                     │
+│ languages                   │ en-IN,hi,bn,te,mr,ta,ur,gu,kn,ml,or,pa,as,bh,sat,ks,ne,sd,kok,doi,mni,… │
+│ country_flag                │ https://ipgeolocation.io/static/flags/in_64.png                         │
+│ geoname_id                  │ 9148991                                                                 │
+│ isp                         │ Bharti Airtel Limited                                                   │
+│ connection_type             │                                                                         │
+│ organization                │ Bharti Airtel Limited                                                   │
+│ currency.code               │ INR                                                                     │
+│ currency.name               │ Indian Rupee                                                            │
+│ currency.symbol             │ ₹                                                                       │
+│ time_zone.name              │ Asia/Kolkata                                                            │
+│ time_zone.offset            │ 5.5                                                                     │
+│ time_zone.current_time      │ 2023-07-11 17:08:35.057+0530                                            │
+│ time_zone.current_time_unix │ 1689075515.057                                                          │
+│ time_zone.is_dst            │ False                                                                   │
+│ time_zone.dst_savings       │ 0                                                                       │
+└─────────────────────────────┴─────────────────────────────────────────────────────────────────────────┘
 ```
 
 # Usage GUI
