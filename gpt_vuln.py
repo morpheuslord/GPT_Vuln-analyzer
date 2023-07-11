@@ -1,5 +1,6 @@
 import argparse
 import os
+import json
 from typing import Any
 
 import cowsay
@@ -61,6 +62,18 @@ def help_menu() -> None:
     console.print(table)
 
 
+def print_output(attack_type: str, data: Any) -> Any:
+    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
+    table.add_column("Elements")
+    table.add_column("Results")
+
+    # Iterate over the data and add rows to the table
+    for key, value in data.items():
+        table.add_row(key, value)
+
+    console.print(table)
+
+
 def main(target: Any) -> None:
     cowsay.cow('GVA Usage in progress...')
     if target is not None:
@@ -79,22 +92,28 @@ def main(target: Any) -> None:
                     match profile:
                         case 1:
                             p1_out: str = p_scanner(target, 1, akey)
-                            print(p1_out)
+                            data = json.loads(p1_out)
+                            print_output("Nmap", data)
                         case 2:
                             p2_out: str = p_scanner(target, 2, akey)
-                            print(p2_out)
+                            data = json.loads(p2_out)
+                            print_output("Nmap", data)
                         case 3:
                             p3_out: str = p_scanner(target, 3, akey)
-                            print(p3_out)
+                            data = json.loads(p3_out)
+                            print_output("Nmap", data)
                         case 4:
                             p4_out: str = p_scanner(target, 4, akey)
-                            print(p4_out)
+                            data = json.loads(p4_out)
+                            print_output("Nmap", data)
                         case 5:
                             p5_out: str = p_scanner(target, 5, akey)
-                            print(p5_out)
+                            data = json.loads(p5_out)
+                            print_output("Nmap", data)
                 case 'dns':
                     dns_output: str = dnsr(target, akey)
-                    print(dns_output)
+                    data = json.loads(dns_output)
+                    print_output("DNS", data)
                 case 'sub':
                     sub_output: str = sub(target)
                     console.print(sub_output, style="bold underline")
