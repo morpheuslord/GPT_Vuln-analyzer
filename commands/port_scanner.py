@@ -79,12 +79,9 @@ def AI(key: str, data: Any) -> str:
         2) The final output must be minimal according to the format given.
         3) The final output must be kept to a minimal.
         4) If a value not found in the scan just mention an empty string.
-        5) For the critical score give HIGH, MEDIUM or LOW based on the CVE scores.
-        6) If CVE was not found use the nature of the ports open to decide the CVE score.
-        7) Use the OS information provided to determine the Possible OS used.
-        8) Analyze everything even the smallest of data.
-        9) Completely analyze the data provided and give a confirm answer using the output format.
-        
+        5) Analyze everything even the smallest of data.
+        6) Completely analyze the data provided and give a confirm answer using the output format.
+
         The output format:
         {{
             "critical score": [""],
