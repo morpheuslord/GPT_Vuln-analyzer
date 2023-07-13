@@ -70,6 +70,7 @@ def extract_data(json_string: str) -> Any:
 def AI(key: str, data: Any) -> str:
     openai.api_key = key
     try:
+        # OPENAI API PROMPT
         prompt = f"""
         Do a NMAP scan analysis on the provided NMAP scan information
         The NMAP output must return in a JSON format accorging to the provided
@@ -80,9 +81,7 @@ def AI(key: str, data: Any) -> str:
         3) The final output must be kept to a minimal.
         4) If a value not found in the scan just mention an empty string.
         5) Analyze everything even the smallest of data.
-        6) For the critical score give HIGH, MEDIUM or LOW based on the CVE scores.
-        7) If CVE was not found use the nature of the ports open to decide the CVE score.
-        8) Use the OS information provided to determine the Possible OS used.
+        6) Completely analyze the data provided and give a confirm answer using the output format.
 
         The output format:
         {{
