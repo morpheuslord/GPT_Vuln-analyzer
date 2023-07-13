@@ -70,6 +70,7 @@ def extract_data(json_string: str) -> Any:
 def AI(key: str, data: Any) -> str:
     openai.api_key = key
     try:
+        # OPENAI API PROMPT
         prompt = f"""
         Do a NMAP scan analysis on the provided NMAP scan information
         The NMAP output must return in a JSON format accorging to the provided
