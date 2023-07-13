@@ -62,9 +62,10 @@ def help_menu() -> None:
     console.print(table)
 
 
-def print_output(attack_type: str, data: Any) -> Any:
+def print_output(attack_type: str, jdata: str) -> Any:
+    data = json.loads(jdata)
     table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-    table.add_column("Elements")
+    table.add_column("Variables")
     table.add_column("Results")
 
     # Iterate over the data and add rows to the table
@@ -121,29 +122,24 @@ def main(target: Any) -> None:
                     match profile:
                         case 1:
                             p1_out: str = p_scanner(target, 1, akey)
-                            data = json.loads(p1_out)
-                            print_output("Nmap", data)
+                            print_output("Nmap", p1_out)
                         case 2:
                             p2_out: str = p_scanner(target, 2, akey)
-                            data = json.loads(p2_out)
-                            print_output("Nmap", data)
+                            print_output("Nmap", p2_out)
                         case 3:
                             p3_out: str = p_scanner(target, 3, akey)
-                            data = json.loads(p3_out)
-                            print_output("Nmap", data)
+                            print_output("Nmap", p3_out)
                         case 4:
                             p4_out: str = p_scanner(target, 4, akey)
-                            data = json.loads(p4_out)
-                            print_output("Nmap", data)
+                            print_output("Nmap", p4_out)
                         case 5:
                             p5_out: str = p_scanner(target, 5, akey)
-                            data = json.loads(p5_out)
-                            print_output("Nmap", data)
+                            print_output("Nmap", p5_out)
                 case 'dns':
                     dns_output: str = dnsr(target, akey)
-                    data = json.loads(dns_output)
-                    print_output("DNS", data)
+                    print_output("DNS", dns_output)
                 case 'sub':
+
                     sub_output: str = sub(target)
                     console.print(sub_output, style="bold underline")
     except KeyboardInterrupt:
