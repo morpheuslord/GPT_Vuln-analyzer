@@ -10,28 +10,6 @@ from rich.progress import track
 model_engine = "text-davinci-003"
 
 
-# "do a vulnerability analysis of {} and return a vulnerabilty report in json"
-# Do a DNS analysis on the provided DNS scan information
-# The DNS output must return in a JSON format accorging to the provided
-# output format. The data must be accurate in regards towards a pentest report.
-# The data must follow the following rules:
-# 1) The DNS scans must be done from a pentester point of view
-# 2) The final output must be minimal according to the format given
-# 3) The final output must be kept to a minimal
-
-# The output format:
-# {{
-#     "A": [""],
-#     "AAA": [""],
-#     "NS": [""],
-#     "MX": [""],
-#     "PTR": [""],
-#     "SOA": [""],
-#     "TXT": [""]
-# }}
-
-# DNS Data to be analyzed: {analyze}
-
 def extract_data(json_string: str) -> Any:
     # Define the regular expression patterns for individual values
     A_pattern = r'"A": \["(.*?)"\]'

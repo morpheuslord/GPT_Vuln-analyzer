@@ -9,29 +9,6 @@ model_engine = "text-davinci-003"
 nm = nmap.PortScanner()
 
 
-# "do a vulnerability analysis of {} and return a vulnerabilty report in json"
-# Do a NMAP scan analysis on the provided NMAP scan information
-# The NMAP output must return in a JSON format accorging to the provided
-# output format. The data must be accurate in regards towards a pentest report.
-# The data must follow the following rules:
-# 1) The NMAP scans must be done from a pentester point of view
-# 2) The final output must be minimal according to the format given.
-# 3) The final output must be kept to a minimal.
-# 4) If a value not found in the scan just mention an empty string.
-# 5) Analyze everything even the smallest of data.
-
-# The output format:
-# {{
-#     "critical score": [""],
-#     "os information": [""],
-#     "open ports": [""],
-#     "open services": [""],
-#     "vulnerable service": [""],
-#     "found cve": [""]
-# }}
-
-# NMAP Data to be analyzed: {data}
-
 def extract_data(json_string: str) -> Any:
     # Define the regular expression patterns for individual values
     critical_score_pattern = r'"critical score": \["(.*?)"\]'
@@ -103,6 +80,9 @@ def AI(key: str, data: Any) -> str:
         3) The final output must be kept to a minimal.
         4) If a value not found in the scan just mention an empty string.
         5) Analyze everything even the smallest of data.
+        6) For the critical score give HIGH, MEDIUM or LOW based on the CVE scores.
+        7) If CVE was not found use the nature of the ports open to decide the CVE score.
+        8) Use the OS information provided to determine the Possible OS used.
 
         The output format:
         {{
@@ -148,7 +128,7 @@ def p_scanner(ip: Optional[str], profile: int, key: Optional[str]) -> str:
     elif profile == 4:
         profile_argument = '-Pn -p- -T4 -A -v'
     elif profile == 5:
-        profile_argument = '-Pn -sS -sU -T4 -A -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --script=vuln'
+        profile_argument = '-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln'
     else:
         raise ValueError(f"Invalid Argument: {profile}")
     # The scanner with GPT Implemented
