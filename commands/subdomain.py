@@ -1,19 +1,36 @@
 import dns.resolver
+from rich.console import Console
 from rich.progress import track
+from rich.table import Table
+
+console = Console()
 
 
-def sub(target: str) -> str:
+def display_urls(sd_data: list[str], count: int) -> None:
+    console = Console()
+    table = Table(title=f"GVA Subdomain report. found out of {count}", show_header=True, header_style="bold")
+    table.add_column("Index", justify="right", style="cyan")
+    table.add_column("URL", style="green")
+    for index, url in enumerate(sd_data):
+        table.add_row(str(index), url)
+    console.print(table)
+
+
+def sub(target: str, list: str) -> str:
     sd_data = []
-    # Subdomain lists basic subdomains that can be enumerated
-    s_array = ['www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'hod', 'butterfly', 'ckp',
-               'tele2', 'receiver', 'reality', 'panopto', 't7', 'thot', 'wien', 'uat-online', 'Footer']
+    s_array = []
+    count: int = 0
+    with open(list, "r") as file:
+        for line in file:
+            subdomain_key = line.strip()
+            s_array.append(subdomain_key)
     for subd in track(s_array):
         try:
             ip_value = dns.resolver.resolve(f'{subd}.{target}', 'A')
             if ip_value:
                 sd_data.append(f'{subd}.{target}')
                 if f"{subd}.{target}" in sd_data:
-                    print(f'{subd}.{target} | Found')
+                    count = count + 1
                 else:
                     pass
         except dns.resolver.NXDOMAIN:
@@ -23,4 +40,5 @@ def sub(target: str) -> str:
         except KeyboardInterrupt:
             print('Ended')
             quit()
+    display_urls(sd_data, count)
     return 'Done'

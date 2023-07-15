@@ -32,6 +32,12 @@ parser.add_argument('--attack', metavar='attack', type=str,
                     sub - Subdomain Enumeration using the default array.
                     dns - to perform DNS Enumeration and get openion from Chat-GPT
                     ''', required=False)
+parser.add_argument('--list', metavar='list', type=str,
+                    help='''
+                    The path to the subdomain list file (txt).
+                    ''',
+                    default='lists/default.txt',
+                    required=False)
 parser.add_argument('--r', metavar='r', type=str,
                     help='Shows a more clean help manu using rich only argument-input is help',
                     default=help,
@@ -42,6 +48,7 @@ target = args.target
 profile = args.profile
 attack = args.attack
 choice = args.r
+list = args.list
 
 
 def help_menu() -> None:
@@ -65,8 +72,8 @@ def help_menu() -> None:
 def print_output(attack_type: str, jdata: str) -> Any:
     data = json.loads(jdata)
     table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-    table.add_column("Variables")
-    table.add_column("Results")
+    table.add_column("Variables", style="cyan")
+    table.add_column("Results", style="green")
 
     # Iterate over the data and add rows to the table
     for key, value in data.items():
@@ -139,8 +146,7 @@ def main(target: Any) -> None:
                     dns_output: str = dnsr(target, akey)
                     print_output("DNS", dns_output)
                 case 'sub':
-
-                    sub_output: str = sub(target)
+                    sub_output: str = sub(target, list)
                     console.print(sub_output, style="bold underline")
     except KeyboardInterrupt:
         console.print_exception("Bye")
