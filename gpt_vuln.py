@@ -53,15 +53,17 @@ list = args.list
 
 def help_menu() -> None:
     table = Table(title="Help Menu for GVA")
-    table.add_column("Options")
-    table.add_column("Input Type")
-    table.add_column("Argument Input")
-    table.add_column("Discription")
-    table.add_column("Other internal options")
+    table.add_column("Options", style="cyan")
+    table.add_column("Input Type", style="green")
+    table.add_column("Argument Input", style="green")
+    table.add_column("Discription", style="green")
+    table.add_column("Other internal options", style="green")
     table.add_row("Attack", "--attack", "TXT/STRING",
                   "The Attack the user whats to run", "sub / dns / nmap / geo")
     table.add_row("Target", "--target", "IP/HOSTNAME",
                   "The target of the user", "None")
+    table.add_row("Domain List", "--list", "Path to text file",
+                  "subdomain dictionary list", "Path")
     table.add_row("Profile", "--profile", "INT (1-5)",
                   "The type of Nmap Scan the user intends", "None")
     table.add_row("Rich Help", "--r", "STRING",

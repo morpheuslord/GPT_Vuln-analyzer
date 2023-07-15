@@ -81,9 +81,11 @@ python gpt_vuln.py --target <IP> --attack nmap --profile <1-5>
 # Specify target for DNS no profile needed
 python gpt_vuln.py --target <IP or HOSTNAME> --attack dns
 
-# Specify target for Subdomain Enumeration no profile needed
+# Specify target for Subdomain Enumeration no profile used default list file
 python gpt_vuln.py --target <HOSTNAME> --attack sub
 
+# Specify target for Subdomain Enumeration no profile used custom list file
+python gpt_vuln.py --target <HOSTNAME> --attack sub --list <PATH to FILE>
 # Specify target for geolocation lookup
 python gpt_vuln.py --target <IP> --attack geo
 ```
