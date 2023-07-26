@@ -142,6 +142,9 @@ def dnsr(target: str, key: Optional[str]) -> Any:
         except dns.resolver.NXDOMAIN:
             print('NXDOMAIN record NOT Found')
             pass
+        except dns.resolver.LifetimeTimeout:
+            print("Timmed out check your internet")
+            pass
         except KeyboardInterrupt:
             print("Bye")
             quit()

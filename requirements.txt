@@ -18,3 +18,4 @@ rich==13.4.2
 cowsay==5.0
 tk==0.1.0
 customtkinter==5.2.0
+python-dotenv==1.0.0
