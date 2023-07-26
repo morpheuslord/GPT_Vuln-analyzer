@@ -6,7 +6,7 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 
 - Python 3.10
 - All the packages mentioned in the requirements.txt file
-- OpenAI api
+- OpenAI API
 - IPGeolocation API
 
 ## Usage Package
@@ -35,7 +35,7 @@ sub_domain_list = ['admin', 'whateveryouwant']
 
 # scanner(target: str, profile: int, api_key: str)
 # dns_recon(target: str, api_key: str)
-# domain(target: str, domain_list: List[str)
+# domain(target: str, domain_list: List[str])
 # geo(api_key: str, target: str)
 
 print(scanner.scanner('127.0.0.1', 1, openai_key))
@@ -93,7 +93,6 @@ python gpt_vuln.py --target <IP> --attack geo
 # Interactive step by step cli interface
 python gpt_vuln.py --menu True
 ```
-
 #### CLI Interface Option
 
 ```bash
