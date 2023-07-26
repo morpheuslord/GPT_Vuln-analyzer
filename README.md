@@ -93,8 +93,32 @@ python gpt_vuln.py --target <IP> --attack geo
 # Interactive step by step cli interface
 python gpt_vuln.py --menu True
 ```
+#### CLI Interface Option
 
-Supported in both windows and linux
+```bash
+  ________________________
+| GVA Usage in progress... |
+  ========================
+                        \
+                         \
+                           ^__^
+                           (oo)\_______
+                           (__)\       )\/\
+                               ||----w |
+                               ||     ||
+┏━━━━━━━━━┳━━━━━━━━━━━━━━━━┓
+┃ Options ┃ Utility        ┃
+┡━━━━━━━━━╇━━━━━━━━━━━━━━━━┩
+│ 1       │ Nmap Enum      │
+│ 2       │ DNS Enum       │
+│ 3       │ Subdomain Enum │
+│ 4       │ GEO-IP Enum    │
+│ q       │ Quit           │
+└─────────┴────────────────┘
+Enter your choice:
+```
+
+Supported in both windows and Linux
 
 ## Understanding the code
 
