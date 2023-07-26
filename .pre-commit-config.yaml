@@ -1,6 +1,4 @@
-# Borrowed initially from https://github.com/lyft/cartography
 default_language_version:
-    # force all unspecified python hooks to run python3
     python: python3
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
@@ -9,9 +7,6 @@ repos:
     -   id: check-executables-have-shebangs
     -   id: check-merge-conflict
     -   id: check-vcs-permalinks
-    # Disabling this as it is giving false positives for sam templates
-    # -   id: check-yaml
-    #     args: ['--unsafe'] # Just check the syntax
     -   id: debug-statements
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
@@ -23,7 +18,6 @@ repos:
     rev: v1.5.7
     hooks:
     -   id: autopep8
-        # disable a few rewrites which will cause autopep8 to reflow
         args: [--in-place, '--ignore=E265,E501,W504']
 -   repo: https://github.com/asottile/reorder_python_imports
     rev: v2.6.0
