@@ -6,7 +6,7 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 
 - Python 3.10
 - All the packages mentioned in the requirements.txt file
-- OpenAI api
+- OpenAI API
 - IPGeolocation API
 
 ## Usage Package
