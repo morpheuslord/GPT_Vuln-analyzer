@@ -13,8 +13,9 @@ requests==2.28.2
 tqdm==4.65.0
 urllib3==1.26.14
 yarl==1.8.2
-dnspython
-rich
-cowsay
-tk
-customtkinter
+dnspython==2.3.0
+rich==13.4.2
+cowsay==5.0
+tk==0.1.0
+customtkinter==5.2.0
+python-dotenv==1.0.0

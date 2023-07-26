@@ -86,8 +86,12 @@ python gpt_vuln.py --target <HOSTNAME> --attack sub
 
 # Specify target for Subdomain Enumeration no profile used custom list file
 python gpt_vuln.py --target <HOSTNAME> --attack sub --list <PATH to FILE>
+
 # Specify target for geolocation lookup
 python gpt_vuln.py --target <IP> --attack geo
+
+# Interactive step by step cli interface
+python gpt_vuln.py --menu True
 ```
 
 Supported in both windows and linux
