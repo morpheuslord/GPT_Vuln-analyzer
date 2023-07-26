@@ -119,7 +119,12 @@ python gpt_vuln.py --menu True
 Enter your choice:
 ```
 
-Supported in both windows and linux
+### OS Supported
+
+| Preview                                                                                                              | Code | Name      | Status |
+| -------------------------------------------------------------------------------------------------------------------- | ---- | --------- | ------ |
+| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/LIN.png "LIN (48x48)") | LIN  | GNU/Linux | ✅     |
+| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/WIN.png "WIN (48x48)") | WIN  | Windows   | ✅     |
 
 ## Understanding the code
 
