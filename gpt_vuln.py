@@ -6,10 +6,11 @@ from typing import Any
 
 import cowsay
 from dotenv import load_dotenv
-from rich.console import Console
-from rich.table import Table
 from rich import print
+from rich.console import Console
 from rich.panel import Panel
+from rich.table import Table
+
 from commands.dns_recon import dnsr
 from commands.geo import geoip
 from commands.port_scanner import p_scanner
@@ -313,7 +314,7 @@ def sub_menu() -> None:
             menu_term()
 
 
-def menu_term():
+def menu_term() -> None:
     table = Table()
     table.add_column("Options", style="cyan")
     table.add_column("Utility", style="green")

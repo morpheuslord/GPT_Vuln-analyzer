@@ -118,7 +118,7 @@ python gpt_vuln.py --menu True
 Enter your choice:
 ```
 
-Supported in both windows and Linux
+Supported in both windows and linux
 
 ## Understanding the code
 
