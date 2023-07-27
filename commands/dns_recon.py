@@ -5,6 +5,7 @@ from typing import Optional
 
 import dns.resolver
 import openai
+import requests
 from rich.progress import track
 
 model_engine = "text-davinci-003"
@@ -75,6 +76,52 @@ def extract_data(json_string: str) -> Any:
     return json_output
 
 
+def BardAI(key: str, data: Any) -> str:
+    prompt = f"""
+        Do a DNS analysis on the provided DNS scan information
+        The DNS output must return in a JSON format accorging to the provided
+        output format. The data must be accurate in regards towards a pentest report.
+        The data must follow the following rules:
+        1) The DNS scans must be done from a pentester point of view
+        2) The final output must be minimal according to the format given
+        3) The final output must be kept to a minimal
+
+        The output format:
+        {{
+            "A": [""],
+            "AAA": [""],
+            "NS": [""],
+            "MX": [""],
+            "PTR": [""],
+            "SOA": [""],
+            "TXT": [""]
+        }}
+
+        DNS Data to be analyzed: {data}
+        """
+
+    url = "https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=" + key
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "prompt": {
+            "text": prompt
+        }
+    }
+
+    response = requests.post(url, json=data, headers=headers)
+
+    if response.status_code == 200:
+        generated_text = response.json()
+        return extract_data(str(generated_text))
+    else:
+        print("Error: Unable to generate text. Status Code:", response.status_code)
+        return "None"
+
+
 def gpt_ai(analyze: str, key: Optional[str]) -> str:
     openai.api_key = key
     prompt = f"""
@@ -115,11 +162,7 @@ def gpt_ai(analyze: str, key: Optional[str]) -> str:
         quit()
 
 
-def dnsr(target: str, key: Optional[str]) -> Any:
-    if key is not None:
-        pass
-    else:
-        raise ValueError("KeyNotFound: Key Not Provided")
+def dnsr(target: str, akey: Optional[str], bkey: Optional[str], AI: str) -> Any:
     if target is not None:
         pass
     else:
@@ -148,5 +191,25 @@ def dnsr(target: str, key: Optional[str]) -> Any:
         except KeyboardInterrupt:
             print("Bye")
             quit()
-    response = gpt_ai(analyze, key)
+    match AI:
+        case 'openai':
+            try:
+                if akey is not None:
+                    pass
+                else:
+                    raise ValueError("KeyNotFound: Key Not Provided")
+                response = gpt_ai(akey, analyze)
+            except KeyboardInterrupt:
+                print("Bye")
+                quit()
+        case 'bard':
+            try:
+                if bkey is not None:
+                    pass
+                else:
+                    raise ValueError("KeyNotFound: Key Not Provided")
+                response = BardAI(bkey, analyze)
+            except KeyboardInterrupt:
+                print("Bye")
+                quit()
     return response

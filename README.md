@@ -47,11 +47,12 @@ gui.application()
 
 ## Usage CLI
 
-- First Change the "**API**KEY\_\_" part of the code with OpenAI api key and the IPGeolocation API key in the `.env` file
+- First Change the "OPENAI_API_KEY", "GEOIP_API_KEY" and "BARD_API_KEY" part of the code with OpenAI api key and the IPGeolocation API key in the `.env` file
 
 ```python
 GEOIP_API_KEY = ''
 OPENAI_API_KEY = ''
+BARD_API_KEY = ''
 ```
 
 - second install the packages
@@ -90,6 +91,12 @@ python gpt_vuln.py --target <HOSTNAME> --attack sub --list <PATH to FILE>
 # Specify target for geolocation lookup
 python gpt_vuln.py --target <IP> --attack geo
 
+# Specify the AI to be used for nmap
+python gpt_vuln.py --target <IP> --attack nmap --profile <1-5> --ai bard / openai <default>
+
+# Specify the AI to be used for dns
+python gpt_vuln.py --target <IP> --attack dns --ai bard / openai <default>
+
 # Interactive step by step cli interface
 python gpt_vuln.py --menu True
 ```
@@ -117,6 +124,16 @@ python gpt_vuln.py --menu True
 └─────────┴────────────────┘
 Enter your choice:
 ```
+
+The CLI interface has a few things to note.
+
+- The API keys must be provided manually.
+- The ones defined in the `.env` files work with the args options
+- The process is similar but more organized.
+
+### My views on Bard
+
+Its same as Openai GPT3.5 but faster. It can generate the same answer but in 2 times the speed.
 
 ### OS Supported
 
@@ -281,8 +298,13 @@ def AI(key: str, data: Any) -> str:
 ```
 
 The AI code defines an output format and commands the AI to follow a few pre dertermined rules to increase accuracy.
-
 The regex extraction code does the extraction and further the main function arranges them into tables.
+
+## Using Bard AI
+
+For you to use Bard AI you must signup to the MakerSuit Palm API for developer access and generate yout API key from there. For links and how this works you can use this video ![MakerSuit](https://www.youtube.com/watch?v=Ce1AOchQMzA&t=128s)
+
+Once the API is aquired just add it to the `.env` file and you are good to go.
 
 ### Output
 
