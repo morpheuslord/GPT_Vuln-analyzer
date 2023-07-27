@@ -5,6 +5,7 @@ from typing import Optional
 
 import nmap
 import openai
+import requests
 model_engine = "text-davinci-003"
 nm = nmap.PortScanner()
 
@@ -67,10 +68,57 @@ def extract_data(json_string: str) -> Any:
     return json_output
 
 
+def BardAI(key: str, data: Any) -> str:
+    prompt = f"""
+        Do a NMAP scan analysis on the provided NMAP scan information
+        The NMAP output must return in a JSON format accorging to the provided
+        output format. The data must be accurate in regards towards a pentest report.
+        The data must follow the following rules:
+        1) The NMAP scans must be done from a pentester point of view
+        2) The final output must be minimal according to the format given.
+        3) The final output must be kept to a minimal.
+        4) If a value not found in the scan just mention an empty string.
+        5) Analyze everything even the smallest of data.
+        6) Completely analyze the data provided and give a confirm answer using the output format.
+
+        The output format:
+        {{
+            "critical score": [""],
+            "os information": [""],
+            "open ports": [""],
+            "open services": [""],
+            "vulnerable service": [""],
+            "found cve": [""]
+        }}
+
+        NMAP Data to be analyzed: {data}
+        """
+
+    url = "https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=" + key
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "prompt": {
+            "text": prompt
+        }
+    }
+
+    response = requests.post(url, json=data, headers=headers)
+
+    if response.status_code == 200:
+        generated_text = response.json()
+        return extract_data(str(generated_text))
+    else:
+        print("Error: Unable to generate text. Status Code:", response.status_code)
+        return "None"
+
+
 def AI(key: str, data: Any) -> str:
     openai.api_key = key
     try:
-        # OPENAI API PROMPT
         prompt = f"""
         Do a NMAP scan analysis on the provided NMAP scan information
         The NMAP output must return in a JSON format accorging to the provided
@@ -110,11 +158,7 @@ def AI(key: str, data: Any) -> str:
         quit()
 
 
-def p_scanner(ip: Optional[str], profile: int, key: Optional[str]) -> str:
-    if key is not None:
-        pass
-    else:
-        raise ValueError("KeyNotFound: Key Not Provided")
+def p_scanner(ip: Optional[str], profile: int, akey: Optional[str], bkey: Optional[str], AI: str) -> str:
     # Handle the None case
     profile_argument = ""
     # The port profiles or scan types user can choose
@@ -134,9 +178,25 @@ def p_scanner(ip: Optional[str], profile: int, key: Optional[str]) -> str:
     nm.scan('{}'.format(ip), arguments='{}'.format(profile_argument))
     json_data = nm.analyse_nmap_xml_scan()
     analyze = json_data["scan"]
-    try:
-        response = AI(key, analyze)
-    except KeyboardInterrupt:
-        print("Bye")
-        quit()
+    match AI:
+        case 'openai':
+            try:
+                if akey is not None:
+                    pass
+                else:
+                    raise ValueError("KeyNotFound: Key Not Provided")
+                response = AI(akey, analyze)
+            except KeyboardInterrupt:
+                print("Bye")
+                quit()
+        case 'bard':
+            try:
+                if bkey is not None:
+                    pass
+                else:
+                    raise ValueError("KeyNotFound: Key Not Provided")
+                response = BardAI(bkey, analyze)
+            except KeyboardInterrupt:
+                print("Bye")
+                quit()
     return str(response)
