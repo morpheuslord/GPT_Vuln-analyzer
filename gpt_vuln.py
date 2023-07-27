@@ -177,7 +177,7 @@ def nmap_menu() -> None:
                 table0.add_column("AI Available", style="green")
                 table0.add_row("1", "OpenAI")
                 table0.add_row("2", "Bard")
-                console.print(table0)
+                print(Panel(table0))
                 ai_set_choice = input("Enter AI of Choice: ")
                 if ai_set_choice == "1":
                     ai_set = "openai"
@@ -204,7 +204,7 @@ def nmap_menu() -> None:
                 table1.add_row("3", "-Pn -sS -sU -T4 -A -v")
                 table1.add_row("4", "-Pn -p- -T4 -A -v")
                 table1.add_row("5", "-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln")
-                console.print(table1)
+                print(Panel(table1))
                 profile_num = input("Enter your Profile: ")
                 print(Panel(f"Profile Set {profile_num}"))
                 nmap_menu()
@@ -257,7 +257,7 @@ def dns_menu() -> None:
                 table0.add_column("AI Available", style="green")
                 table0.add_row("1", "OpenAI")
                 table0.add_row("2", "Bard")
-                console.print(table0)
+                print(Panel(table0))
                 ai_set_choice = input("Enter AI of Choice: ")
                 if ai_set_choice == "1":
                     ai_set = "openai"
@@ -282,7 +282,7 @@ def dns_menu() -> None:
                 table1.add_row("OpenAI API Key", str(akey_set))
                 table1.add_row("Bard AI API Key", str(bkey_set))
                 table1.add_row("Target", str(t))
-                console.print(table1)
+                print(Panel(table1))
                 dns_menu()
             case "4":
                 clearscr()
@@ -329,7 +329,7 @@ def geo_menu() -> None:
                 table1.add_column("Value", style="green")
                 table1.add_row("API Key", str(keyset))
                 table1.add_row("Target", str(t))
-                console.print(table1)
+                print(Panel(table1))
                 geo_menu()
             case "4":
                 clearscr()
@@ -362,13 +362,13 @@ def sub_menu() -> None:
                 clearscr()
                 print(Panel("Set TXT subdomain file location"))
                 list_loc = input("Enter List Location:  ")
-                print(Panel(f"[RED]Location Set: {list_loc}"))
+                print(Panel(f"Location Set: {list_loc}"))
                 sub_menu()
             case "2":
                 clearscr()
                 print(Panel("Set Target Hostname or IP"))
                 t = input("Enter Target: ")
-                print(Panel(f"[RED]Target Set: {t}"))
+                print(Panel(f"Target Set: {t}"))
                 sub_menu()
             case "3":
                 clearscr()
@@ -377,7 +377,7 @@ def sub_menu() -> None:
                 table1.add_column("Value", style="green")
                 table1.add_row("Location", str(list_loc))
                 table1.add_row("Target", str(t))
-                console.print(table1)
+                print(Panel(table1))
                 sub_menu()
             case "4":
                 clearscr()
