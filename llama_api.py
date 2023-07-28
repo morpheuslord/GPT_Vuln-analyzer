@@ -61,8 +61,6 @@ The output format:
         "SOA": [""],
         "TXT": [""]
     }}
-
-
 """
 
 
