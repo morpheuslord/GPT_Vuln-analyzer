@@ -171,15 +171,20 @@ def nmap_menu() -> None:
                 table0.add_column("AI Available", style="green")
                 table0.add_row("1", "OpenAI")
                 table0.add_row("2", "Bard")
+                table0.add_row("3", "LLama2")
                 print(Panel(table0))
                 ai_set_choice = input("Enter AI of Choice: ")
                 if ai_set_choice == "1":
                     ai_set = "openai"
                     akey_set = input("Enter OpenAI API: ")
-                    print(Panel(f"OpenAI-Key Set: {akey_set}"))
-                else:
+                    print(Panel(f"API-Key Set: {akey_set}"))
+                elif ai_set_choice == "2":
                     ai_set = "bard"
                     bkey_set = input("Enter Bard AI API: ")
+                    print(Panel(f"API-Key Set: {bkey_set}"))
+                elif ai_set_choice == "3":
+                    ai_set = "llama"
+                    print(Panel("No Key needed"))
                     print(Panel(f"BardAI-Key Set: {bkey_set}"))
                 nmap_menu()
             case "2":
@@ -251,16 +256,20 @@ def dns_menu() -> None:
                 table0.add_column("AI Available", style="green")
                 table0.add_row("1", "OpenAI")
                 table0.add_row("2", "Bard")
+                table0.add_row("3", "LLama2")
                 print(Panel(table0))
                 ai_set_choice = input("Enter AI of Choice: ")
                 if ai_set_choice == "1":
                     ai_set = "openai"
                     akey_set = input("Enter OpenAI API: ")
                     print(Panel(f"API-Key Set: {akey_set}"))
-                else:
+                elif ai_set_choice == "2":
                     ai_set = "bard"
                     bkey_set = input("Enter Bard AI API: ")
                     print(Panel(f"API-Key Set: {bkey_set}"))
+                elif ai_set_choice == "3":
+                    ai_set = "llama"
+                    print(Panel("No Key needed"))
                 dns_menu()
             case "2":
                 clearscr()
@@ -416,7 +425,7 @@ def menu_term() -> None:
         print(Panel("Exiting Program"))
 
 
-def print_output(attack_type: str, jdata: str, ai: str) -> Any:
+def print_output(attack_type: str, jdata: str) -> Any:
     data = json.loads(jdata)
     table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
     table.add_column("Variables", style="cyan")
