@@ -7,6 +7,8 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 - Python 3.10
 - All the packages mentioned in the requirements.txt file
 - OpenAI API
+- Bard API (MakerSuite Palm)
+- HuggingFace token (with llama2 access )
 - IPGeolocation API
 
 ## Usage Package
@@ -92,7 +94,7 @@ python gpt_vuln.py --target <HOSTNAME> --attack sub --list <PATH to FILE>
 python gpt_vuln.py --target <IP> --attack geo
 
 # Specify the AI to be used for nmap
-python gpt_vuln.py --target <IP> --attack nmap --profile <1-5> --ai bard / openai <default>
+python gpt_vuln.py --target <IP> --attack nmap --profile <1-5> --ai llama /bard / openai <default>
 
 # Specify the AI to be used for dns
 python gpt_vuln.py --target <IP> --attack dns --ai bard / openai <default>
@@ -137,10 +139,10 @@ Its same as Openai GPT3.5 but faster. It can generate the same answer but in 2 t
 
 ### OS Supported
 
-| Preview                                                                                                              | Code | Name      | Status |
-| -------------------------------------------------------------------------------------------------------------------- | ---- | --------- | ------ |
-| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/LIN.png "LIN (48x48)") | LIN  | GNU/Linux | ✅     |
-| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/WIN.png "WIN (48x48)") | WIN  | Windows   | ✅     |
+| Preview                                                                                                              | Code | Name      | Working Status | OpenAI Status | Bard Status | LLama2 Status |
+| -------------------------------------------------------------------------------------------------------------------- | ---- | --------- | --------- | --------- | --------- | --------- |
+| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/LIN.png "LIN (48x48)") | LIN  | GNU/Linux | ✅     | ✅     | ✅     |   ❌   |
+| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/WIN.png "WIN (48x48)") | WIN  | Windows   | ✅     | ✅     | ✅     |   ❌   |
 
 ## Understanding the code
 
