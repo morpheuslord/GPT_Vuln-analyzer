@@ -142,7 +142,7 @@ Its same as Openai GPT3.5 but faster. It can generate the same answer but in 2 t
 | Preview                                                                                                              | Code | Name      | Working Status | OpenAI Status | Bard Status | LLama2 Status |
 | -------------------------------------------------------------------------------------------------------------------- | ---- | --------- | --------- | --------- | --------- | --------- |
 | ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/LIN.png "LIN (48x48)") | LIN  | GNU/Linux | ✅     | ✅     | ✅     |   ❌   |
-| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/WIN.png "WIN (48x48)") | WIN  | Windows   | ✅     | ✅     | ✅     |   ❌   |
+| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/WIN.png "WIN (48x48)") | WIN  | Windows   | ✅     | ✅     | ✅     |   ✅   |
 
 ## Understanding the code
 
@@ -156,7 +156,7 @@ Profiles:
 | `p4`      | `json`      | Partial Intense Scan  | `-Pn -p- -T4 -A -v`                                   |
 | `p5`      | `json`      | Complete Intense Scan | `-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln` |
 
-The profile is the type of scan that will be executed by the nmap subprocess. The Ip or target will be provided via argparse. At first the custom nmap scan is run which has all the curcial arguments for the scan to continue. Next, the scan data is extracted from the huge pile of data driven by nmap. the "scan" object has a list of sub-data under "tcp" each labled according to the ports opened. once the data is extracted the data is sent to openai API davenci model via a prompt. the prompt specifically asks for a JSON output and the data also to be used in a certain manner.
+The profile is the type of scan that will be executed by the nmap subprocess. The Ip or target will be provided via argparse. At first, the custom nmap scan is run which has all the crucial arguments for the scan to continue. Next, the scan data is extracted from the huge pile of data driven by nmap. the "scan" object has a list of sub-data under "tcp" each labelled according to the ports opened. once the data is extracted the data is sent to the openai API Davenci model via a prompt. the prompt specifically asks for a JSON output and the data also to be used in a certain manner.
 
 The entire structure of request that has to be sent to the openai API is designed in the completion section of the Program.
 
