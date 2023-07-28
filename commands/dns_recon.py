@@ -122,6 +122,63 @@ def BardAI(key: str, data: Any) -> str:
         return "None"
 
 
+def chat_with_api(api_url, user_message, model_name, file_name=None):
+    # Prepare the request data in JSON format
+    data = {
+        'user_message': user_message,
+        'model_name': model_name,
+        'file_name': file_name
+    }
+
+    # Send the POST request to the API
+    response = requests.post(api_url, json=data)
+
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        return response.json()['bot_response']
+    else:
+        # If there was an error, print the error message
+        print(f"Error: {response.status_code} - {response.text}")
+        return None
+
+
+def llama_AI(data: str):
+    api_url = 'http://localhost:5000/api/chatbot'
+
+    user_message = f"""
+        Do a NMAP scan analysis on the provided NMAP scan information
+        The NMAP output must return in a JSON format accorging to the provided
+        output format. The data must be accurate in regards towards a pentest report.
+        The data must follow the following rules:
+        1) The NMAP scans must be done from a pentester point of view
+        2) The final output must be minimal according to the format given.
+        3) The final output must be kept to a minimal.
+        4) If a value not found in the scan just mention an empty string.
+        5) Analyze everything even the smallest of data.
+        6) Completely analyze the data provided and give a confirm answer using the output format.
+
+        The output format:
+        {{
+            "critical score": [""],
+            "os information": [""],
+            "open ports": [""],
+            "open services": [""],
+            "vulnerable service": [""],
+            "found cve": [""]
+        }}
+
+        NMAP Data to be analyzed: {data}
+        """
+    model_name = "TheBloke/Llama-2-7B-Chat-GGML"
+    file_name = "llama-2-7b-chat.ggmlv3.q4_K_M.bin"
+
+    bot_response = chat_with_api(api_url, user_message, model_name, file_name)
+
+    if bot_response:
+        data = extract_data(bot_response)
+        return data
+
+
 def gpt_ai(analyze: str, key: Optional[str]) -> str:
     openai.api_key = key
     prompt = f"""

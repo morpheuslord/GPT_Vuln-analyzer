@@ -5,6 +5,7 @@ import platform
 from typing import Any
 
 import cowsay
+import subprocess
 from dotenv import load_dotenv
 from rich import print
 from rich.console import Console
@@ -84,6 +85,12 @@ def clearscr() -> None:
         pass
 
 
+def start_api_app():
+    if os.name == 'nt':
+        CREATE_NEW_CONSOLE = 0x00000010
+        subprocess.Popen(["python", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
+
+
 def help_menu() -> None:
     table = Table(title="Help Menu for GVA")
     table.add_column("Options", style="cyan")
@@ -105,19 +112,6 @@ def help_menu() -> None:
                   "Interactive UI menu", "True / False (Default)")
     table.add_row("Rich Help", "--r", "STRING",
                   "Pritty Help menu", "help")
-    console.print(table)
-
-
-def print_output(attack_type: str, jdata: str) -> Any:
-    data = json.loads(jdata)
-    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-    table.add_column("Variables", style="cyan")
-    table.add_column("Results", style="green")
-
-    # Iterate over the data and add rows to the table
-    for key, value in data.items():
-        table.add_row(key, value)
-
     console.print(table)
 
 
@@ -391,6 +385,7 @@ def sub_menu() -> None:
 
 
 def menu_term() -> None:
+    start_api_app()
     try:
         table = Table()
         table.add_column("Options", style="cyan")
@@ -421,7 +416,20 @@ def menu_term() -> None:
         print(Panel("Exiting Program"))
 
 
+def print_output(attack_type: str, jdata: str, ai: str) -> Any:
+    data = json.loads(jdata)
+    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
+    table.add_column("Variables", style="cyan")
+    table.add_column("Results", style="green")
+
+    # Iterate over the data and add rows to the table
+    for key, value in data.items():
+        table.add_row(key, value)
+    console.print(table)
+
+
 def main(target: Any) -> None:
+    start_api_app()
     cowsay.cow('GVA Usage in progress...')
     if target is not None:
         pass
