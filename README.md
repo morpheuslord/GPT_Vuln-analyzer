@@ -299,14 +299,22 @@ def AI(key: str, data: Any) -> str:
         quit()
 ```
 
-The AI code defines an output format and commands the AI to follow a few pre dertermined rules to increase accuracy.
+The AI code defines an output format and commands the AI to follow a few pre-determined rules to increase accuracy.
 The regex extraction code does the extraction and further the main function arranges them into tables.
 
 ## Using Bard AI
 
-For you to use Bard AI you must signup to the MakerSuit Palm API for developer access and generate yout API key from there. For links and how this works you can use this video ![MakerSuit](https://www.youtube.com/watch?v=Ce1AOchQMzA&t=128s)
+For you to use Bard AI you must signup to the MakerSuit Palm API for developer access and generate your API key from there. For links and how this works you can use this video [MakerSuit](https://www.youtube.com/watch?v=Ce1AOchQMzA&t=128s)
 
-Once the API is aquired just add it to the `.env` file and you are good to go.
+Once the API is acquired just add it to the `.env` file and you are good to go.
+
+## Using LLama2 AI
+
+Using LLama2 is one of the best offline and free options out there. It is currently under improvement I am working on a prompt that will better incorporate cybersecurity perspective into the AI.
+I have to thank @thisserand and his [llama2_local](https://github.com/thisserand/llama2_local) repo and also his YT video [YT_Video](https://youtu.be/WzCS8z9GqHw). They were great resources. To be frank the llama2 code is 95% his I just yanked the code and added a Flask API functionality to it.
+
+The Accuracy of the AI in offline and outside the codes test was great and had equal accuracy to openai or bard but while in code it was facing a few issues may be because of the prompting and all. I will try and fix it.
+The speed depends on your system and the GPU and CPU configs you have. currently, it is using the `TheBloke/Llama-2-7B-Chat-GGML` model and can be changed via the `portscanner` and `dnsrecon` files.
 
 ### Output
 
