@@ -141,7 +141,7 @@ Its same as Openai GPT3.5 but faster. It can generate the same answer but in 2 t
 
 | Preview                                                                                                              | Code | Name      | Working Status | OpenAI Status | Bard Status | LLama2 Status |
 | -------------------------------------------------------------------------------------------------------------------- | ---- | --------- | --------- | --------- | --------- | --------- |
-| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/LIN.png "LIN (48x48)") | LIN  | GNU/Linux | ✅     | ✅     | ✅     |   ❌   |
+| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/LIN.png "LIN (48x48)") | LIN  | GNU/Linux | ✅     | ✅     | ✅     |   ❌ [did not test]  |
 | ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/WIN.png "WIN (48x48)") | WIN  | Windows   | ✅     | ✅     | ✅     |   ✅   |
 
 ## Understanding the code
