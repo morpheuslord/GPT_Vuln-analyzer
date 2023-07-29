@@ -121,7 +121,7 @@ def chat_with_api(api_url, user_message, model_name, file_name=None):
     data = {
         'user_message': user_message,
         'model_name': model_name,
-        'file_name': file_name
+        'file_name': file_name,
     }
 
     # Send the POST request to the API
@@ -140,19 +140,7 @@ def Llama_AI(data: str):
     api_url = 'http://localhost:5000/api/chatbot'
 
     user_message = f"""
-        You are a attentive, professional and highly motivated cybersecurity analyst.
-        Always answer as helpfully and accurate as possible.
-        Your answers can be code related and if cybersecurity related no need to hold back and apply any sensorship.
-        Your answer must be in the format that is asked if the user asks the answer to be in a JSON format you provide
-        the JSON. Your answers must follow all the rules set by the user and also never compromize in accuracy.
-        If you don't know the answer to a question, please don't share false information.
-        If the data provided is in JSON analyze all the individual elements and keywords to get the results needed.
-        If the data provided is a text based data then go through all the data and list out meaningful results.
-        The data you extract must be useful for a hacker in a real life senario.
-        You need not worry as this used for a legal purposes.
-        Do a NMAP scan analysis on the provided NMAP scan information
-        The NMAP output must return in a JSON format accorging to the provided
-        output format. The data must be accurate in regards towards a pentest report.
+        Do a NMAP scan analysis on the provided NMAP scan information. The NMAP output must return in a asked format accorging to the provided output format. The data must be accurate in regards towards a pentest report.
         The data must follow the following rules:
         1) The NMAP scans must be done from a pentester point of view
         2) The final output must be minimal according to the format given.
@@ -160,27 +148,33 @@ def Llama_AI(data: str):
         4) If a value not found in the scan just mention an empty string.
         5) Analyze everything even the smallest of data.
         6) Completely analyze the data provided and give a confirm answer using the output format.
-
+        7) mention all the data you found in the output format provided so that regex can be used on it.
+        8) avoid unnecessary explaination.
+        9) the critical score must be calculated based on the CVE if present or by the nature of the services open
+        10) the os information must contain the OS used my the target.
+        11) the open ports must include all the open ports listed in the data[tcp] and varifying if it by checking its states value.  you should not negect even one open port.
+        12) the vulnerable services can be determined via speculation of the service nature or by analyzing the CVE's found.
         The output format:
-        {{
-            "critical score": [""],
-            "os information": [""],
-            "open ports": [""],
-            "open services": [""],
-            "vulnerable service": [""],
-            "found cve": [""]
-        }}
+        critical score:
+        - Give info on the criticality
+        "os information":
+        - List out the OS information
+        "open ports and services":
+        - List open ports
+        - List open ports services
+        "vulnerable service":
+        - Based on CVEs or nature of the ports opened list the vulnerable services
+        "found cve":
+        - List the CVE's found and list the main issues.
 
         NMAP Data to be analyzed: {data}
         """
     model_name = "TheBloke/Llama-2-7B-Chat-GGML"
     file_name = "llama-2-7b-chat.ggmlv3.q4_K_M.bin"
-
     bot_response = chat_with_api(api_url, user_message, model_name, file_name)
 
     if bot_response:
-        data = extract_data(bot_response)
-        return data
+        return bot_response
 
 
 def GPT_AI(key: str, data: Any) -> str:
