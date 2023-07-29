@@ -222,7 +222,7 @@ def nmap_menu() -> None:
             case "5":
                 clearscr()
                 pout: str = p_scanner(t, int(profile_num), akey_set, bkey_set, ai_set)
-                print_output("Nmap", pout)
+                print_output("Nmap", pout, ai_set)
             case "r":
                 clearscr()
                 menu_term()
@@ -290,7 +290,7 @@ def dns_menu() -> None:
             case "4":
                 clearscr()
                 dns_output: str = dnsr(t, akey_set, bkey_set, ai_set)
-                print_output("DNS", dns_output)
+                print_output("DNS", dns_output, ai_set)
             case "r":
                 clearscr()
                 menu_term()
