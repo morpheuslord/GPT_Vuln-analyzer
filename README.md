@@ -102,6 +102,7 @@ python gpt_vuln.py --target <IP> --attack dns --ai bard / openai <default>
 # Interactive step by step cli interface
 python gpt_vuln.py --menu True
 ```
+
 #### CLI Interface Option
 
 ```bash
@@ -139,10 +140,10 @@ Its same as Openai GPT3.5 but faster. It can generate the same answer but in 2 t
 
 ### OS Supported
 
-| Preview                                                                                                              | Code | Name      | Working Status | OpenAI Status | Bard Status | LLama2 Status |
-| -------------------------------------------------------------------------------------------------------------------- | ---- | --------- | --------- | --------- | --------- | --------- |
-| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/LIN.png "LIN (48x48)") | LIN  | GNU/Linux | ✅     | ✅     | ✅     |   ❌ [did not test]  |
-| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/WIN.png "WIN (48x48)") | WIN  | Windows   | ✅     | ✅     | ✅     |   ✅   |
+| Preview                                                                                                              | Code | Name      | Working Status | OpenAI Status | Bard Status | LLama2 Status     |
+| -------------------------------------------------------------------------------------------------------------------- | ---- | --------- | -------------- | ------------- | ----------- | ----------------- |
+| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/LIN.png "LIN (48x48)") | LIN  | GNU/Linux | ✅             | ✅            | ✅          | ❌ [did not test] |
+| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/WIN.png "WIN (48x48)") | WIN  | Windows   | ✅             | ✅            | ✅          | ✅                |
 
 ## Understanding the code
 
@@ -315,6 +316,8 @@ I have to thank **@thisserand** and his [llama2_local](https://github.com/thisse
 
 The Accuracy of the AI in offline and outside the codes test was great and had equal accuracy to openai or bard but while in code it was facing a few issues may be because of the prompting and all. I will try and fix it.
 The speed depends on your system and the GPU and CPU configs you have. currently, it is using the `TheBloke/Llama-2-7B-Chat-GGML` model and can be changed via the `portscanner` and `dnsrecon` files.
+
+For now the llama code and scans are handeled differently. After few tests I found out llama needs to be trained a little to opparate like how I intended it to work so it needs some time. Any suggestions on how I can do that can be added in the discussions of this repo [Discussions Link](https://github.com/morpheuslord/GPT_Vuln-analyzer/discussions). For now the output wont be a devided list of all the data instead will be an explaination of the vulnerability or issues discovered by the AI.
 
 ### Output
 
