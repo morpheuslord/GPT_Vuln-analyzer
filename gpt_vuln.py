@@ -425,16 +425,29 @@ def menu_term() -> None:
         print(Panel("Exiting Program"))
 
 
-def print_output(attack_type: str, jdata: str) -> Any:
-    data = json.loads(jdata)
-    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-    table.add_column("Variables", style="cyan")
-    table.add_column("Results", style="green")
+def print_output(attack_type: str, jdata: str, ai: str) -> Any:
+    if ai == 'openai':
+        data = json.loads(jdata)
+        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
+        table.add_column("Variables", style="cyan")
+        table.add_column("Results", style="green")
 
-    # Iterate over the data and add rows to the table
-    for key, value in data.items():
-        table.add_row(key, value)
-    console.print(table)
+        # Iterate over the data and add rows to the table
+        for key, value in data.items():
+            table.add_row(key, value)
+        console.print(table)
+    elif ai == 'bard':
+        data = json.loads(jdata)
+        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
+        table.add_column("Variables", style="cyan")
+        table.add_column("Results", style="green")
+
+        # Iterate over the data and add rows to the table
+        for key, value in data.items():
+            table.add_row(key, value)
+        console.print(table)
+    else:
+        print(Panel(jdata))
 
 
 def main(target: Any) -> None:
@@ -458,22 +471,22 @@ def main(target: Any) -> None:
                     match profile:
                         case 1:
                             p1_out: str = p_scanner(target, 1, akey, bkey, ai)
-                            print_output("Nmap", p1_out)
+                            print_output("Nmap", p1_out, ai)
                         case 2:
                             p2_out: str = p_scanner(target, 2, akey, bkey, ai)
-                            print_output("Nmap", p2_out)
+                            print_output("Nmap", p2_out, ai)
                         case 3:
                             p3_out: str = p_scanner(target, 3, akey, bkey, ai)
-                            print_output("Nmap", p3_out)
+                            print_output("Nmap", p3_out, ai)
                         case 4:
                             p4_out: str = p_scanner(target, 4, akey, bkey, ai)
-                            print_output("Nmap", p4_out)
+                            print_output("Nmap", p4_out, ai)
                         case 5:
                             p5_out: str = p_scanner(target, 5, akey, bkey, ai)
-                            print_output("Nmap", p5_out)
+                            print_output("Nmap", p5_out, ai)
                 case 'dns':
                     dns_output: str = dnsr(target, akey, bkey, ai)
-                    print_output("DNS", dns_output)
+                    print_output("DNS", dns_output, ai)
                 case 'sub':
                     sub_output: str = sub(target, list_loc)
                     console.print(sub_output, style="bold underline")
