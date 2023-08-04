@@ -205,14 +205,16 @@ def GPT_AI(key: str, data: Any) -> str:
         NMAP Data to be analyzed: {data}
         """
         # A structure for the request
-        completion = openai.Completion.create(
-            engine=model_engine,
-            prompt=prompt,
+        messages = [{ "content": prompt,"role": "user"}]
+        # A structure for the request
+        response = completion(
+            model=model_engine,
+            messages=messages,
             max_tokens=1024,
             n=1,
             stop=None,
         )
-        response = completion.choices[0].text
+        response = response['choices'][0]['message']['content']
         return str(extract_data(str(response)))
     except KeyboardInterrupt:
         print("Bye")

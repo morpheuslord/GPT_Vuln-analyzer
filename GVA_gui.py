@@ -1,6 +1,6 @@
 from subprocess import run
 from typing import Any
-
+from litellm import completion
 import customtkinter
 import dns.resolver
 import nmap
@@ -135,15 +135,16 @@ def dnsr(target: str) -> Any:
     try:
         prompt = "do a DNS analysis of {} and return proper clues for an attack in json".format(
             analize)
+        messages = [{ "content": prompt,"role": "user"}]
         # A structure for the request
-        completion = openai.Completion.create(
-            engine=model_engine,
-            prompt=prompt,
+        response = completion(
+            model=model_engine,
+            messages=messages,
             max_tokens=1024,
             n=1,
             stop=None,
         )
-        response = completion.choices[0].text
+        response = response['choices'][0]['message']['content']
     except KeyboardInterrupt:
         print("Bye")
         quit()
@@ -174,14 +175,16 @@ def scanner(ip: str, profile: int) -> str:
         prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
             analyze)
         # A structure for the request
-        completion = openai.Completion.create(
-            engine=model_engine,
-            prompt=prompt,
+        messages = [{ "content": prompt,"role": "user"}]
+        # A structure for the request
+        response = completion(
+            model=model_engine,
+            messages=messages,
             max_tokens=1024,
             n=1,
             stop=None,
         )
-        response = completion.choices[0].text
+        response = response['choices'][0]['message']['content']
     except KeyboardInterrupt:
         print("Bye")
         quit()
