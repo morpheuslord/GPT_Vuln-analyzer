@@ -6,7 +6,7 @@ from typing import Optional
 import nmap
 import openai
 import requests
-model_engine = "text-davinci-003"
+model_engine = "gpt-3.5-turbo-0613"
 nm = nmap.PortScanner()
 
 
@@ -205,16 +205,17 @@ def GPT_AI(key: str, data: Any) -> str:
         NMAP Data to be analyzed: {data}
         """
         # A structure for the request
-        messages = [{ "content": prompt,"role": "user"}]
+        messages = [{ "content": prompt,"role": "Security Analyst"}]
         # A structure for the request
-        response = completion(
+        response = openai.ChatCompletion.create(
             model=model_engine,
             messages=messages,
-            max_tokens=1024,
+            max_tokens=2500,
             n=1,
             stop=None,
         )
         response = response['choices'][0]['message']['content']
+        print(response)
         return str(extract_data(str(response)))
     except KeyboardInterrupt:
         print("Bye")
