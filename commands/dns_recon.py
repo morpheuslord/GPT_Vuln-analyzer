@@ -96,7 +96,6 @@ def BardAI(key: str, data: Any) -> str:
             "SOA": [""],
             "TXT": [""]
         }}
-
         DNS Data to be analyzed: {data}
         """
 
@@ -124,12 +123,13 @@ def BardAI(key: str, data: Any) -> str:
         return "None"
 
 
-def chat_with_api(api_url, user_message, model_name, file_name=None):
+def chat_with_api(api_url, user_message, user_instruction, model_name, file_name=None):
     # Prepare the request data in JSON format
     data = {
         'user_message': user_message,
         'model_name': model_name,
-        'file_name': file_name
+        'file_name': file_name,
+        'user_instruction': user_instruction
     }
 
     # Send the POST request to the API
@@ -147,7 +147,7 @@ def chat_with_api(api_url, user_message, model_name, file_name=None):
 def llama_AI(data: str):
     api_url = 'http://localhost:5000/api/chatbot'
 
-    user_message = f"""
+    user_instruction = """
         Do a DNS scan analysis on the provided DNS scan information. The DNS output must return in a asked format accorging to the provided output format. The data must be accurate in regards towards a pentest report.
         The data must follow the following rules:
         1) The DNS scans must be done from a pentester point of view
@@ -170,12 +170,14 @@ def llama_AI(data: str):
         - List the SOA records and security views on them
         "TXT":
         - List the TXT records and security views on them
-
+    """
+    user_message = f"""
         DNS Data to be analyzed: {data}
-        """
+    """
+
     model_name = "TheBloke/Llama-2-7B-Chat-GGML"
     file_name = "llama-2-7b-chat.ggmlv3.q4_K_M.bin"
-    bot_response = chat_with_api(api_url, user_message, model_name, file_name)
+    bot_response = chat_with_api(api_url, user_message, user_instruction, model_name, file_name)
     print("test")
     if bot_response:
         return bot_response
@@ -207,7 +209,7 @@ def gpt_ai(analyze: str, key: Optional[str]) -> str:
     """
     try:
         # A structure for the request
-        messages = [{ "content": prompt,"role": "user"}]
+        messages = [{"content": prompt, "role": "user"}]
         # A structure for the request
         response = completion(
             model=model_engine,

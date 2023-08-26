@@ -11,14 +11,15 @@ from flask import Flask, request, jsonify
 
 
 BOS, EOS = "<s>", "</s>"
-B_INST, E_INST = "[INST]", "[/INST]"
+E_INST = "[/INST]"
 B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
 DEFAULT_SYSTEM_PROMPT = """\
 You are a helpful, respectful and honest cybersecurity analyst. Being a security analyst you must scrutanize the details provided to ensure it is usable for penitration testing. Please ensure that your responses are socially unbiased and positive in nature.
 If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
 
 
-def format_to_llama_chat_style(history) -> str:
+def format_to_llama_chat_style(user_instructions, history) -> str:
+    B_INST = f"[INST]{user_instructions}"
     prompt = ""
     for i, dialog in enumerate(history[:-1]):
         instruction, response = dialog[0], dialog[1]
@@ -94,6 +95,7 @@ app = Flask(__name__)
 @app.route('/api/chatbot', methods=['POST'])
 def chatbot_api():
     data = request.json
+    user_instruction = data['user_instruction']
     user_message = data['user_message']
     model_name = data['model_name']
     file_name = data.get('file_name')
@@ -108,7 +110,7 @@ def chatbot_api():
         model_name, model_type, file_name)
 
     if is_chat_model:
-        instruction = format_to_llama_chat_style([[user_message, None]])
+        instruction = format_to_llama_chat_style(user_instruction, [[user_message, None]])
     else:
         instruction = user_message
 

@@ -9,8 +9,12 @@ import subprocess
 from dotenv import load_dotenv
 from rich import print
 from rich.console import Console
-from rich.panel import Panel
 from rich.table import Table
+from rich.panel import Panel
+from rich.console import Group
+from rich.align import Align
+from rich import box
+from rich.markdown import Markdown
 
 from commands.dns_recon import dnsr
 from commands.geo import geoip
@@ -63,6 +67,7 @@ choice = args.r
 list_loc = args.list
 ai = args.ai
 menu = args.menu
+ai_set_args = ""
 keyset = ""
 akey_set = ""
 bkey_set = ""
@@ -152,6 +157,7 @@ def nmap_menu() -> None:
         global ai_set
         global akey_set
         global bkey_set
+        global ai_set_args
         table = Table()
         table.add_column("Options", style="cyan")
         table.add_column("Utility", style="green")
@@ -175,17 +181,17 @@ def nmap_menu() -> None:
                 print(Panel(table0))
                 ai_set_choice = input("Enter AI of Choice: ")
                 if ai_set_choice == "1":
-                    ai_set = "openai"
+                    ai_set_args, ai_set = "openai", "openai"
                     akey_set = input("Enter OpenAI API: ")
                     print(Panel(f"API-Key Set: {akey_set}"))
                 elif ai_set_choice == "2":
-                    ai_set = "bard"
+                    ai_set_args, ai_set = "bard", "bard"
                     bkey_set = input("Enter Bard AI API: ")
                     print(Panel(f"API-Key Set: {bkey_set}"))
                 elif ai_set_choice == "3":
-                    ai_set = "llama"
+                    ai_set_args, ai_set = "llama", "llama"
                     print(Panel("No Key needed"))
-                    print(Panel(f"BardAI-Key Set: {bkey_set}"))
+                    print(Panel("Selected LLama"))
                 nmap_menu()
             case "2":
                 clearscr()
@@ -212,6 +218,7 @@ def nmap_menu() -> None:
                 table2 = Table()
                 table2.add_column("Options", style="cyan")
                 table2.add_column("Value", style="green")
+                table2.add_row("AI Set", str(ai_set_args))
                 table2.add_row("OpenAI API Key", str(akey_set))
                 table2.add_row("Bard AI API Key", str(bkey_set))
                 table2.add_row("Target", str(t))
@@ -394,7 +401,6 @@ def sub_menu() -> None:
 
 
 def menu_term() -> None:
-    start_api_app()
     try:
         table = Table()
         table.add_column("Options", style="cyan")
@@ -447,7 +453,18 @@ def print_output(attack_type: str, jdata: str, ai: str) -> Any:
             table.add_row(key, value)
         console.print(table)
     else:
-        print(Panel(jdata))
+        ai_out = Markdown(jdata)
+        message_panel = Panel(
+            Align.center(
+                Group("\n", Align.center(ai_out)),
+                vertical="middle",
+            ),
+            box=box.ROUNDED,
+            padding=(1, 2),
+            title="[b red]The GVA LLama2",
+            border_style="blue",
+        )
+        print(message_panel)
 
 
 def main(target: Any) -> None:
