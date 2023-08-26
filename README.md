@@ -321,8 +321,8 @@ For now, the llama code and scans are handled differently. After a few tests, I 
 
 ### Output
 
-nmap output:
-
+#### Nmap output:
+##### OpenAI and Bard:
 ```table
 ┏━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Elements           ┃ Results                                             ┃
@@ -335,8 +335,42 @@ nmap output:
 │ found cve          │ CVE-2023-28531                                      │
 └────────────────────┴─────────────────────────────────────────────────────┘
 ```
+##### LLama2
+```table
+╭───────────────────────────────────────────── The GVA LLama2 ──────────────────────────────────────────────╮
+│                                                                                                           │
+│                                                                                                           │
+│                                                                                                           │
+│  Based on the provided NMAP data, I have conducted a thorough analysis of the target system's open ports  │
+│  and services, vulnerabilities, and operating system information. Here is my findings: Critical Score:    │
+│  The critical score for this target system is 7 out of 10. The system has several open ports that could   │
+│  potentially be exploited, including port 80 (HTTP), port 135 (RPC), and port 445 (Microsoft DS). While   │
+│  These ports are not necessarily vulnerable, they do indicate that the system is running services that    │
+│  could be targeted by attackers. Additionally, the system has an outdated version of Microsoft IIS        │
+│  running on port 80, which could be a potential vulnerability. OS Information: The target system is       │
+│  running Microsoft Windows 10 1607. Open Ports and Services: The target system has the following open     │
+│  ports:                                                                                                   │
+│                                                                                                           │
+│   • Port 80: HTTP (Microsoft IIS httpd)                                                                   │
+│   • Port 135: RPC (Microsoft Windows RPC)                                                                 │
+│   • Port 445: Microsoft DS                                                                                │
+│   • Port 8000: Splunkd httpd All of these ports are currently open and have a state of "open".            │
+│     Vulnerable Services: Based on the CVEs found in the NMAP data, there are several potential            │
+│     vulnerabilities in the target system's services. These include:                                       │
+│   • CVE-2019-1489: An elevation of privilege vulnerability in Microsoft IIS that could be exploited by    │
+│     an attacker to gain control of the system. This vulnerability is related to the outdated version of   │
+│     Microsoft IIS running on port 80.                                                                     │
+│   • CVE-2017-0143: A remote code execution vulnerability in Microsoft Windows RPC that could be           │
+│     exploited by an attacker to execute arbitrary code on the target system. This vulnerability is        │
+│     related to the outdated version of Microsoft Windows RPC running on port 135.                         │
+│   • CVE-2020-1362: A remote code execution vulnerability in Microsoft DS that could be exploited by an    │
+│     attacker to execute arbitrary code on the target system. This vulnerability is related to the         │
+│     outdated version of Microsoft DS running on port 445. Found CVEs: The following C                     │
+│                                                                                                           │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
 
-DNS Output:
+#### DNS Output:
 target is jainuniversity.ac.in
 
 ```table
@@ -354,7 +388,7 @@ target is jainuniversity.ac.in
 └──────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-GEO Location output:
+#### GEO Location output:
 
 ```table
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
