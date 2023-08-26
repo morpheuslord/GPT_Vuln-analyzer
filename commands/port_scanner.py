@@ -116,12 +116,13 @@ def BardAI(key: str, data: Any) -> str:
         return "None"
 
 
-def chat_with_api(api_url, user_message, model_name, file_name=None):
+def chat_with_api(api_url, user_message, user_instruction, model_name, file_name=None):
     # Prepare the request data in JSON format
     data = {
         'user_message': user_message,
         'model_name': model_name,
         'file_name': file_name,
+        'user_instruction': user_instruction
     }
 
     # Send the POST request to the API
@@ -139,22 +140,22 @@ def chat_with_api(api_url, user_message, model_name, file_name=None):
 def Llama_AI(data: str):
     api_url = 'http://localhost:5000/api/chatbot'
 
-    user_message = f"""
-        Do a NMAP scan analysis on the provided NMAP scan information. The NMAP output must return in a asked format accorging to the provided output format. The data must be accurate in regards towards a pentest report.
-        The data must follow the following rules:
-        1) The NMAP scans must be done from a pentester point of view
-        2) The final output must be minimal according to the format given.
-        3) The final output must be kept to a minimal.
-        4) If a value not found in the scan just mention an empty string.
-        5) Analyze everything even the smallest of data.
-        6) Completely analyze the data provided and give a confirm answer using the output format.
-        7) mention all the data you found in the output format provided so that regex can be used on it.
-        8) avoid unnecessary explaination.
-        9) the critical score must be calculated based on the CVE if present or by the nature of the services open
-        10) the os information must contain the OS used my the target.
-        11) the open ports must include all the open ports listed in the data[tcp] and varifying if it by checking its states value.  you should not negect even one open port.
-        12) the vulnerable services can be determined via speculation of the service nature or by analyzing the CVE's found.
-        The output format:
+    user_instruction = """
+    Do a NMAP scan analysis on the provided NMAP scan information. The NMAP output must return in a asked format accorging to the provided output format. The data must be accurate in regards towards a pentest report.
+    The data must follow the following rules:
+    1) The NMAP scans must be done from a pentester point of view
+    2) The final output must be minimal according to the format given.
+    3) The final output must be kept to a minimal.
+    4) If a value not found in the scan just mention an empty string.
+    5) Analyze everything even the smallest of data.
+    6) Completely analyze the data provided and give a confirm answer using the output format.
+    7) mention all the data you found in the output format provided so that regex can be used on it.
+    8) avoid unnecessary explaination.
+    9) the critical score must be calculated based on the CVE if present or by the nature of the services open
+    10) the os information must contain the OS used my the target.
+    11) the open ports must include all the open ports listed in the data[tcp] and varifying if it by checking its states value.  you should not negect even one open port.
+    12) the vulnerable services can be determined via speculation of the service nature or by analyzing the CVE's found.
+    The output format:
         critical score:
         - Give info on the criticality
         "os information":
@@ -166,12 +167,13 @@ def Llama_AI(data: str):
         - Based on CVEs or nature of the ports opened list the vulnerable services
         "found cve":
         - List the CVE's found and list the main issues.
-
+    """
+    user_message = f"""
         NMAP Data to be analyzed: {data}
-        """
+    """
     model_name = "TheBloke/Llama-2-7B-Chat-GGML"
     file_name = "llama-2-7b-chat.ggmlv3.q4_K_M.bin"
-    bot_response = chat_with_api(api_url, user_message, model_name, file_name)
+    bot_response = chat_with_api(api_url, user_message, user_instruction, model_name, file_name)
 
     if bot_response:
         return bot_response
@@ -205,7 +207,7 @@ def GPT_AI(key: str, data: Any) -> str:
         NMAP Data to be analyzed: {data}
         """
         # A structure for the request
-        messages = [{ "content": prompt,"role": "Security Analyst"}]
+        messages = [{"content": prompt, "role": "Security Analyst"}]
         # A structure for the request
         response = openai.ChatCompletion.create(
             model=model_engine,
