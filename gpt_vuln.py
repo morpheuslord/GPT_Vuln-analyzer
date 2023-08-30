@@ -25,9 +25,12 @@ console = Console()
 load_dotenv()
 
 # The API Keys
-gkey = os.getenv('GEOIP_API_KEY')  # GeoIP API
-akey = os.getenv('OPENAI_API_KEY')  # OpenAI API
-bkey = os.getenv('BARD_API_KEY')  # BardAPI KEY
+gkey = os.getenv('GEOIP_API_KEY')
+akey = os.getenv('OPENAI_API_KEY')
+bkey = os.getenv('BARD_API_KEY')
+lkey = os.getenv('RUNPOD_API_KEY')
+lendpoint = os.getenv('RUNPOD_ENDPOINT_ID')
+
 parser = argparse.ArgumentParser(
     description='Python-Nmap and chatGPT intigrated Vulnerability scanner')
 parser.add_argument('--target', metavar='target', type=str,
@@ -55,7 +58,7 @@ parser.add_argument('--menu', metavar='menu', type=bool,
                     required=False,
                     default=False)
 parser.add_argument('--ai', metavar='ai', type=str,
-                    help='AI options for ("openai" Default, "bard", "llama")',
+                    help='AI options for ("openai" Default, "bard", "llama", "llama-api")',
                     required=False,
                     default='openai')
 args = parser.parse_args()
@@ -74,6 +77,8 @@ bkey_set = ""
 t = ""
 profile_num = ""
 ai_set = ""
+llamakey = ""
+llamaendpoint = ""
 
 
 def clearscr() -> None:
@@ -97,7 +102,7 @@ def start_api_app():
         case 'Darwin':
             subprocess.Popen(["python3", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
         case 'Linux':
-            subprocess.Popen(["python3", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
+            subprocess.Popen(["python3", "llama_api.py"])
         case 'Windows':
             subprocess.Popen(["python", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
 
@@ -147,6 +152,8 @@ def nmap_menu() -> None:
         global akey_set
         global bkey_set
         global ai_set_args
+        global llamakey
+        global llamaendpoint
         table = Table()
         table.add_column("Options", style="cyan")
         table.add_column("Utility", style="green")
@@ -178,9 +185,26 @@ def nmap_menu() -> None:
                     bkey_set = input("Enter Bard AI API: ")
                     print(Panel(f"API-Key Set: {bkey_set}"))
                 elif ai_set_choice == "3":
-                    ai_set_args, ai_set = "llama", "llama"
-                    print(Panel("No Key needed"))
-                    print(Panel("Selected LLama"))
+                    clearscr()
+                    tablel = Table()
+                    tablel.add_column("Options", style="cyan")
+                    tablel.add_column("Llama Options", style="cyan")
+                    tablel.add_row("1", "Llama Local")
+                    tablel.add_row("2", "Llama RunPod")
+                    print(tablel)
+                    ai_set_choice = input("Enter AI of Choice: ")
+                    ai_set_args = "llama"
+                    ai_set = "llama"
+                    if ai_set_choice == "1":
+                        ai_set = "llama"
+                        print(Panel("No Key needed"))
+                        print(Panel("Selected LLama"))
+                    elif ai_set_choice == "2":
+                        ai_set = "llama-api"
+                        llamaendpoint = input("Enter Runpod Endpoint ID: ")
+                        llamakey = input("Enter Runpod API Key: ")
+                        print(Panel(f"API-Key Set: {llamakey}"))
+                        print(Panel(f"Runpod Endpoint Set: {llamaendpoint}"))
                 nmap_menu()
             case "2":
                 clearscr()
@@ -210,6 +234,8 @@ def nmap_menu() -> None:
                 table2.add_row("AI Set", str(ai_set_args))
                 table2.add_row("OpenAI API Key", str(akey_set))
                 table2.add_row("Bard AI API Key", str(bkey_set))
+                table2.add_row("Llama Runpod API Key", str(llamakey))
+                table2.add_row("Runpod Endpoint ID", str(llamaendpoint))
                 table2.add_row("Target", str(t))
                 table2.add_row("Profile", str(profile_num))
                 # console.print(table2)
@@ -217,7 +243,7 @@ def nmap_menu() -> None:
                 nmap_menu()
             case "5":
                 clearscr()
-                pout: str = p_scanner(t, int(profile_num), akey_set, bkey_set, ai_set)
+                pout: str = p_scanner(t, int(profile_num), akey_set, bkey_set, lkey, lendpoint, ai_set)
                 print_output("Nmap", pout, ai_set)
             case "r":
                 clearscr()
@@ -234,6 +260,9 @@ def dns_menu() -> None:
         global ai_set
         global akey_set
         global bkey_set
+        global ai_set_args
+        global llamakey
+        global llamaendpoint
         table = Table()
         table.add_column("Options", style="cyan")
         table.add_column("Utility", style="green")
@@ -256,16 +285,34 @@ def dns_menu() -> None:
                 print(Panel(table0))
                 ai_set_choice = input("Enter AI of Choice: ")
                 if ai_set_choice == "1":
-                    ai_set = "openai"
+                    ai_set_args, ai_set = "openai", "openai"
                     akey_set = input("Enter OpenAI API: ")
                     print(Panel(f"API-Key Set: {akey_set}"))
                 elif ai_set_choice == "2":
-                    ai_set = "bard"
+                    ai_set_args, ai_set = "bard", "bard"
                     bkey_set = input("Enter Bard AI API: ")
                     print(Panel(f"API-Key Set: {bkey_set}"))
                 elif ai_set_choice == "3":
+                    clearscr()
+                    tablel = Table()
+                    tablel.add_column("Options", style="cyan")
+                    tablel.add_column("Llama Options", style="cyan")
+                    tablel.add_row("1", "Llama Local")
+                    tablel.add_row("2", "Llama RunPod")
+                    print(tablel)
+                    ai_set_choice = input("Enter AI of Choice: ")
+                    ai_set_args = "llama"
                     ai_set = "llama"
-                    print(Panel("No Key needed"))
+                    if ai_set_choice == "1":
+                        ai_set = "llama"
+                        print(Panel("No Key needed"))
+                        print(Panel("Selected LLama"))
+                    elif ai_set_choice == "2":
+                        ai_set = "llama-api"
+                        llamaendpoint = input("Enter Runpod Endpoint ID: ")
+                        llamakey = input("Enter Runpod API Key: ")
+                        print(Panel(f"API-Key Set: {llamakey}"))
+                        print(Panel(f"Runpod Endpoint Set: {llamaendpoint}"))
                 dns_menu()
             case "2":
                 clearscr()
@@ -278,14 +325,17 @@ def dns_menu() -> None:
                 table1 = Table()
                 table1.add_column("Options", style="cyan")
                 table1.add_column("Value", style="green")
+                table1.add_row("AI Set", str(ai_set_args))
                 table1.add_row("OpenAI API Key", str(akey_set))
                 table1.add_row("Bard AI API Key", str(bkey_set))
+                table1.add_row("Llama Runpod API Key", str(llamakey))
+                table1.add_row("Runpod Endpoint ID", str(llamaendpoint))
                 table1.add_row("Target", str(t))
                 print(Panel(table1))
                 dns_menu()
             case "4":
                 clearscr()
-                dns_output: str = dnsr(t, akey_set, bkey_set, ai_set)
+                dns_output: str = dnsr(t, akey_set, bkey_set, lkey, lendpoint, ai_set)
                 print_output("DNS", dns_output, ai_set)
             case "r":
                 clearscr()
@@ -455,6 +505,19 @@ def print_output(attack_type: str, jdata: str, ai: str) -> Any:
                         border_style="blue",
                     )
                     print(message_panel)
+                case 'llama-api':
+                    ai_out = Markdown(jdata)
+                    message_panel = Panel(
+                        Align.center(
+                            Group("\n", Align.center(ai_out)),
+                            vertical="middle",
+                        ),
+                        box=box.ROUNDED,
+                        padding=(1, 2),
+                        title="[b red]The GVA LLama2",
+                        border_style="blue",
+                    )
+                    print(message_panel)
         case "DNS":
             match ai:
                 case 'openai':
@@ -488,6 +551,19 @@ def print_output(attack_type: str, jdata: str, ai: str) -> Any:
                         border_style="blue",
                     )
                     print(message_panel)
+                case 'llama-api':
+                    ai_out = Markdown(jdata)
+                    message_panel = Panel(
+                        Align.center(
+                            Group("\n", Align.center(ai_out)),
+                            vertical="middle",
+                        ),
+                        box=box.ROUNDED,
+                        padding=(1, 2),
+                        title="[b red]The GVA LLama2",
+                        border_style="blue",
+                    )
+                    print(message_panel)
         case "GeoIP":
             data = json.loads(jdata)
             table = Table(title="GVA Report for GeoIP", show_header=True, header_style="bold magenta")
@@ -505,7 +581,8 @@ def print_output(attack_type: str, jdata: str, ai: str) -> Any:
 
 
 def main(target: Any) -> None:
-    start_api_app()
+    if ai == "llama":
+        start_api_app()
     cowsay.cow('GVA Usage in progress...')
     if target is not None:
         pass
@@ -524,22 +601,22 @@ def main(target: Any) -> None:
                 case 'nmap':
                     match profile:
                         case 1:
-                            p1_out: str = p_scanner(target, 1, akey, bkey, ai)
+                            p1_out: str = p_scanner(target, 1, akey, bkey, lkey, lendpoint, ai)
                             print_output("Nmap", p1_out, ai)
                         case 2:
-                            p2_out: str = p_scanner(target, 2, akey, bkey, ai)
+                            p2_out: str = p_scanner(target, 2, akey, bkey, lkey, lendpoint, ai)
                             print_output("Nmap", p2_out, ai)
                         case 3:
-                            p3_out: str = p_scanner(target, 3, akey, bkey, ai)
+                            p3_out: str = p_scanner(target, 3, akey, bkey, lkey, lendpoint, ai)
                             print_output("Nmap", p3_out, ai)
                         case 4:
-                            p4_out: str = p_scanner(target, 4, akey, bkey, ai)
+                            p4_out: str = p_scanner(target, 4, akey, bkey, lkey, lendpoint, ai)
                             print_output("Nmap", p4_out, ai)
                         case 5:
-                            p5_out: str = p_scanner(target, 5, akey, bkey, ai)
+                            p5_out: str = p_scanner(target, 5, akey, bkey, lkey, lendpoint, ai)
                             print_output("Nmap", p5_out, ai)
                 case 'dns':
-                    dns_output: str = dnsr(target, akey, bkey, ai)
+                    dns_output: str = dnsr(target, akey, bkey, lkey, lendpoint, ai)
                     print_output("DNS", dns_output, ai)
                 case 'sub':
                     sub_output: str = sub(target, list_loc)
