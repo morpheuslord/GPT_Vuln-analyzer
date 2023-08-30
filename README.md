@@ -50,11 +50,13 @@ gui.application()
 ## Usage CLI
 
 - First Change the "OPENAI_API_KEY", "GEOIP_API_KEY" and "BARD_API_KEY" part of the code with OpenAI api key and the IPGeolocation API key in the `.env` file
-
+- For the `llama-api` option or specific the llama runpod serverless endpoint deployment option requires you to enter the `serverless endpoint ID` from runpod and also your `RUNPOD API KEY`
 ```python
 GEOIP_API_KEY = ''
 OPENAI_API_KEY = ''
 BARD_API_KEY = ''
+RUNPOD_ENDPOINT_ID = ''
+RUNPOD_API_KEY = ''
 ```
 
 - second install the packages
@@ -94,10 +96,10 @@ python gpt_vuln.py --target <HOSTNAME> --attack sub --list <PATH to FILE>
 python gpt_vuln.py --target <IP> --attack geo
 
 # Specify the AI to be used for nmap
-python gpt_vuln.py --target <IP> --attack nmap --profile <1-5> --ai llama /bard / openai <default>
+python gpt_vuln.py --target <IP> --attack nmap --profile <1-5> --ai llama /llama-api /bard / openai <default>
 
 # Specify the AI to be used for dns
-python gpt_vuln.py --target <IP> --attack dns --ai bard / openai <default>
+python gpt_vuln.py --target <IP> --attack dns --ai llama /llama-api /bard / openai <default>
 
 # Interactive step by step cli interface
 python gpt_vuln.py --menu True
