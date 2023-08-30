@@ -211,7 +211,7 @@ def gpt_ai(analyze: str, key: Optional[str]) -> str:
         # A structure for the request
         messages = [{"content": prompt, "role": "user"}]
         # A structure for the request
-        response = completion(
+        response = openai.ChatCompletion.create(
             model=model_engine,
             messages=messages,
             max_tokens=1024,
