@@ -10,6 +10,31 @@ model_engine = "gpt-3.5-turbo-0613"
 nm = nmap.PortScanner()
 
 
+def llama_runpod_api(prompt, lkey, lendpoint) -> Any:
+    url = f"https://api.runpod.ai/v2/{lendpoint}/runsync"
+    payload = json.dumps({
+        "input": {
+            "prompt": prompt,
+            "max_new_tokens": 4500,
+            "temperature": 0.9,
+            "top_k": 50,
+            "top_p": 0.7,
+            "repetition_penalty": 1.2,
+            "batch_size": 8,
+            "stop": [
+                "</s>"
+            ]
+        }
+    })
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {lkey}',
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+    response_t = json.loads(response.text)
+    return response_t["output"]
+
+
 def extract_data(json_string: str) -> Any:
     # Define the regular expression patterns for individual values
     critical_score_pattern = r'"critical score": \["(.*?)"\]'
@@ -137,7 +162,7 @@ def chat_with_api(api_url, user_message, user_instruction, model_name, file_name
         return None
 
 
-def Llama_AI(data: str):
+def Llama_AI(data: str, mode: str, lkey, lendpoint):
     api_url = 'http://localhost:5000/api/chatbot'
 
     user_instruction = """
@@ -173,8 +198,11 @@ def Llama_AI(data: str):
     """
     model_name = "TheBloke/Llama-2-7B-Chat-GGML"
     file_name = "llama-2-7b-chat.ggmlv3.q4_K_M.bin"
-    bot_response = chat_with_api(api_url, user_message, user_instruction, model_name, file_name)
-
+    if mode == "local":
+        bot_response = chat_with_api(api_url, user_message, user_instruction, model_name, file_name)
+    elif mode == "runpod":
+        prompt = f"[INST] <<SYS>> {user_instruction}<</SYS>> NMAP Data to be analyzed: {user_message} [/INST]"
+        bot_response = llama_runpod_api(prompt, lkey, lendpoint)
     if bot_response:
         return bot_response
 
@@ -224,7 +252,7 @@ def GPT_AI(key: str, data: Any) -> str:
         quit()
 
 
-def p_scanner(ip: Optional[str], profile: int, akey: Optional[str], bkey: Optional[str], AI: str) -> Any:
+def p_scanner(ip: Optional[str], profile: int, akey: Optional[str], bkey: Optional[str], lkey, lendpoint, AI: str) -> Any:
     # Handle the None case
     profile_argument = ""
     # The port profiles or scan types user can choose
@@ -267,7 +295,13 @@ def p_scanner(ip: Optional[str], profile: int, akey: Optional[str], bkey: Option
                 quit()
         case 'llama':
             try:
-                response = Llama_AI(analyze)
+                response = Llama_AI(analyze, "local", lkey, lendpoint)
+            except KeyboardInterrupt:
+                print("Bye")
+                quit()
+        case 'llama-api':
+            try:
+                response = Llama_AI(analyze, "runpod", lkey, lendpoint)
             except KeyboardInterrupt:
                 print("Bye")
                 quit()
