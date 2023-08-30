@@ -135,7 +135,7 @@ def dnsr(target: str) -> Any:
     try:
         prompt = "do a DNS analysis of {} and return proper clues for an attack in json".format(
             analize)
-        messages = [{ "content": prompt,"role": "user"}]
+        messages = [{"content": prompt, "role": "user"}]
         # A structure for the request
         response = completion(
             model=model_engine,
@@ -175,7 +175,7 @@ def scanner(ip: str, profile: int) -> str:
         prompt = "do a vulnerability analysis of {} and return a vulnerabilty report in json".format(
             analyze)
         # A structure for the request
-        messages = [{ "content": prompt,"role": "user"}]
+        messages = [{"content": prompt, "role": "user"}]
         # A structure for the request
         response = completion(
             model=model_engine,

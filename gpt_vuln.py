@@ -46,7 +46,7 @@ parser.add_argument('--list', metavar='list', type=str,
                     ''',
                     default='lists/default.txt',
                     required=False)
-parser.add_argument('--r', metavar='r', type=str,
+parser.add_argument('--rich_menu', metavar='rich_menu', type=str,
                     help='Shows a more clean help manu using rich only argument-input is help',
                     default=help,
                     required=False)
@@ -55,7 +55,7 @@ parser.add_argument('--menu', metavar='menu', type=bool,
                     required=False,
                     default=False)
 parser.add_argument('--ai', metavar='ai', type=str,
-                    help='Terminal Interactive Menu',
+                    help='AI options for ("openai" Default, "bard", "llama")',
                     required=False,
                     default='openai')
 args = parser.parse_args()
@@ -63,7 +63,7 @@ args = parser.parse_args()
 target = args.target
 profile = args.profile
 attack = args.attack
-choice = args.r
+choice = args.rich_menu
 list_loc = args.list
 ai = args.ai
 menu = args.menu
@@ -91,9 +91,15 @@ def clearscr() -> None:
 
 
 def start_api_app():
-    if os.name == 'nt':
-        CREATE_NEW_CONSOLE = 0x00000010
-        subprocess.Popen(["python", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
+    CREATE_NEW_CONSOLE = 0x00000010
+    osp = platform.system()
+    match osp:
+        case 'Darwin':
+            subprocess.Popen(["python3", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
+        case 'Linux':
+            subprocess.Popen(["python3", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
+        case 'Windows':
+            subprocess.Popen(["python", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
 
 
 def help_menu() -> None:
@@ -117,23 +123,6 @@ def help_menu() -> None:
                   "Interactive UI menu", "True / False (Default)")
     table.add_row("Rich Help", "--r", "STRING",
                   "Pritty Help menu", "help")
-    console.print(table)
-
-
-def GEOIP_to_table(json_data: str) -> Any:
-    data = json.loads(json_data)
-
-    table = Table(title="GVA Report for GeoIP", show_header=True, header_style="bold magenta")
-    table.add_column("Identifiers", style="cyan")
-    table.add_column("Data", style="green")
-
-    flattened_data: dict = flatten_json(data, separator='.')
-
-    for key, value in flattened_data.items():
-        value_str = str(value)
-        table.add_row(key, value_str)
-
-    console = Console()
     console.print(table)
 
 
@@ -344,7 +333,7 @@ def geo_menu() -> None:
             case "4":
                 clearscr()
                 geo_output: str = geoip(keyset, t)
-                GEOIP_to_table(str(geo_output))
+                print_output("GeoIP", str(geo_output), ai)
             case "r":
                 clearscr()
                 menu_term()
@@ -432,39 +421,87 @@ def menu_term() -> None:
 
 
 def print_output(attack_type: str, jdata: str, ai: str) -> Any:
-    if ai == 'openai':
-        data = json.loads(jdata)
-        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-        table.add_column("Variables", style="cyan")
-        table.add_column("Results", style="green")
+    match attack_type:
+        case "Nmap":
+            match ai:
+                case 'openai':
+                    data = json.loads(jdata)
+                    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
+                    table.add_column("Variables", style="cyan")
+                    table.add_column("Results", style="green")
 
-        # Iterate over the data and add rows to the table
-        for key, value in data.items():
-            table.add_row(key, value)
-        console.print(table)
-    elif ai == 'bard':
-        data = json.loads(jdata)
-        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-        table.add_column("Variables", style="cyan")
-        table.add_column("Results", style="green")
+                    for key, value in data.items():
+                        table.add_row(key, value)
+                    print(table)
+                case 'bard':
+                    data = json.loads(jdata)
+                    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
+                    table.add_column("Variables", style="cyan")
+                    table.add_column("Results", style="green")
 
-        # Iterate over the data and add rows to the table
-        for key, value in data.items():
-            table.add_row(key, value)
-        console.print(table)
-    else:
-        ai_out = Markdown(jdata)
-        message_panel = Panel(
-            Align.center(
-                Group("\n", Align.center(ai_out)),
-                vertical="middle",
-            ),
-            box=box.ROUNDED,
-            padding=(1, 2),
-            title="[b red]The GVA LLama2",
-            border_style="blue",
-        )
-        print(message_panel)
+                    for key, value in data.items():
+                        table.add_row(key, value)
+                    print(table)
+                case 'llama':
+                    ai_out = Markdown(jdata)
+                    message_panel = Panel(
+                        Align.center(
+                            Group("\n", Align.center(ai_out)),
+                            vertical="middle",
+                        ),
+                        box=box.ROUNDED,
+                        padding=(1, 2),
+                        title="[b red]The GVA LLama2",
+                        border_style="blue",
+                    )
+                    print(message_panel)
+        case "DNS":
+            match ai:
+                case 'openai':
+                    data = json.loads(jdata)
+                    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
+                    table.add_column("Variables", style="cyan")
+                    table.add_column("Results", style="green")
+
+                    for key, value in data.items():
+                        table.add_row(key, value)
+                    print(table)
+                case 'bard':
+                    data = json.loads(jdata)
+                    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
+                    table.add_column("Variables", style="cyan")
+                    table.add_column("Results", style="green")
+
+                    for key, value in data.items():
+                        table.add_row(key, value)
+                    print(table)
+                case 'llama':
+                    ai_out = Markdown(jdata)
+                    message_panel = Panel(
+                        Align.center(
+                            Group("\n", Align.center(ai_out)),
+                            vertical="middle",
+                        ),
+                        box=box.ROUNDED,
+                        padding=(1, 2),
+                        title="[b red]The GVA LLama2",
+                        border_style="blue",
+                    )
+                    print(message_panel)
+        case "GeoIP":
+            data = json.loads(jdata)
+            table = Table(title="GVA Report for GeoIP", show_header=True, header_style="bold magenta")
+            table.add_column("Identifiers", style="cyan")
+            table.add_column("Data", style="green")
+
+            flattened_data: dict = flatten_json(data, separator='.')
+
+            for key, value in flattened_data.items():
+                value_str = str(value)
+                table.add_row(key, value_str)
+
+            console = Console()
+            console.print(table)
 
 
 def main(target: Any) -> None:
@@ -483,7 +520,7 @@ def main(target: Any) -> None:
             match attack:
                 case 'geo':
                     geo_output: str = geoip(gkey, target)
-                    GEOIP_to_table(str(geo_output))
+                    print_output("GeoIP", str(geo_output), ai)
                 case 'nmap':
                     match profile:
                         case 1:
