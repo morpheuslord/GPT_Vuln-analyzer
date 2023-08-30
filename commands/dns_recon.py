@@ -11,6 +11,31 @@ from rich.progress import track
 model_engine = "text-davinci-003"
 
 
+def llama_runpod_api(prompt, lkey, lendpoint) -> Any:
+    url = f"https://api.runpod.ai/v2/{lendpoint}/runsync"
+    payload = json.dumps({
+        "input": {
+            "prompt": prompt,
+            "max_new_tokens": 4500,
+            "temperature": 0.9,
+            "top_k": 50,
+            "top_p": 0.7,
+            "repetition_penalty": 1.2,
+            "batch_size": 8,
+            "stop": [
+                "</s>"
+            ]
+        }
+    })
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {lkey}',
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+    response_t = json.loads(response.text)
+    return response_t["output"]
+
+
 def extract_data(json_string: str) -> Any:
     # Define the regular expression patterns for individual values
     A_pattern = r'"A": \["(.*?)"\]'
@@ -144,7 +169,7 @@ def chat_with_api(api_url, user_message, user_instruction, model_name, file_name
         return None
 
 
-def llama_AI(data: str):
+def llama_AI(data: str, mode: str, lkey, lendpoint):
     api_url = 'http://localhost:5000/api/chatbot'
 
     user_instruction = """
@@ -177,6 +202,11 @@ def llama_AI(data: str):
 
     model_name = "TheBloke/Llama-2-7B-Chat-GGML"
     file_name = "llama-2-7b-chat.ggmlv3.q4_K_M.bin"
+    if mode == "local":
+        bot_response = chat_with_api(api_url, user_message, user_instruction, model_name, file_name)
+    elif mode == "runpod":
+        prompt = f"[INST] <<SYS>> {user_instruction}<</SYS>> NMAP Data to be analyzed: {user_message} [/INST]"
+        bot_response = llama_runpod_api(prompt, lkey, lendpoint)
     bot_response = chat_with_api(api_url, user_message, user_instruction, model_name, file_name)
     print("test")
     if bot_response:
@@ -225,7 +255,7 @@ def gpt_ai(analyze: str, key: Optional[str]) -> str:
         quit()
 
 
-def dnsr(target: str, akey: Optional[str], bkey: Optional[str], AI: str) -> Any:
+def dnsr(target: str, akey: Optional[str], bkey: Optional[str], lkey, lendpoint, AI: str) -> Any:
     if target is not None:
         pass
     else:
@@ -278,9 +308,14 @@ def dnsr(target: str, akey: Optional[str], bkey: Optional[str], AI: str) -> Any:
                 quit()
         case 'llama':
             try:
-                response = llama_AI(analyze)
+                response = llama_AI(analyze, "local", lkey, lendpoint)
             except KeyboardInterrupt:
                 print("Bye")
                 quit()
-
+        case 'llama-api':
+            try:
+                response = llama_AI(analyze, "runpod", lkey, lendpoint)
+            except KeyboardInterrupt:
+                print("Bye")
+                quit()
     return str(response)
