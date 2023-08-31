@@ -8,6 +8,8 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 - All the packages mentioned in the requirements.txt file
 - OpenAI API
 - Bard API (MakerSuite Palm)
+- llama.cpp
+- Runpod serverless endpoint
 - HuggingFace token (with llama2 access )
 - IPGeolocation API
 
@@ -320,6 +322,14 @@ The Accuracy of the AI offline and outside the codes test was great and had equa
 The speed depends on your system and the GPU and CPU configs you have. currently, it is using the `TheBloke/Llama-2-7B-Chat-GGML` model and can be changed via the `portscanner` and `dnsrecon` files.
 
 For now, the llama code and scans are handled differently. After a few tests, I found out llama needs to be trained a little to operate like how I intended it to work so it needs some time. Any suggestions on how I can do that can be added to the discussions of this repo [Discussions Link](https://github.com/morpheuslord/GPT_Vuln-analyzer/discussions). For now, the output won't be a divided list of all the data instead will be an explanation of the vulnerability or issues discovered by the AI.
+
+The prompt for the model usage looks like this:
+```prompt
+[INST] <<SYS>> {user_instruction}<</SYS>> NMAP Data to be analyzed: {user_message} [/INST]
+```
+The instructions looks like this:
+```
+```
 
 ### Output
 
