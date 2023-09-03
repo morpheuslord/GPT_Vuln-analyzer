@@ -51,8 +51,8 @@ gui.application()
 
 ## Usage CLI
 
-- First Change the "OPENAI_API_KEY", "GEOIP_API_KEY" and "BARD_API_KEY" part of the code with OpenAI api key and the IPGeolocation API key in the `.env` file
-- For the `llama-api` option or specific the llama runpod serverless endpoint deployment option requires you to enter the `serverless endpoint ID` from runpod and also your `RUNPOD API KEY`
+- First Change the "OPENAI_API_KEY", "GEOIP_API_KEY" and "BARD_API_KEY" part of the code with the OpenAI api key and the IPGeolocation API key in the `.env` file
+- For the `llama-api` option or specifically the llama runpod serverless endpoint deployment option requires you to enter the `serverless endpoint ID` from runpod and also your `RUNPOD API KEY`
 ```python
 GEOIP_API_KEY = ''
 OPENAI_API_KEY = ''
@@ -69,7 +69,7 @@ or
 pip install -r requirements.txt
 ```
 
-- run the code python3 gpt_vuln.py
+- Run the code python3 gpt_vuln.py
 
 ```bash
 # Regular Help Menu
@@ -140,7 +140,7 @@ The CLI interface has a few things to note.
 
 ### My views on Bard
 
-Its same as Openai GPT3.5 but faster. It can generate the same answer but in 2 times the speed.
+Its the same as Openai GPT3.5 but faster. It can generate the same answer but in 2 times the speed.
 
 ### OS Supported
 
@@ -309,7 +309,7 @@ The regex extraction code does the extraction and further the main function arra
 
 ## Using Bard AI
 
-For you to use Bard AI you must signup to the MakerSuit Palm API for developer access and generate your API key from there. For links and how this works you can use this video [MakerSuit](https://www.youtube.com/watch?v=Ce1AOchQMzA&t=128s)
+For you to use Bard AI you must sign up to the MakerSuit Palm API for developer access and generate your API key from there. For links and how this works you can use this video [MakerSuit](https://www.youtube.com/watch?v=Ce1AOchQMzA&t=128s)
 
 Once the API is acquired just add it to the `.env` file and you are good to go.
 
@@ -318,7 +318,7 @@ Once the API is acquired just add it to the `.env` file and you are good to go.
 Using LLama2 is one of the best offline and free options out there. It is currently under improvement I am working on a prompt that will better incorporate cybersecurity perspective into the AI.
 I have to thank **@thisserand** and his [llama2_local](https://github.com/thisserand/llama2_local) repo and also his YT video [YT_Video](https://youtu.be/WzCS8z9GqHw). They were great resources. To be frank the llama2 code is 95% his, I just yanked the code and added a Flask API functionality to it.
 
-The Accuracy of the AI offline and outside the codes test was great and had equal accuracy to openai or bard but while in code it was facing a few issues may be because of the prompting and all. I will try and fix it.
+The Accuracy of the AI offline and outside the codes test was great and had equal accuracy to openai or bard but while in code it was facing a few issues be because of the prompting and all. I will try and fix it.
 The speed depends on your system and the GPU and CPU configs you have. currently, it is using the `TheBloke/Llama-2-7B-Chat-GGML` model and can be changed via the `portscanner` and `dnsrecon` files.
 
 For now, the llama code and scans are handled differently. After a few tests, I found out llama needs to be trained a little to operate like how I intended it to work so it needs some time. Any suggestions on how I can do that can be added to the discussions of this repo [Discussions Link](https://github.com/morpheuslord/GPT_Vuln-analyzer/discussions). For now, the output won't be a divided list of all the data instead will be an explanation of the vulnerability or issues discovered by the AI.
@@ -359,7 +359,7 @@ The instructions looks like this:
 
 Using the instruction set and the data provided via the prompt the llama AI generates its output.
 
-For the most usage I suggest you create an runpod serverless endpoit deployment of llama you can refer this tutorial for that [tutorial](https://www.youtube.com/watch?v=Ftb4vbGUr7U). Follow the tutorial for better use.
+For the most usage I suggest you create a runpod serverless endpoint deployment of llama you can refer to this tutorial for that [tutorial](https://www.youtube.com/watch?v=Ftb4vbGUr7U). Follow the tutorial for better use.
 ### Output
 
 #### Nmap output:
@@ -472,9 +472,9 @@ target is jainuniversity.ac.in
 
 # Usage GUI
 
-The GUI uses customtkinter for the running of the code. The interface is straight forward the only thing required to remember is:
+The GUI uses customtkinter for the running of the code. The interface is straightforward the only thing required to remember is:
 
-- When using dns attack dont specify the profile
+- When using dns attack don't specify the profile
 
 ```bash
 python GVA_gui.py
@@ -498,8 +498,8 @@ python GVA_gui.py
 
 ## Advantage
 
-- Can be used in developing a more advanced systems completly made of the API and scanner combination
-- Has the capability to analize DNS information and reslove Mustiple records it a more better format.
+- Can be used in developing more advanced systems completely made of the API and scanner combination
+- Has the capability to analyse DNS information and resolve multiple records in a better format.
 - Can increase the effectiveness of the final system
 - Can also perform subdomain enumeration
 - Highly productive when working with models such as GPT3
