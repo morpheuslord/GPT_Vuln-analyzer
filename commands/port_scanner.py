@@ -11,7 +11,15 @@ class NetworkScanner():
             2: '-Pn -T4 -A -v',
             3: '-Pn -sS -sU -T4 -A -v',
             4: '-Pn -p- -T4 -A -v',
-            5: '-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln'
+            5: '-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln',
+            6: '-Pn -sV -p- -A',
+            7: '-Pn -sS -sV -O -T4 -A',
+            8: '-Pn -sC',
+            9: '-Pn -p 1-65535 -T4 -A -v',
+            10: '-Pn -sU -T4',
+            11: '-Pn -sV --top-ports 100',
+            12: '-Pn -sS -sV -T4 --script=default,discovery,vuln',
+            13: '-Pn -F'
         }
         # The scanner with GPT Implemented
         nm.scan('{}'.format(ip), arguments='{}'.format(profile_arguments.get(profile)))
