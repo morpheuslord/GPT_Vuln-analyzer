@@ -22,28 +22,54 @@ cd package && pip3/pip install .
 Simple import any of the 3 packages and then add define the variables accordingly
 
 ```python
-from GVA import scanner
-from GVA import dns_recon
-from GVA import subdomain
-from GVA import geo
+from GVA.scanner import NetworkScanner
+from GVA.dns_recon import DNSRecon
+from GVA.geo import geo_ip_recon
+from GVA.menus import Menus
+from GVA.ai_models import NMAP_AI_MODEL
+from GVA.ai_models import DNS_AI_MODEL
+from GVA.assets import Assets
+from GVA.subdomain import sub_enum
 from GVA import gui
-from dotenv import load_dotenv()
 
-load_dotenv()
-openai_key = os.getenv('OPENAI_API_KEY')
-geoIP_key = os.getenv('GEOIP_API_KEY')
+# The components defined
+dns_enum = DNSRecon()
+geo_ip = geo_ip_recon()
+p_ai_models = NMAP_AI_MODEL()
+dns_ai_models = DNS_AI_MODEL()
+port_scanner = NetworkScanner()
+sub_recon = sub_enum()
+asset_codes = Assets()
 
-sub_domain_list = ['admin', 'whateveryouwant']
 
-# scanner(target: str, profile: int, api_key: str)
-# dns_recon(target: str, api_key: str)
-# domain(target: str, domain_list: List[str])
-# geo(api_key: str, target: str)
+# KEEP IT BLANK IF YOU HAVE NO CLUE THE MENU WILL ASK TO FILL IT ONCE ACTIVE
+lkey = "LLAMA API KEY"
+lendpoint = "LLAMA ENDPOINT"
+keyset = "AI API KEY"
+target_ip_hostname = "TARGET IP OR HOSTNAME"
+profile_num = "PROFILE FOR NMAP SCAN"
+ai_set = "AI OF CHOICE"
+akey_set = "OPENAI API KEY"
+bkey_set = "BARD API KEY"
+ai_set_args = ""  # Keep it blank at any cost
+llamakey = "LLAMA RUNPOD API KEY"
+llamaendpoint = "LLAMA RUNPOD ENDPOINT"
 
-print(scanner.scanner('127.0.0.1', 1, openai_key))
-print(dns_recon.dns_recon('127.0.0.1', openai_key))
-print(subdomain.domain('127.0.0.1', sub_domain_list))
-print(geo.geo(geoIP_key, '127.0.0.1'))
+Menus(
+    lamma_key=lkey,
+    llama_api_endpoint=lendpoint,
+    initial_keyset=keyset,
+    target=target_ip_hostname,
+    profile_num=profile_num,
+    ai_set=ai_set,
+    openai_akey_set=akey_set,
+    bard_key_set=bkey_set,
+    ai_set_args=ai_set_args,
+    llama_runpod_key=llamakey,
+    llama_endpoint=llamaendpoint
+)
+
+
 gui.application()
 ```
 
@@ -51,6 +77,7 @@ gui.application()
 
 - First Change the "OPENAI_API_KEY", "GEOIP_API_KEY" and "BARD_API_KEY" part of the code with OpenAI api key and the IPGeolocation API key in the `.env` file
 - For the `llama-api` option or specific the llama runpod serverless endpoint deployment option requires you to enter the `serverless endpoint ID` from runpod and also your `RUNPOD API KEY`
+
 ```python
 GEOIP_API_KEY = ''
 OPENAI_API_KEY = ''
@@ -164,36 +191,55 @@ The profile is the type of scan that will be executed by the nmap subprocess. Th
 The entire structure of request that has to be sent to the openai API is designed in the completion section of the Program.
 
 ```python
-def scanner(ip: Optional[str], profile: int, key: str) -> str:
-    if key is not None:
-        pass
-    else:
-        raise ValueError("KeyNotFound: Key Not Provided")
-    # Handle the None case
-    profile_argument = ""
-    # The port profiles or scan types user can choose
-    if profile == 1:
-        profile_argument = '-Pn -sV -T4 -O -F'
-    elif profile == 2:
-        profile_argument = '-Pn -T4 -A -v'
-    elif profile == 3:
-        profile_argument = '-Pn -sS -sU -T4 -A -v'
-    elif profile == 4:
-        profile_argument = '-Pn -p- -T4 -A -v'
-    elif profile == 5:
-        profile_argument = '-Pn -sS -sU -T4 -A -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --script=vuln'
-    else:
-        raise ValueError(f"Invalid Argument: {profile}")
-    # The scanner with GPT Implemented
-    nm.scan('{}'.format(ip), arguments='{}'.format(profile_argument))
-    json_data = nm.analyse_nmap_xml_scan()
-    analyze = json_data["scan"]
-    try:
-        response = PortAI(key, analyze)
-    except KeyboardInterrupt:
-        print("Bye")
-        quit()
-    return str(response)
+class NetworkScanner():
+    def scanner(self, AIModels, ip: Optional[str], profile: int, akey: Optional[str], bkey: Optional[str], lkey, lendpoint, AI: str) -> str:
+        profile_arguments = {
+            1: '-Pn -sV -T4 -O -F',
+            2: '-Pn -T4 -A -v',
+            3: '-Pn -sS -sU -T4 -A -v',
+            4: '-Pn -p- -T4 -A -v',
+            5: '-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln'
+        }
+        # The scanner with GPT Implemented
+        nm.scan('{}'.format(ip), arguments='{}'.format(profile_arguments.get(profile)))
+        json_data = nm.analyse_nmap_xml_scan()
+        analyze = json_data["scan"]
+        match AI:
+            case 'openai':
+                try:
+                    if akey is not None:
+                        pass
+                    else:
+                        raise ValueError("KeyNotFound: Key Not Provided")
+                    response = AIModels.GPT_AI(akey, analyze)
+                except KeyboardInterrupt:
+                    print("Bye")
+                    quit()
+            case 'bard':
+                try:
+                    if bkey is not None:
+                        pass
+                    else:
+                        raise ValueError("KeyNotFound: Key Not Provided")
+                    response = AIModels.BardAI(bkey, analyze)
+                except KeyboardInterrupt:
+                    print("Bye")
+                    quit()
+            case 'llama':
+                try:
+                    response = AIModels.Llama_AI(analyze, "local", lkey, lendpoint)
+                except KeyboardInterrupt:
+                    print("Bye")
+                    quit()
+            case 'llama-api':
+                try:
+                    response = AIModels.Llama_AI(analyze, "runpod", lkey, lendpoint)
+                except KeyboardInterrupt:
+                    print("Bye")
+                    quit()
+        self.response = response
+        text = str(self.response)
+        return text
 
 ```
 
@@ -324,7 +370,9 @@ For now, the llama code and scans are handled differently. After a few tests, I 
 ### Output
 
 #### Nmap output:
+
 ##### OpenAI and Bard:
+
 ```table
 ┏━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Elements           ┃ Results                                             ┃
@@ -337,7 +385,9 @@ For now, the llama code and scans are handled differently. After a few tests, I 
 │ found cve          │ CVE-2023-28531                                      │
 └────────────────────┴─────────────────────────────────────────────────────┘
 ```
+
 ##### LLama2
+
 ```table
 ╭───────────────────────────────────────────── The GVA LLama2 ──────────────────────────────────────────────╮
 │                                                                                                           │
@@ -373,6 +423,7 @@ For now, the llama code and scans are handled differently. After a few tests, I 
 ```
 
 #### DNS Output:
+
 target is jainuniversity.ac.in
 
 ```table
