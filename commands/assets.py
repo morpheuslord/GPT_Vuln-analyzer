@@ -64,7 +64,7 @@ class Assets():
                       "The target of the user", "None")
         table.add_row("Domain List", "--list", "Path to text file",
                       "subdomain dictionary list", "Path")
-        table.add_row("Profile", "--profile", "INT (1-5)",
+        table.add_row("Profile", "--profile", "INT (1-13)",
                       "The type of Nmap Scan the user intends", "None")
         table.add_row("AI", "--ai", "STRING",
                       "Choose your AI of choice", "bard / openai (default)")

@@ -109,7 +109,7 @@ python gpt_vuln.py --r help
 python gpt_vuln.py --target <IP> --attack dns/nmap
 
 # Specify target and profile for nmap
-python gpt_vuln.py --target <IP> --attack nmap --profile <1-5>
+python gpt_vuln.py --target <IP> --attack nmap --profile <1-13>
 (Default:1)
 
 # Specify target for DNS no profile needed
@@ -180,13 +180,21 @@ Its the same as Openai GPT3.5 but faster. It can generate the same answer but in
 
 Profiles:
 
-| Parameter | Return data | Description           | Nmap Command                                          |
-| :-------- | :---------- | :-------------------- | :---------------------------------------------------- |
-| `p1`      | `json`      | Effective Scan        | `-Pn -sV -T4 -O -F`                                   |
-| `p2`      | `json`      | Simple Scan           | `-Pn -T4 -A -v`                                       |
-| `p3`      | `json`      | Low Power Scan        | `-Pn -sS -sU -T4 -A -v`                               |
-| `p4`      | `json`      | Partial Intense Scan  | `-Pn -p- -T4 -A -v`                                   |
-| `p5`      | `json`      | Complete Intense Scan | `-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln` |
+| Parameter | Return data | Description                                          | Nmap Command                                          |
+| :-------- | :---------- | :--------------------------------------------------- | :---------------------------------------------------- |
+| `p1`      | `json`      | Effective Scan                                       | `-Pn -sV -T4 -O -F`                                   |
+| `p2`      | `json`      | Simple Scan                                          | `-Pn -T4 -A -v`                                       |
+| `p3`      | `json`      | Low Power Scan                                       | `-Pn -sS -sU -T4 -A -v`                               |
+| `p4`      | `json`      | Partial Intense Scan                                 | `-Pn -p- -T4 -A -v`                                   |
+| `p5`      | `json`      | Complete Intense Scan                                | `-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln` |
+| `p6`      | `json`      | Comprehensive Service Version Detection              | `-Pn -sV -p- -A`                                      |
+| `p7`      | `json`      | Aggressive Scan with OS Detection                    | `-Pn -sS -sV -O -T4 -A`                               |
+| `p8`      | `json`      | Script Scan for Common Vulnerabilities               | `-Pn -sC`                                             |
+| `p9`      | `json`      | Intense Scan, All TCP Ports                          | `-Pn -p 1-65535 -T4 -A -v`                            |
+| `p10`     | `json`      | UDP Scan                                             | `-Pn -sU -T4`                                         |
+| `p11`     | `json`      | Service and Version Detection for Top Ports          | `-Pn -sV --top-ports 100`                             |
+| `p12`     | `json`      | Aggressive Scan with NSE Scripts for Vulnerabilities | `-Pn -sS -sV -T4 --script=default,discovery,vuln`     |
+| `p13`     | `json`      | Fast Scan for Common Ports                           | `-Pn -F`                                              |
 
 The profile is the type of scan that will be executed by the nmap subprocess. The Ip or target will be provided via argparse. At first, the custom nmap scan is run which has all the crucial arguments for the scan to continue. Next, the scan data is extracted from the huge pile of data driven by nmap. the "scan" object has a list of sub-data under "tcp" each labelled according to the ports opened. once the data is extracted the data is sent to the openai API Davinci model via a prompt. the prompt specifically asks for a JSON output and the data also to be used in a certain manner.
 
@@ -200,7 +208,15 @@ class NetworkScanner():
             2: '-Pn -T4 -A -v',
             3: '-Pn -sS -sU -T4 -A -v',
             4: '-Pn -p- -T4 -A -v',
-            5: '-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln'
+            5: '-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln',
+            6: '-Pn -sV -p- -A',
+            7: '-Pn -sS -sV -O -T4 -A',
+            8: '-Pn -sC',
+            9: '-Pn -p 1-65535 -T4 -A -v',
+            10: '-Pn -sU -T4',
+            11: '-Pn -sV --top-ports 100',
+            12: '-Pn -sS -sV -T4 --script=default,discovery,vuln',
+            13: '-Pn -F'
         }
         # The scanner with GPT Implemented
         nm.scan('{}'.format(ip), arguments='{}'.format(profile_arguments.get(profile)))
