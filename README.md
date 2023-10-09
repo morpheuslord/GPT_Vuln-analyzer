@@ -1,5 +1,4 @@
 # GPT_Vuln-analyzer
-![GitHub All Releases](https://img.shields.io/github/downloads/lewdev/hw-gen/total)
 
 This is a Proof Of Concept application that demostrates how AI can be used to generate accurate results for vulnerability analysis and also allows further utilization of the already super useful ChatGPT made using openai-api, python-nmap, dnsresolver python modules and also use customtkinter and tkinter for the GUI version of the code. This project also has a CLI and a GUI interface, It is capable of doing network vulnerability analysis, DNS enumeration and also subdomain enumeration.
 
