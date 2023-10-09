@@ -1,27 +1,28 @@
 import argparse
-import json
 import os
-import platform
 from typing import Any
 
 import cowsay
-import subprocess
 from dotenv import load_dotenv
-from rich import print
 from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.console import Group
-from rich.align import Align
-from rich import box
-from rich.markdown import Markdown
 
-from commands.dns_recon import dnsr
-from commands.geo import geoip
-from commands.port_scanner import p_scanner
-from commands.subdomain import sub
+from commands.dns_recon import DNSRecon
+from commands.geo import geo_ip_recon
+from commands.port_scanner import NetworkScanner
+from commands.models import NMAP_AI_MODEL
+from commands.models import DNS_AI_MODEL
+from commands.subdomain import sub_enum
+from commands.menus import Menus
+from commands.assets import Assets
 
 console = Console()
+dns_enum = DNSRecon()
+geo_ip = geo_ip_recon()
+p_ai_models = NMAP_AI_MODEL()
+dns_ai_models = DNS_AI_MODEL()
+port_scanner = NetworkScanner()
+sub_recon = sub_enum()
+asset_codes = Assets()
 load_dotenv()
 
 # The API Keys
@@ -81,508 +82,9 @@ llamakey = ""
 llamaendpoint = ""
 
 
-def clearscr() -> None:
-    try:
-        osp = platform.system()
-        match osp:
-            case 'Darwin':
-                os.system("clear")
-            case 'Linux':
-                os.system("clear")
-            case 'Windows':
-                os.system("cls")
-    except Exception:
-        pass
-
-
-def start_api_app():
-    CREATE_NEW_CONSOLE = 0x00000010
-    osp = platform.system()
-    match osp:
-        case 'Darwin':
-            subprocess.Popen(["python3", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
-        case 'Linux':
-            subprocess.Popen(["python3", "llama_api.py"])
-        case 'Windows':
-            subprocess.Popen(["python", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
-
-
-def help_menu() -> None:
-    table = Table(title="Help Menu for GVA")
-    table.add_column("Options", style="cyan")
-    table.add_column("Input Type", style="green")
-    table.add_column("Argument Input", style="green")
-    table.add_column("Discription", style="green")
-    table.add_column("Other internal options", style="green")
-    table.add_row("Attack", "--attack", "TXT/STRING",
-                  "The Attack the user whats to run", "sub / dns / nmap / geo")
-    table.add_row("Target", "--target", "IP/HOSTNAME",
-                  "The target of the user", "None")
-    table.add_row("Domain List", "--list", "Path to text file",
-                  "subdomain dictionary list", "Path")
-    table.add_row("Profile", "--profile", "INT (1-5)",
-                  "The type of Nmap Scan the user intends", "None")
-    table.add_row("AI", "--ai", "STRING",
-                  "Choose your AI of choice", "bard / openai (default)")
-    table.add_row("menu", "--menu", "BOOL",
-                  "Interactive UI menu", "True / False (Default)")
-    table.add_row("Rich Help", "--r", "STRING",
-                  "Pritty Help menu", "help")
-    console.print(table)
-
-
-def flatten_json(data: Any, separator: Any = '.') -> Any:
-    flattened_data = {}
-    for key, value in data.items():
-        if isinstance(value, dict):
-            nested_data = flatten_json(value, separator)
-            for nested_key, nested_value in nested_data.items():
-                flattened_data[key + separator + nested_key] = nested_value
-        else:
-            flattened_data[key] = value
-    return flattened_data
-
-
-def nmap_menu() -> None:
-    try:
-        global keyset
-        global t
-        global profile_num
-        global ai_set
-        global akey_set
-        global bkey_set
-        global ai_set_args
-        global llamakey
-        global llamaendpoint
-        table = Table()
-        table.add_column("Options", style="cyan")
-        table.add_column("Utility", style="green")
-        table.add_row("1", "AI Options")
-        table.add_row("2", "Set Target")
-        table.add_row("3", "Set Profile")
-        table.add_row("4", "Show options")
-        table.add_row("5", "Run Attack")
-        table.add_row("r", "Return")
-        console.print(table)
-        option = input("Enter your choice: ")
-        match option:
-            case "1":
-                clearscr()
-                table0 = Table()
-                table0.add_column("Options", style="cyan")
-                table0.add_column("AI Available", style="green")
-                table0.add_row("1", "OpenAI")
-                table0.add_row("2", "Bard")
-                table0.add_row("3", "LLama2")
-                print(Panel(table0))
-                ai_set_choice = input("Enter AI of Choice: ")
-                if ai_set_choice == "1":
-                    ai_set_args, ai_set = "openai", "openai"
-                    akey_set = input("Enter OpenAI API: ")
-                    print(Panel(f"API-Key Set: {akey_set}"))
-                elif ai_set_choice == "2":
-                    ai_set_args, ai_set = "bard", "bard"
-                    bkey_set = input("Enter Bard AI API: ")
-                    print(Panel(f"API-Key Set: {bkey_set}"))
-                elif ai_set_choice == "3":
-                    clearscr()
-                    tablel = Table()
-                    tablel.add_column("Options", style="cyan")
-                    tablel.add_column("Llama Options", style="cyan")
-                    tablel.add_row("1", "Llama Local")
-                    tablel.add_row("2", "Llama RunPod")
-                    print(tablel)
-                    ai_set_choice = input("Enter AI of Choice: ")
-                    ai_set_args = "llama"
-                    ai_set = "llama"
-                    if ai_set_choice == "1":
-                        ai_set = "llama"
-                        print(Panel("No Key needed"))
-                        print(Panel("Selected LLama"))
-                    elif ai_set_choice == "2":
-                        ai_set = "llama-api"
-                        llamaendpoint = input("Enter Runpod Endpoint ID: ")
-                        llamakey = input("Enter Runpod API Key: ")
-                        print(Panel(f"API-Key Set: {llamakey}"))
-                        print(Panel(f"Runpod Endpoint Set: {llamaendpoint}"))
-                nmap_menu()
-            case "2":
-                clearscr()
-                print(Panel("Set Target Hostname or IP"))
-                t = input("Enter Target: ")
-                print(Panel(f"Target Set: {t}"))
-                nmap_menu()
-            case "3":
-                clearscr()
-                table1 = Table()
-                table1.add_column("Options", style="cyan")
-                table1.add_column("Value", style="green")
-                table1.add_row("1", "-Pn -sV -T4 -O -F")
-                table1.add_row("2", "-Pn -T4 -A -v")
-                table1.add_row("3", "-Pn -sS -sU -T4 -A -v")
-                table1.add_row("4", "-Pn -p- -T4 -A -v")
-                table1.add_row("5", "-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln")
-                print(Panel(table1))
-                profile_num = input("Enter your Profile: ")
-                print(Panel(f"Profile Set {profile_num}"))
-                nmap_menu()
-            case "4":
-                clearscr()
-                table2 = Table()
-                table2.add_column("Options", style="cyan")
-                table2.add_column("Value", style="green")
-                table2.add_row("AI Set", str(ai_set_args))
-                table2.add_row("OpenAI API Key", str(akey_set))
-                table2.add_row("Bard AI API Key", str(bkey_set))
-                table2.add_row("Llama Runpod API Key", str(llamakey))
-                table2.add_row("Runpod Endpoint ID", str(llamaendpoint))
-                table2.add_row("Target", str(t))
-                table2.add_row("Profile", str(profile_num))
-                # console.print(table2)
-                print(Panel(table2))
-                nmap_menu()
-            case "5":
-                clearscr()
-                pout: str = p_scanner(t, int(profile_num), akey_set, bkey_set, lkey, lendpoint, ai_set)
-                print_output("Nmap", pout, ai_set)
-            case "r":
-                clearscr()
-                menu_term()
-    except KeyboardInterrupt:
-        print(Panel("Exiting Program"))
-
-
-def dns_menu() -> None:
-    try:
-        global keyset
-        global t
-        global profile_num
-        global ai_set
-        global akey_set
-        global bkey_set
-        global ai_set_args
-        global llamakey
-        global llamaendpoint
-        table = Table()
-        table.add_column("Options", style="cyan")
-        table.add_column("Utility", style="green")
-        table.add_row("1", "AI Option")
-        table.add_row("2", "Set Target")
-        table.add_row("3", "Show options")
-        table.add_row("4", "Run Attack")
-        table.add_row("r", "Return")
-        console.print(table)
-        option = input("Enter your choice: ")
-        match option:
-            case "1":
-                clearscr()
-                table0 = Table()
-                table0.add_column("Options", style="cyan")
-                table0.add_column("AI Available", style="green")
-                table0.add_row("1", "OpenAI")
-                table0.add_row("2", "Bard")
-                table0.add_row("3", "LLama2")
-                print(Panel(table0))
-                ai_set_choice = input("Enter AI of Choice: ")
-                if ai_set_choice == "1":
-                    ai_set_args, ai_set = "openai", "openai"
-                    akey_set = input("Enter OpenAI API: ")
-                    print(Panel(f"API-Key Set: {akey_set}"))
-                elif ai_set_choice == "2":
-                    ai_set_args, ai_set = "bard", "bard"
-                    bkey_set = input("Enter Bard AI API: ")
-                    print(Panel(f"API-Key Set: {bkey_set}"))
-                elif ai_set_choice == "3":
-                    clearscr()
-                    tablel = Table()
-                    tablel.add_column("Options", style="cyan")
-                    tablel.add_column("Llama Options", style="cyan")
-                    tablel.add_row("1", "Llama Local")
-                    tablel.add_row("2", "Llama RunPod")
-                    print(tablel)
-                    ai_set_choice = input("Enter AI of Choice: ")
-                    ai_set_args = "llama"
-                    ai_set = "llama"
-                    if ai_set_choice == "1":
-                        ai_set = "llama"
-                        print(Panel("No Key needed"))
-                        print(Panel("Selected LLama"))
-                    elif ai_set_choice == "2":
-                        ai_set = "llama-api"
-                        llamaendpoint = input("Enter Runpod Endpoint ID: ")
-                        llamakey = input("Enter Runpod API Key: ")
-                        print(Panel(f"API-Key Set: {llamakey}"))
-                        print(Panel(f"Runpod Endpoint Set: {llamaendpoint}"))
-                dns_menu()
-            case "2":
-                clearscr()
-                print(Panel("Set Target Hostname or IP"))
-                t = input("Enter Target: ")
-                print(Panel(f"Target Set:{t}"))
-                dns_menu()
-            case "3":
-                clearscr()
-                table1 = Table()
-                table1.add_column("Options", style="cyan")
-                table1.add_column("Value", style="green")
-                table1.add_row("AI Set", str(ai_set_args))
-                table1.add_row("OpenAI API Key", str(akey_set))
-                table1.add_row("Bard AI API Key", str(bkey_set))
-                table1.add_row("Llama Runpod API Key", str(llamakey))
-                table1.add_row("Runpod Endpoint ID", str(llamaendpoint))
-                table1.add_row("Target", str(t))
-                print(Panel(table1))
-                dns_menu()
-            case "4":
-                clearscr()
-                dns_output: str = dnsr(t, akey_set, bkey_set, lkey, lendpoint, ai_set)
-                print_output("DNS", dns_output, ai_set)
-            case "r":
-                clearscr()
-                menu_term()
-    except KeyboardInterrupt:
-        print(Panel("Exiting Program"))
-
-
-def geo_menu() -> None:
-    try:
-        global keyset
-        global t
-        global profile_num
-        table = Table()
-        table.add_column("Options", style="cyan")
-        table.add_column("Utility", style="green")
-        table.add_row("1", "ADD API Key")
-        table.add_row("2", "Set Target")
-        table.add_row("3", "Show options")
-        table.add_row("4", "Run Attack")
-        table.add_row("r", "Return")
-        console.print(table)
-        option = input("Enter your choice: ")
-        match option:
-            case "1":
-                clearscr()
-                keyset = input("Enter GEO-IP API: ")
-                print(Panel(f"GEOIP API Key Set: {keyset}"))
-                geo_menu()
-            case "2":
-                clearscr()
-                print(Panel("Set Target Hostname or IP"))
-                t = input("Enter Target: ")
-                print(Panel(f"Target Set: {t}"))
-                geo_menu()
-            case "3":
-                clearscr()
-                table1 = Table()
-                table1.add_column("Options", style="cyan")
-                table1.add_column("Value", style="green")
-                table1.add_row("API Key", str(keyset))
-                table1.add_row("Target", str(t))
-                print(Panel(table1))
-                geo_menu()
-            case "4":
-                clearscr()
-                geo_output: str = geoip(keyset, t)
-                print_output("GeoIP", str(geo_output), ai)
-            case "r":
-                clearscr()
-                menu_term()
-    except KeyboardInterrupt:
-        print(Panel("Exiting Program"))
-
-
-def sub_menu() -> None:
-    try:
-        global list_loc
-        global t
-        global profile_num
-        table = Table()
-        table.add_column("Options", style="cyan")
-        table.add_column("Utility", style="green")
-        table.add_row("1", "ADD Subdomain list")
-        table.add_row("2", "Set Target")
-        table.add_row("3", "Show options")
-        table.add_row("4", "Run Attack")
-        table.add_row("r", "Return")
-        console.print(table)
-        option = input("Enter your choice: ")
-        match option:
-            case "1":
-                clearscr()
-                print(Panel("Set TXT subdomain file location"))
-                list_loc = input("Enter List Location:  ")
-                print(Panel(f"Location Set: {list_loc}"))
-                sub_menu()
-            case "2":
-                clearscr()
-                print(Panel("Set Target Hostname or IP"))
-                t = input("Enter Target: ")
-                print(Panel(f"Target Set: {t}"))
-                sub_menu()
-            case "3":
-                clearscr()
-                table1 = Table()
-                table1.add_column("Options", style="cyan")
-                table1.add_column("Value", style="green")
-                table1.add_row("Location", str(list_loc))
-                table1.add_row("Target", str(t))
-                print(Panel(table1))
-                sub_menu()
-            case "4":
-                clearscr()
-                sub_output: str = sub(t, list_loc)
-                console.print(sub_output, style="bold underline")
-            case "r":
-                clearscr()
-                menu_term()
-    except KeyboardInterrupt:
-        print(Panel("Exiting Program"))
-
-
-def menu_term() -> None:
-    try:
-        table = Table()
-        table.add_column("Options", style="cyan")
-        table.add_column("Utility", style="green")
-        table.add_row("1", "Nmap Enum")
-        table.add_row("2", "DNS Enum")
-        table.add_row("3", "Subdomain Enum")
-        table.add_row("4", "GEO-IP Enum")
-        table.add_row("q", "Quit")
-        console.print(table)
-        option = input("Enter your choice: ")
-        match option:
-            case "1":
-                clearscr()
-                nmap_menu()
-            case "2":
-                clearscr()
-                dns_menu()
-            case "3":
-                clearscr()
-                sub_menu()
-            case "4":
-                clearscr()
-                geo_menu()
-            case "q":
-                quit()
-    except KeyboardInterrupt:
-        print(Panel("Exiting Program"))
-
-
-def print_output(attack_type: str, jdata: str, ai: str) -> Any:
-    match attack_type:
-        case "Nmap":
-            match ai:
-                case 'openai':
-                    data = json.loads(jdata)
-                    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                    table.add_column("Variables", style="cyan")
-                    table.add_column("Results", style="green")
-
-                    for key, value in data.items():
-                        table.add_row(key, value)
-                    print(table)
-                case 'bard':
-                    data = json.loads(jdata)
-                    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                    table.add_column("Variables", style="cyan")
-                    table.add_column("Results", style="green")
-
-                    for key, value in data.items():
-                        table.add_row(key, value)
-                    print(table)
-                case 'llama':
-                    ai_out = Markdown(jdata)
-                    message_panel = Panel(
-                        Align.center(
-                            Group("\n", Align.center(ai_out)),
-                            vertical="middle",
-                        ),
-                        box=box.ROUNDED,
-                        padding=(1, 2),
-                        title="[b red]The GVA LLama2",
-                        border_style="blue",
-                    )
-                    print(message_panel)
-                case 'llama-api':
-                    ai_out = Markdown(jdata)
-                    message_panel = Panel(
-                        Align.center(
-                            Group("\n", Align.center(ai_out)),
-                            vertical="middle",
-                        ),
-                        box=box.ROUNDED,
-                        padding=(1, 2),
-                        title="[b red]The GVA LLama2",
-                        border_style="blue",
-                    )
-                    print(message_panel)
-        case "DNS":
-            match ai:
-                case 'openai':
-                    data = json.loads(jdata)
-                    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                    table.add_column("Variables", style="cyan")
-                    table.add_column("Results", style="green")
-
-                    for key, value in data.items():
-                        table.add_row(key, value)
-                    print(table)
-                case 'bard':
-                    data = json.loads(jdata)
-                    table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                    table.add_column("Variables", style="cyan")
-                    table.add_column("Results", style="green")
-
-                    for key, value in data.items():
-                        table.add_row(key, value)
-                    print(table)
-                case 'llama':
-                    ai_out = Markdown(jdata)
-                    message_panel = Panel(
-                        Align.center(
-                            Group("\n", Align.center(ai_out)),
-                            vertical="middle",
-                        ),
-                        box=box.ROUNDED,
-                        padding=(1, 2),
-                        title="[b red]The GVA LLama2",
-                        border_style="blue",
-                    )
-                    print(message_panel)
-                case 'llama-api':
-                    ai_out = Markdown(jdata)
-                    message_panel = Panel(
-                        Align.center(
-                            Group("\n", Align.center(ai_out)),
-                            vertical="middle",
-                        ),
-                        box=box.ROUNDED,
-                        padding=(1, 2),
-                        title="[b red]The GVA LLama2",
-                        border_style="blue",
-                    )
-                    print(message_panel)
-        case "GeoIP":
-            data = json.loads(jdata)
-            table = Table(title="GVA Report for GeoIP", show_header=True, header_style="bold magenta")
-            table.add_column("Identifiers", style="cyan")
-            table.add_column("Data", style="green")
-
-            flattened_data: dict = flatten_json(data, separator='.')
-
-            for key, value in flattened_data.items():
-                value_str = str(value)
-                table.add_row(key, value_str)
-
-            console = Console()
-            console.print(table)
-
-
 def main(target: Any) -> None:
     if ai == "llama":
-        start_api_app()
+        asset_codes.start_api_app()
     cowsay.cow('GVA Usage in progress...')
     if target is not None:
         pass
@@ -590,36 +92,51 @@ def main(target: Any) -> None:
         target = '127.0.0.1'
     try:
         if choice == "help":
-            help_menu()
+            asset_codes.help_menu()
         elif menu is True:
-            menu_term()
+            Menus(
+                lkey=lkey,
+                lendpoint=lendpoint,
+                keyset=keyset,
+                t=t,
+                profile_num=profile_num,
+                ai_set=ai_set,
+                akey_set=akey_set,
+                bkey_set=bkey_set,
+                ai_set_args=ai_set_args,
+                llamakey=llamakey,
+                llamaendpoint=llamaendpoint
+            )
         else:
             match attack:
                 case 'geo':
-                    geo_output: str = geoip(gkey, target)
-                    print_output("GeoIP", str(geo_output), ai)
+                    geo_output: str = geo_ip_recon.geoip(gkey, target)
+                    asset_codes.print_output("GeoIP", str(geo_output), ai)
                 case 'nmap':
-                    match profile:
-                        case 1:
-                            p1_out: str = p_scanner(target, 1, akey, bkey, lkey, lendpoint, ai)
-                            print_output("Nmap", p1_out, ai)
-                        case 2:
-                            p2_out: str = p_scanner(target, 2, akey, bkey, lkey, lendpoint, ai)
-                            print_output("Nmap", p2_out, ai)
-                        case 3:
-                            p3_out: str = p_scanner(target, 3, akey, bkey, lkey, lendpoint, ai)
-                            print_output("Nmap", p3_out, ai)
-                        case 4:
-                            p4_out: str = p_scanner(target, 4, akey, bkey, lkey, lendpoint, ai)
-                            print_output("Nmap", p4_out, ai)
-                        case 5:
-                            p5_out: str = p_scanner(target, 5, akey, bkey, lkey, lendpoint, ai)
-                            print_output("Nmap", p5_out, ai)
+                    p1_out = port_scanner.scanner(
+                        AIModels=p_ai_models,
+                        ip=target,
+                        profile=int(profile),
+                        akey=akey,
+                        bkey=bkey,
+                        lkey=lkey,
+                        lendpoint=lendpoint,
+                        AI=ai
+                    )
+                    asset_codes.print_output("Nmap", p1_out, ai)
                 case 'dns':
-                    dns_output: str = dnsr(target, akey, bkey, lkey, lendpoint, ai)
-                    print_output("DNS", dns_output, ai)
+                    dns_output: str = dns_enum.dns_resolver(
+                        AIModels=dns_ai_models,
+                        target=target,
+                        akey=akey,
+                        bkey=bkey,
+                        lkey=lkey,
+                        lendpoint=lendpoint,
+                        AI=ai
+                    )
+                    asset_codes.print_output("DNS", dns_output, ai)
                 case 'sub':
-                    sub_output: str = sub(target, list_loc)
+                    sub_output: str = sub_recon.sub_enumerator(target, list_loc)
                     console.print(sub_output, style="bold underline")
     except KeyboardInterrupt:
         console.print_exception("Bye")
