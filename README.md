@@ -27,9 +27,11 @@ Simple import any of the 3 packages and then add define the variables accordingl
 from GVA.scanner import NetworkScanner
 from GVA.dns_recon import DNSRecon
 from GVA.geo import geo_ip_recon
+from GVA.jwt import JWTAnalyzer
 from GVA.menus import Menus
 from GVA.ai_models import NMAP_AI_MODEL
 from GVA.ai_models import DNS_AI_MODEL
+from GVA.ai_models import JWT_AI_MODEL
 from GVA.assets import Assets
 from GVA.subdomain import sub_enum
 from GVA import gui
@@ -40,6 +42,7 @@ geo_ip = geo_ip_recon()
 p_ai_models = NMAP_AI_MODEL()
 dns_ai_models = DNS_AI_MODEL()
 port_scanner = NetworkScanner()
+jwt_analizer = JWTAnalyzer()
 sub_recon = sub_enum()
 asset_codes = Assets()
 
@@ -48,7 +51,7 @@ asset_codes = Assets()
 lkey = "LLAMA API KEY"
 lendpoint = "LLAMA ENDPOINT"
 keyset = "AI API KEY"
-target_ip_hostname = "TARGET IP OR HOSTNAME"
+target_ip_hostname_or_token = "TARGET IP, HOSTNAME OR TOKEN"
 profile_num = "PROFILE FOR NMAP SCAN"
 ai_set = "AI OF CHOICE"
 akey_set = "OPENAI API KEY"
@@ -106,14 +109,14 @@ python gpt_vuln.py --help
 python gpt_vuln.py --r help
 
 # Specify target with the attack
-python gpt_vuln.py --target <IP> --attack dns/nmap
+python gpt_vuln.py --target <IP/hostname/token> --attack dns/nmap/jwt
 
 # Specify target and profile for nmap
-python gpt_vuln.py --target <IP> --attack nmap --profile <1-13>
+python gpt_vuln.py --target <IP/hostname/token> --attack nmap --profile <1-13>
 (Default:1)
 
 # Specify target for DNS no profile needed
-python gpt_vuln.py --target <IP or HOSTNAME> --attack dns
+python gpt_vuln.py --target <IP/hostname/token> --attack dns
 
 # Specify target for Subdomain Enumeration no profile used default list file
 python gpt_vuln.py --target <HOSTNAME> --attack sub
@@ -129,6 +132,9 @@ python gpt_vuln.py --target <IP> --attack nmap --profile <1-5> --ai llama /llama
 
 # Specify the AI to be used for dns
 python gpt_vuln.py --target <IP> --attack dns --ai llama /llama-api /bard / openai <default>
+
+# Specify the AI to be used for JWT analysis
+python gpt_vuln.py --target <token> --attack jwt --ai llama /llama-api /bard / openai <default>
 
 # Interactive step by step cli interface
 python gpt_vuln.py --menu True
@@ -154,6 +160,7 @@ python gpt_vuln.py --menu True
 │ 2       │ DNS Enum       │
 │ 3       │ Subdomain Enum │
 │ 4       │ GEO-IP Enum    │
+| 5       | JWT Analysis   |
 │ q       │ Quit           │
 └─────────┴────────────────┘
 Enter your choice:
@@ -423,6 +430,22 @@ Using the instruction set and the data provided via the prompt the llama AI gene
 
 For the most usage I suggest you create a runpod serverless endpoint deployment of llama you can refer to this tutorial for that [tutorial](https://www.youtube.com/watch?v=Ftb4vbGUr7U). Follow the tutorial for better use.
 ### Output
+
+#### JWT Output:
+
+```
+                                            GVA Report for JWT
+┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Variables           ┃ Results                                                                          ┃
+┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Algorithm Used      │ HS256                                                                            │
+│ Header              │ eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9                                         │
+│ Payload             │ eyJzdWIiOiAiMTIzNDU2Nzg5MCIsICJuYW1lIjogIkpvaG4gRG9lIiwgImlhdCI6IDE1MTYyMzkwMjJ9 │
+│ Signature           │                                                                                  │
+│ PossibleAttacks     │ None identified                                                                  │
+│ VulnerableEndpoints │ Unable to determine without additional information                               │
+└─────────────────────┴──────────────────────────────────────────────────────────────────────────────────┘
+```
 
 #### Nmap output:
 
