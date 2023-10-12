@@ -64,7 +64,7 @@ class Assets():
                       "The target of the user", "None")
         table.add_row("Domain List", "--list", "Path to text file",
                       "subdomain dictionary list", "Path")
-        table.add_row("Profile", "--profile", "INT (1-13)",
+        table.add_row("Profile", "--profile", "INT (1-5)",
                       "The type of Nmap Scan the user intends", "None")
         table.add_row("AI", "--ai", "STRING",
                       "Choose your AI of choice", "bard / openai (default)")
@@ -75,7 +75,6 @@ class Assets():
         console.print(table)
 
     def print_output(self, attack_type: str, jdata: str, ai: str) -> Any:
-        jdata = str(jdata)
         match attack_type:
             case "Nmap":
                 match ai:
@@ -96,52 +95,6 @@ class Assets():
 
                         for key, value in data.items():
                             table.add_row(key, value)
-                        print(table)
-                    case 'llama':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-                    case 'llama-api':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-            case "JWT":
-                match ai:
-                    case 'openai':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
-
-                        for key, value in data.items():
-                            table.add_row(str(key), str(value))
-                        print(table)
-                    case 'bard':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
-
-                        for key, value in data.items():
-                            table.add_row(str(key), str(value))
                         print(table)
                     case 'llama':
                         ai_out = Markdown(jdata)

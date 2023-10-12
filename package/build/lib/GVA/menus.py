@@ -13,19 +13,17 @@ from rich.markdown import Markdown
 from GVA.dns_recon import DNSRecon
 from GVA.geo import geo_ip_recon
 from GVA.scanner import NetworkScanner
-from GVA.subdomain import sub_enum
-from GVA.jwt import JWTAnalyzer
 from GVA.ai_models import NMAP_AI_MODEL
 from GVA.ai_models import DNS_AI_MODEL
 from GVA.ai_models import JWT_AI_MODEL
+from GVA.subdomain import sub_enum
 
 dns_enum = DNSRecon()
 geo_ip = geo_ip_recon()
 p_ai_models = NMAP_AI_MODEL()
 dns_ai_models = DNS_AI_MODEL()
-jwt_ai_model = JWT_AI_MODEL()
-port_scanner = NetworkScanner()
 jwt_analyzer = JWTAnalyzer()
+port_scanner = NetworkScanner()
 sub_recon = sub_enum()
 console = Console()
 target = ""
@@ -93,52 +91,6 @@ class Menus():
 
                         for key, value in data.items():
                             table.add_row(key, value)
-                        print(table)
-                    case 'llama':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-                    case 'llama-api':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-            case "JWT":
-                match ai:
-                    case 'openai':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
-
-                        for key, value in data.items():
-                            table.add_row(str(key), str(value))
-                        print(table)
-                    case 'bard':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
-
-                        for key, value in data.items():
-                            table.add_row(str(key), str(value))
                         print(table)
                     case 'llama':
                         ai_out = Markdown(jdata)
@@ -640,9 +592,6 @@ class Menus():
                 case "4":
                     clearscr()
                     self.geo_menu()
-                case "5":
-                    clearscr()
-                    self.jwt_menu()
                 case "q":
                     quit()
         except KeyboardInterrupt:
