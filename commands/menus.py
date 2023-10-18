@@ -8,6 +8,7 @@ from commands.dns_recon import DNSRecon
 from commands.geo import geo_ip_recon
 from commands.port_scanner import NetworkScanner
 from commands.jwt import JWTAnalyzer
+from commands.packet_analysis import PacketAnalysis
 from commands.models import NMAP_AI_MODEL
 from commands.models import DNS_AI_MODEL
 from commands.models import JWT_AI_MODEL
@@ -17,6 +18,7 @@ from commands.assets import Assets
 assets = Assets()
 dns_enum = DNSRecon()
 geo_ip = geo_ip_recon()
+packetanalysis = PacketAnalysis()
 jwt_analyzer = JWTAnalyzer()
 p_ai_models = NMAP_AI_MODEL()
 dns_ai_models = DNS_AI_MODEL()
@@ -24,22 +26,6 @@ jwt_ai_model = JWT_AI_MODEL()
 port_scanner = NetworkScanner()
 sub_recon = sub_enum()
 console = Console()
-target = ""
-profile = ""
-attack = ""
-choice = ""
-list_loc = ""
-ai = ""
-menu = ""
-ai_set_args = ""
-keyset = ""
-akey_set = ""
-bkey_set = ""
-t = ""
-profile_num = ""
-ai_set = ""
-llamakey = ""
-llamaendpoint = ""
 
 
 def clearscr() -> None:
@@ -68,7 +54,7 @@ class Menus():
             table.add_row("3", "Set Profile")
             table.add_row("4", "Show options")
             table.add_row("5", "Run Attack")
-            table.add_row("r", "Return")
+            table.add_row("q", "Quit")
             console.print(table)
             self.option = input("Enter your choice: ")
             match self.option:
@@ -168,9 +154,8 @@ class Menus():
                         AI=self.ai_set
                     )
                     assets.print_output("Nmap", pout, self.ai_set)
-                case "r":
-                    clearscr()
-                    self.menu_term()
+                case "q":
+                    quit()
         except KeyboardInterrupt:
             print(Panel("Exiting Program"))
 
@@ -183,7 +168,7 @@ class Menus():
             table.add_row("2", "Set Target")
             table.add_row("3", "Show options")
             table.add_row("4", "Run Attack")
-            table.add_row("r", "Return")
+            table.add_row("q", "Quit")
             console.print(table)
             option = input("Enter your choice: ")
             match option:
@@ -259,9 +244,8 @@ class Menus():
                         AI=self.ai_set
                     )
                     assets.print_output("DNS", dns_output, self.ai_set)
-                case "r":
-                    clearscr()
-                    self.menu_term()
+                case "q":
+                    quit()
         except KeyboardInterrupt:
             print(Panel("Exiting Program"))
 
@@ -274,7 +258,7 @@ class Menus():
             table.add_row("2", "Set Token")
             table.add_row("3", "Show options")
             table.add_row("4", "Run Attack")
-            table.add_row("r", "Return")
+            table.add_row("q", "Quit")
             console.print(table)
             option = input("Enter your choice: ")
             match option:
@@ -350,9 +334,62 @@ class Menus():
                         AI=self.ai_set
                     )
                     assets.print_output("JWT", JWT_output, self.ai_set)
-                case "r":
+                case "q":
+                    quit()
+        except KeyboardInterrupt:
+            print(Panel("Exiting Program"))
+
+    def pcap_menu(self) -> None:
+        try:
+            table = Table()
+            table.add_column("Options", style="cyan")
+            table.add_column("Utility", style="green")
+            table.add_row("1", "Set Target file location")
+            table.add_row("2", "Set Output file location")
+            table.add_row("3", "Set Threads")
+            table.add_row("4", "Show options")
+            table.add_row("5", "Run Attack")
+            table.add_row("q", "Quit")
+            console.print(table)
+            self.option = input("Enter your choice: ")
+            match self.option:
+                case "1":
                     clearscr()
-                    self.menu_term()
+                    print(Panel("Set Target PCAP file Location"))
+                    self.t = input("Enter Target: ")
+                    print(Panel(f"Target Set: {self.t}"))
+                    self.pcap_menu()
+                case "2":
+                    clearscr()
+                    print(Panel("Set Output file Location"))
+                    self.t = input("Enter Location: ")
+                    print(Panel(f"Output Set: {self.output_loc}"))
+                    self.pcap_menu()
+                case "3":
+                    clearscr()
+                    print(Panel("Set Number of threads"))
+                    self.t = input("Enter Threads: ")
+                    print(Panel(f"Threads Set: {self.threads}"))
+                    self.pcap_menu()
+                case "4":
+                    clearscr()
+                    table1 = Table()
+                    table1.add_column("Options", style="cyan")
+                    table1.add_column("Value", style="green")
+                    table1.add_row("Target PCAP file", str(self.t))
+                    table1.add_row("Output location", str(self.output_loc))
+                    table1.add_row("Threads set", str(self.threads))
+                    print(Panel(table1))
+                    self.pcap_menu()
+                case "5":
+                    clearscr()
+                    packetanalysis.PacketAnalyzer(
+                        cap_loc=self.t,
+                        save_loc=self.output_loc,
+                        max_workers=self.threads
+                    )
+                case "q":
+                    quit()
         except KeyboardInterrupt:
             print(Panel("Exiting Program"))
 
@@ -365,7 +402,7 @@ class Menus():
             table.add_row("2", "Set Target")
             table.add_row("3", "Show options")
             table.add_row("4", "Run Attack")
-            table.add_row("r", "Return")
+            table.add_row("q", "Quit")
             console.print(table)
             self.option = input("Enter your choice: ")
             match self.option:
@@ -393,9 +430,8 @@ class Menus():
                     clearscr()
                     geo_output: str = geo_ip.geoip(self.keyset, self.t)
                     assets.print_output("GeoIP", str(geo_output), ai="None")
-                case "r":
-                    clearscr()
-                    self.menu_term()
+                case "q":
+                    quit()
         except KeyboardInterrupt:
             print(Panel("Exiting Program"))
 
@@ -408,7 +444,7 @@ class Menus():
             table.add_row("2", "Set Target")
             table.add_row("3", "Show options")
             table.add_row("4", "Run Attack")
-            table.add_row("r", "Return")
+            table.add_row("q", "Quit")
             console.print(table)
             self.option = input("Enter your choice: ")
             match self.option:
@@ -437,15 +473,16 @@ class Menus():
                     clearscr()
                     sub_output: str = sub_recon.sub_enumerator(self.t, self.list_loc)
                     console.print(sub_output, style="bold underline")
-                case "r":
-                    clearscr()
-                    self.menu_term()
+                case "q":
+                    quit()
         except KeyboardInterrupt:
             print(Panel("Exiting Program"))
 
-    def __init__(self, lkey, lendpoint, keyset, t, profile_num, ai_set, akey_set, bkey_set, ai_set_args, llamakey, llamaendpoint) -> None:
+    def __init__(self, lkey, threads, output_loc, lendpoint, keyset, t, profile_num, ai_set, akey_set, bkey_set, ai_set_args, llamakey, llamaendpoint) -> None:
         try:
             self.lkey = lkey
+            self.threads = threads
+            self.output_loc = output_loc
             self.lendpoint = lendpoint
             self.keyset = keyset
             self.t = t
@@ -464,6 +501,7 @@ class Menus():
             table.add_row("3", "Subdomain Enum")
             table.add_row("4", "GEO-IP Enum")
             table.add_row("5", "JWT Analysis")
+            table.add_row("6", "PCAP Analysis")
             table.add_row("q", "Quit")
             console.print(table)
             option = input("Enter your choice: ")
@@ -483,6 +521,9 @@ class Menus():
                 case "5":
                     clearscr()
                     self.jwt_menu()
+                case "6":
+                    clearscr()
+                    self.pcap_menu()
                 case "q":
                     quit()
         except KeyboardInterrupt:

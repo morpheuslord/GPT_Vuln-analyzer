@@ -4,12 +4,13 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 
 ## Requirements
 
-- Python 3.10
+- Python 3.10 or above
 - All the packages mentioned in the requirements.txt file
 - OpenAI API
 - Bard API (MakerSuite Palm)
 - HuggingFace token (with llama2 access )
 - IPGeolocation API
+- Wireshark and tshark (both added to path)
 
 ## Usage Package
 
@@ -27,6 +28,7 @@ from GVA.dns_recon import DNSRecon
 from GVA.geo import geo_ip_recon
 from GVA.jwt import JWTAnalyzer
 from GVA.menus import Menus
+from GVA.packet_analysis import PacketAnalysis
 from GVA.ai_models import NMAP_AI_MODEL
 from GVA.ai_models import DNS_AI_MODEL
 from GVA.ai_models import JWT_AI_MODEL
@@ -43,12 +45,14 @@ port_scanner = NetworkScanner()
 jwt_analizer = JWTAnalyzer()
 sub_recon = sub_enum()
 asset_codes = Assets()
-
+packet_analysis = PacketAnalysis()
 
 # KEEP IT BLANK IF YOU HAVE NO CLUE THE MENU WILL ASK TO FILL IT ONCE ACTIVE
 lkey = "LLAMA API KEY"
 lendpoint = "LLAMA ENDPOINT"
 keyset = "AI API KEY"
+output_loc = "OUTPUT LOCATION FOR PCAP"
+threads = 200 # Default INT 200 but can be increased.
 target_ip_hostname_or_token = "TARGET IP, HOSTNAME OR TOKEN"
 profile_num = "PROFILE FOR NMAP SCAN"
 ai_set = "AI OF CHOICE"
@@ -62,6 +66,8 @@ Menus(
     lamma_key=lkey,
     llama_api_endpoint=lendpoint,
     initial_keyset=keyset,
+    threads=threads,
+    output_loc=output_loc,
     target=target_ip_hostname,
     profile_num=profile_num,
     ai_set=ai_set,
@@ -125,6 +131,9 @@ python gpt_vuln.py --target <HOSTNAME> --attack sub --list <PATH to FILE>
 # Specify target for geolocation lookup
 python gpt_vuln.py --target <IP> --attack geo
 
+# Specify PCAP file for packet analysis
+python gpt_vuln.py --target <PCAP FILE> --attack pcap --output <OUTPUT FILE LOCATION> --thread NUM of threads <200:default>
+
 # Specify the AI to be used for nmap
 python gpt_vuln.py --target <IP> --attack nmap --profile <1-5> --ai llama /llama-api /bard / openai <default>
 
@@ -159,6 +168,7 @@ python gpt_vuln.py --menu True
 │ 3       │ Subdomain Enum │
 │ 4       │ GEO-IP Enum    │
 | 5       | JWT Analysis   |
+| 6       | PCAP Analysis  |
 │ q       │ Quit           │
 └─────────┴────────────────┘
 Enter your choice:
@@ -519,6 +529,34 @@ target is jainuniversity.ac.in
 │ time_zone.is_dst            │ False                                                                   │
 │ time_zone.dst_savings       │ 0                                                                       │
 └─────────────────────────────┴─────────────────────────────────────────────────────────────────────────┘
+```
+
+#### PCAP OUTPUT
+
+```
+Collecting Json Data
+Extracting IP details...
+Extracting DNS details...
+Extracting EAPOL details...
+Extracting TCP STREAMS details...
+TCP streams can take some time..
+Total Streams combination:  252
+Number of workers in progress:  250
+Completed
+                                                            GVA Report for PCAP
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Identifiers                        ┃ Data                                                                                               ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ PacketAnalysis.Services            │ ['49943', '49958', '49934', '49944', '49931', '443', '49957']                                      │
+│ PacketAnalysis.TCP Streams         │ ['1', '4', '5', '2', '0', '3']                                                                     │
+│ PacketAnalysis.Sources Address     │ ['█████████████', '1.1.1.1', '█████████████', '█████████████', '█████████████', '█████████████']   │
+│ PacketAnalysis.Destination Address │ ['█████████████', '1.1.1.1', '█████████████', '█████████████', '█████████████', '█████████████']   │
+│ PacketAnalysis.DNS Resolved        │ []                                                                                                 │
+│ PacketAnalysis.DNS Query           │ ['oneclient.sfx.ms']                                                                               │
+│ PacketAnalysis.DNS Response        │ ['oneclient.sfx.ms.edgekey.net', 'e9659.dspg.akamaiedge.net', 'oneclient.sfx.ms']                  │
+│ PacketAnalysis.EAPOL Data          │ []                                                                                                 │
+│ PacketAnalysis. Total Streams Data │ 126                                                                                                │
+└────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 # Usage GUI

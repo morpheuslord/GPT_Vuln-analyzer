@@ -34,7 +34,7 @@ class Assets():
         osp = platform.system()
         match osp:
             case 'Darwin':
-                subprocess.Popen(["python3", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
+                subprocess.Popen(["python3", "llama_api.py"])
             case 'Linux':
                 subprocess.Popen(["python3", "llama_api.py"])
             case 'Windows':
@@ -59,15 +59,19 @@ class Assets():
         table.add_column("Discription", style="green")
         table.add_column("Other internal options", style="green")
         table.add_row("Attack", "--attack", "TXT/STRING",
-                      "The Attack the user whats to run", "sub / dns / nmap / geo")
-        table.add_row("Target", "--target", "IP/HOSTNAME",
+                      "The Attack the user whats to run", "sub / dns / nmap / geo/ jwt/ pcap")
+        table.add_row("Target", "--target", "IP/HOSTNAME/TOKEN/PCAP-FILE",
                       "The target of the user", "None")
         table.add_row("Domain List", "--list", "Path to text file",
                       "subdomain dictionary list", "Path")
+        table.add_row("Thread", "--thread", "INT",
+                      "Number of threads for PCAP analysis", "200 (Default)")
+        table.add_row("Output", "--output", "Path to text file",
+                      "Outputs the PCAP analysis", "Path")
         table.add_row("Profile", "--profile", "INT (1-13)",
                       "The type of Nmap Scan the user intends", "None")
         table.add_row("AI", "--ai", "STRING",
-                      "Choose your AI of choice", "bard / openai (default)")
+                      "Choose your AI of choice", "/ LLAMA (RUNPOD OR LOCAL) /bard / openai (default)")
         table.add_row("menu", "--menu", "BOOL",
                       "Interactive UI menu", "True / False (Default)")
         table.add_row("Rich Help", "--r", "STRING",
@@ -86,7 +90,8 @@ class Assets():
                         table.add_column("Results", style="green")
 
                         for key, value in data.items():
-                            table.add_row(key, value)
+                            val = str(value)
+                            table.add_row(key, str(val))
                         print(table)
                     case 'bard':
                         data = json.loads(jdata)
@@ -95,7 +100,8 @@ class Assets():
                         table.add_column("Results", style="green")
 
                         for key, value in data.items():
-                            table.add_row(key, value)
+                            val = str(value)
+                            table.add_row(key, str(val))
                         print(table)
                     case 'llama':
                         ai_out = Markdown(jdata)
@@ -178,7 +184,8 @@ class Assets():
                         table.add_column("Results", style="green")
 
                         for key, value in data.items():
-                            table.add_row(key, value)
+                            val = str(value)
+                            table.add_row(key, str(val))
                         print(table)
                     case 'bard':
                         data = json.loads(jdata)
@@ -187,7 +194,8 @@ class Assets():
                         table.add_column("Results", style="green")
 
                         for key, value in data.items():
-                            table.add_row(key, value)
+                            val = str(value)
+                            table.add_row(key, str(val))
                         print(table)
                     case 'llama':
                         ai_out = Markdown(jdata)
@@ -226,6 +234,20 @@ class Assets():
                 for key, value in flattened_data.items():
                     value_str = str(value)
                     table.add_row(key, value_str)
+
+                console = Console()
+                console.print(table)
+            case "PCAP":
+                data = json.loads(jdata)
+                table = Table(title="GVA Report for PCAP", show_header=True, header_style="bold magenta")
+                table.add_column("Identifiers", style="cyan")
+                table.add_column("Data", style="green")
+
+                flattened_data: dict = self.flatten_json(data, separator='.')
+
+                for key, value in flattened_data.items():
+                    value_str = str(value)
+                    table.add_row(key, str(value_str))
 
                 console = Console()
                 console.print(table)
