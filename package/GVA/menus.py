@@ -1,49 +1,31 @@
-import json
 import os
 import platform
-from typing import Any
 from rich import print
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from rich.console import Group
-from rich.align import Align
-from rich import box
-from rich.markdown import Markdown
 from GVA.dns_recon import DNSRecon
 from GVA.geo import geo_ip_recon
 from GVA.scanner import NetworkScanner
 from GVA.subdomain import sub_enum
 from GVA.jwt import JWTAnalyzer
+from GVA.assets import Assets
+from GVA.packet_analysis import PacketAnalysis
 from GVA.ai_models import NMAP_AI_MODEL
 from GVA.ai_models import DNS_AI_MODEL
 from GVA.ai_models import JWT_AI_MODEL
 
+assets = Assets()
 dns_enum = DNSRecon()
 geo_ip = geo_ip_recon()
+packetanalysis = PacketAnalysis()
+jwt_analyzer = JWTAnalyzer()
 p_ai_models = NMAP_AI_MODEL()
 dns_ai_models = DNS_AI_MODEL()
 jwt_ai_model = JWT_AI_MODEL()
 port_scanner = NetworkScanner()
-jwt_analyzer = JWTAnalyzer()
 sub_recon = sub_enum()
 console = Console()
-target = ""
-profile = ""
-attack = ""
-choice = ""
-list_loc = ""
-ai = ""
-menu = ""
-ai_set_args = ""
-keyset = ""
-akey_set = ""
-bkey_set = ""
-t = ""
-profile_num = ""
-ai_set = ""
-llamakey = ""
-llamaendpoint = ""
 
 
 def clearscr() -> None:
@@ -61,171 +43,6 @@ def clearscr() -> None:
 
 
 class Menus():
-    def flatten_json(self, data: Any, separator: Any = '.') -> Any:
-        flattened_data = {}
-        for key, value in data.items():
-            if isinstance(value, dict):
-                nested_data = self.flatten_json(value, separator)
-                for nested_key, nested_value in nested_data.items():
-                    flattened_data[key + separator + nested_key] = nested_value
-            else:
-                flattened_data[key] = value
-        return flattened_data
-
-    def print_output(self, attack_type: str, jdata: str, ai: str) -> Any:
-        match attack_type:
-            case "Nmap":
-                match ai:
-                    case 'openai':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
-
-                        for key, value in data.items():
-                            table.add_row(key, value)
-                        print(table)
-                    case 'bard':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
-
-                        for key, value in data.items():
-                            table.add_row(key, value)
-                        print(table)
-                    case 'llama':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-                    case 'llama-api':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-            case "JWT":
-                match ai:
-                    case 'openai':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
-
-                        for key, value in data.items():
-                            table.add_row(str(key), str(value))
-                        print(table)
-                    case 'bard':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
-
-                        for key, value in data.items():
-                            table.add_row(str(key), str(value))
-                        print(table)
-                    case 'llama':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-                    case 'llama-api':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-            case "DNS":
-                match ai:
-                    case 'openai':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
-
-                        for key, value in data.items():
-                            table.add_row(key, value)
-                        print(table)
-                    case 'bard':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
-
-                        for key, value in data.items():
-                            table.add_row(key, value)
-                        print(table)
-                    case 'llama':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-                    case 'llama-api':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-            case "GeoIP":
-                data = json.loads(jdata)
-                table = Table(title="GVA Report for GeoIP", show_header=True, header_style="bold magenta")
-                table.add_column("Identifiers", style="cyan")
-                table.add_column("Data", style="green")
-
-                flattened_data: dict = self.flatten_json(data, separator='.')
-
-                for key, value in flattened_data.items():
-                    value_str = str(value)
-                    table.add_row(key, value_str)
-
-                console = Console()
-                console.print(table)
 
     def nmap_menu(self) -> None:
         try:
@@ -237,7 +54,7 @@ class Menus():
             table.add_row("3", "Set Profile")
             table.add_row("4", "Show options")
             table.add_row("5", "Run Attack")
-            table.add_row("r", "Return")
+            table.add_row("q", "Quit")
             console.print(table)
             self.option = input("Enter your choice: ")
             match self.option:
@@ -298,6 +115,14 @@ class Menus():
                     table1.add_row("3", "-Pn -sS -sU -T4 -A -v")
                     table1.add_row("4", "-Pn -p- -T4 -A -v")
                     table1.add_row("5", "-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln")
+                    table1.add_row("6", "-Pn -sV -p- -A")
+                    table1.add_row("7", "-Pn -sS -sV -O -T4 -A")
+                    table1.add_row("8", "-Pn -sC")
+                    table1.add_row("9", "-Pn -p 1-65535 -T4 -A -v")
+                    table1.add_row("10", "-Pn -sU -T4")
+                    table1.add_row("11", "-Pn -sV --top-ports 100")
+                    table1.add_row("12", "-Pn -sS -sV -T4 --script=default,discovery,vuln")
+                    table1.add_row("13", "-Pn -F")
                     print(Panel(table1))
                     self.profile_num = input("Enter your Profile: ")
                     print(Panel(f"Profile Set {self.profile_num}"))
@@ -328,10 +153,9 @@ class Menus():
                         lendpoint=self.lendpoint,
                         AI=self.ai_set
                     )
-                    self.print_output("Nmap", pout, self.ai_set)
-                case "r":
-                    clearscr()
-                    self.menu_term()
+                    assets.print_output("Nmap", pout, self.ai_set)
+                case "q":
+                    quit()
         except KeyboardInterrupt:
             print(Panel("Exiting Program"))
 
@@ -344,7 +168,7 @@ class Menus():
             table.add_row("2", "Set Target")
             table.add_row("3", "Show options")
             table.add_row("4", "Run Attack")
-            table.add_row("r", "Return")
+            table.add_row("q", "Quit")
             console.print(table)
             option = input("Enter your choice: ")
             match option:
@@ -419,53 +243,9 @@ class Menus():
                         lendpoint=self.lendpoint,
                         AI=self.ai_set
                     )
-                    self.print_output("DNS", dns_output, self.ai_set)
-                case "r":
-                    clearscr()
-                    self.menu_term()
-        except KeyboardInterrupt:
-            print(Panel("Exiting Program"))
-
-    def geo_menu(self) -> None:
-        try:
-            table = Table()
-            table.add_column("Options", style="cyan")
-            table.add_column("Utility", style="green")
-            table.add_row("1", "ADD API Key")
-            table.add_row("2", "Set Target")
-            table.add_row("3", "Show options")
-            table.add_row("4", "Run Attack")
-            table.add_row("r", "Return")
-            console.print(table)
-            self.option = input("Enter your choice: ")
-            match self.option:
-                case "1":
-                    clearscr()
-                    self.keyset = input("Enter GEO-IP API: ")
-                    print(Panel(f"GEOIP API Key Set: {self.keyset}"))
-                    self.geo_menu()
-                case "2":
-                    clearscr()
-                    print(Panel("Set Target Hostname or IP"))
-                    self.t = input("Enter Target: ")
-                    print(Panel(f"Target Set: {self.t}"))
-                    self.geo_menu()
-                case "3":
-                    clearscr()
-                    table1 = Table()
-                    table1.add_column("Options", style="cyan")
-                    table1.add_column("Value", style="green")
-                    table1.add_row("API Key", str(self.keyset))
-                    table1.add_row("Target", str(self.t))
-                    print(Panel(table1))
-                    self.geo_menu()
-                case "4":
-                    clearscr()
-                    geo_output: str = geo_ip.geoip(self.keyset, self.t)
-                    self.print_output("GeoIP", str(geo_output), ai="None")
-                case "r":
-                    clearscr()
-                    self.menu_term()
+                    assets.print_output("DNS", dns_output, self.ai_set)
+                case "q":
+                    quit()
         except KeyboardInterrupt:
             print(Panel("Exiting Program"))
 
@@ -478,7 +258,7 @@ class Menus():
             table.add_row("2", "Set Token")
             table.add_row("3", "Show options")
             table.add_row("4", "Run Attack")
-            table.add_row("r", "Return")
+            table.add_row("q", "Quit")
             console.print(table)
             option = input("Enter your choice: ")
             match option:
@@ -553,10 +333,105 @@ class Menus():
                         llama_endpoint=self.lendpoint,
                         AI=self.ai_set
                     )
-                    self.print_output("JWT", JWT_output, self.ai_set)
-                case "r":
+                    assets.print_output("JWT", JWT_output, self.ai_set)
+                case "q":
+                    quit()
+        except KeyboardInterrupt:
+            print(Panel("Exiting Program"))
+
+    def pcap_menu(self) -> None:
+        try:
+            table = Table()
+            table.add_column("Options", style="cyan")
+            table.add_column("Utility", style="green")
+            table.add_row("1", "Set Target file location")
+            table.add_row("2", "Set Output file location")
+            table.add_row("3", "Set Threads")
+            table.add_row("4", "Show options")
+            table.add_row("5", "Run Attack")
+            table.add_row("q", "Quit")
+            console.print(table)
+            self.option = input("Enter your choice: ")
+            match self.option:
+                case "1":
                     clearscr()
-                    self.menu_term()
+                    print(Panel("Set Target PCAP file Location"))
+                    self.t = input("Enter Target: ")
+                    print(Panel(f"Target Set: {self.t}"))
+                    self.pcap_menu()
+                case "2":
+                    clearscr()
+                    print(Panel("Set Output file Location"))
+                    self.t = input("Enter Location: ")
+                    print(Panel(f"Output Set: {self.output_loc}"))
+                    self.pcap_menu()
+                case "3":
+                    clearscr()
+                    print(Panel("Set Number of threads"))
+                    self.t = input("Enter Threads: ")
+                    print(Panel(f"Threads Set: {self.threads}"))
+                    self.pcap_menu()
+                case "4":
+                    clearscr()
+                    table1 = Table()
+                    table1.add_column("Options", style="cyan")
+                    table1.add_column("Value", style="green")
+                    table1.add_row("Target PCAP file", str(self.t))
+                    table1.add_row("Output location", str(self.output_loc))
+                    table1.add_row("Threads set", str(self.threads))
+                    print(Panel(table1))
+                    self.pcap_menu()
+                case "5":
+                    clearscr()
+                    packetanalysis.PacketAnalyzer(
+                        cap_loc=self.t,
+                        save_loc=self.output_loc,
+                        max_workers=self.threads
+                    )
+                case "q":
+                    quit()
+        except KeyboardInterrupt:
+            print(Panel("Exiting Program"))
+
+    def geo_menu(self) -> None:
+        try:
+            table = Table()
+            table.add_column("Options", style="cyan")
+            table.add_column("Utility", style="green")
+            table.add_row("1", "ADD API Key")
+            table.add_row("2", "Set Target")
+            table.add_row("3", "Show options")
+            table.add_row("4", "Run Attack")
+            table.add_row("q", "Quit")
+            console.print(table)
+            self.option = input("Enter your choice: ")
+            match self.option:
+                case "1":
+                    clearscr()
+                    self.keyset = input("Enter GEO-IP API: ")
+                    print(Panel(f"GEOIP API Key Set: {self.keyset}"))
+                    self.geo_menu()
+                case "2":
+                    clearscr()
+                    print(Panel("Set Target Hostname or IP"))
+                    self.t = input("Enter Target: ")
+                    print(Panel(f"Target Set: {self.t}"))
+                    self.geo_menu()
+                case "3":
+                    clearscr()
+                    table1 = Table()
+                    table1.add_column("Options", style="cyan")
+                    table1.add_column("Value", style="green")
+                    table1.add_row("API Key", str(self.keyset))
+                    table1.add_row("Target", str(self.t))
+                    print(Panel(table1))
+                    self.geo_menu()
+                case "4":
+                    clearscr()
+                    geo_output: str = geo_ip.geoip(self.keyset, self.t)
+                    assets.print_output("GeoIP", str(geo_output), ai="None")
+                case "q":
+                    quit()
         except KeyboardInterrupt:
             print(Panel("Exiting Program"))
 
@@ -569,7 +444,7 @@ class Menus():
             table.add_row("2", "Set Target")
             table.add_row("3", "Show options")
             table.add_row("4", "Run Attack")
-            table.add_row("r", "Return")
+            table.add_row("q", "Quit")
             console.print(table)
             self.option = input("Enter your choice: ")
             match self.option:
@@ -598,25 +473,26 @@ class Menus():
                     clearscr()
                     sub_output: str = sub_recon.sub_enumerator(self.t, self.list_loc)
                     console.print(sub_output, style="bold underline")
-                case "r":
-                    clearscr()
-                    self.menu_term()
+                case "q":
+                    quit()
         except KeyboardInterrupt:
             print(Panel("Exiting Program"))
 
-    def __init__(self, lamma_key, llama_api_endpoint, initial_keyset, target, profile_num, ai_set, openai_akey_set, bard_key_set, ai_set_args, llama_runpod_key, llama_endpoint) -> None:
+    def __init__(self, lkey, threads, output_loc, lendpoint, keyset, t, profile_num, ai_set, akey_set, bkey_set, ai_set_args, llamakey, llamaendpoint) -> None:
         try:
-            self.lkey = lamma_key
-            self.lendpoint = llama_api_endpoint
-            self.keyset = initial_keyset
-            self.t = target
+            self.lkey = lkey
+            self.threads = threads
+            self.output_loc = output_loc
+            self.lendpoint = lendpoint
+            self.keyset = keyset
+            self.t = t
             self.profile_num = profile_num
             self.ai_set = ai_set
-            self.akey_set = openai_akey_set
-            self.bkey_set = bard_key_set
+            self.akey_set = akey_set
+            self.bkey_set = bkey_set
             self.ai_set_args = ai_set_args
-            self.llamakey = llama_runpod_key
-            self.llamaendpoint = llama_endpoint
+            self.llamakey = llamakey
+            self.llamaendpoint = llamaendpoint
             table = Table()
             table.add_column("Options", style="cyan")
             table.add_column("Utility", style="green")
@@ -624,6 +500,8 @@ class Menus():
             table.add_row("2", "DNS Enum")
             table.add_row("3", "Subdomain Enum")
             table.add_row("4", "GEO-IP Enum")
+            table.add_row("5", "JWT Analysis")
+            table.add_row("6", "PCAP Analysis")
             table.add_row("q", "Quit")
             console.print(table)
             option = input("Enter your choice: ")
@@ -643,6 +521,9 @@ class Menus():
                 case "5":
                     clearscr()
                     self.jwt_menu()
+                case "6":
+                    clearscr()
+                    self.pcap_menu()
                 case "q":
                     quit()
         except KeyboardInterrupt:

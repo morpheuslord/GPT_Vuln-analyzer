@@ -12,6 +12,7 @@ GVA/geo.py
 GVA/gui.py
 GVA/jwt.py
 GVA/menus.py
+GVA/packet_analysis.py
 GVA/requirements.txt
 GVA/scanner.py
 GVA/subdomain.py

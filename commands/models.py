@@ -11,26 +11,41 @@ class DNS_AI_MODEL():
     @staticmethod
     def BardAI(key: str, data: Any) -> str:
         prompt = f"""
-            Do a DNS analysis on the provided DNS scan information
-            The DNS output must return in a JSON format accorging to the provided
-            output format. The data must be accurate in regards towards a pentest report.
-            The data must follow the following rules:
-            1) The DNS scans must be done from a pentester point of view
-            2) The final output must be minimal according to the format given
-            3) The final output must be kept to a minimal
+        Perform a thorough DNS analysis based on the provided DNS scan information. The resulting output must conform to a JSON format designed for integration into a penetration testing (pentest) report.
+        The objective is to provide accurate and essential information from the perspective of a pentester, ensuring the final output is minimal and concise.
+        DNS Data to be Analyzed
+        Analysis Guidelines:
+        Pentester's Viewpoint: Approach the DNS analysis from a pentester's perspective, focusing on security implications and potential vulnerabilities.
+        Output Format Compliance: Ensure that the final output strictly adheres to the specified JSON format. Each section (DNS Records, Reverse DNS, Zone Transfer Scan) must be appropriately populated.
+        Conciseness: Keep the final output minimal. Include only crucial information relevant to a pentest report.
+        Insights to Include:
+            DNS Records: Provide information on A, AAAA, NS, MX, PTR, SOA, and TXT records.
+            Reverse DNS: Include details about the reverse DNS lookup, showcasing the relationship between IP addresses and corresponding domains.
+            Zone Transfer Scan: Indicate whether zone transfers are allowed and, if so, list the name servers associated.
 
-            The output format:
-            {{
+        The output format:
+        {{
+            "DNS_Records": {{
                 "A": [""],
-                "AAA": [""],
+                "AAAA": [""],
                 "NS": [""],
                 "MX": [""],
                 "PTR": [""],
                 "SOA": [""],
                 "TXT": [""]
+            }},
+            "Reverse_DNS": {{
+                "IP_Address": "",
+                "Domain": ""
+            }},
+            "Zone_Transfer_Scan": {{
+                "Allowed": false,
+                "Name_Servers": [""]
             }}
-            DNS Data to be analyzed: {data}
-            """
+        }}
+
+        DNS Data to be analyzed: {data}
+        """
 
         url = "https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=" + key
 
@@ -103,23 +118,37 @@ class DNS_AI_MODEL():
     def gpt_ai(analyze: str, key: Optional[str]) -> str:
         openai.api_key = key
         prompt = f"""
-        Do a DNS analysis on the provided DNS scan information
-        The DNS output must return in a JSON format accorging to the provided
-        output format. The data must be accurate in regards towards a pentest report.
-        The data must follow the following rules:
-        1) The DNS scans must be done from a pentester point of view
-        2) The final output must be minimal according to the format given
-        3) The final output must be kept to a minimal
+        Perform a thorough DNS analysis based on the provided DNS scan information. The resulting output must conform to a JSON format designed for integration into a penetration testing (pentest) report.
+        The objective is to provide accurate and essential information from the perspective of a pentester, ensuring the final output is minimal and concise.
+        DNS Data to be Analyzed:
+        Analysis Guidelines:
+        Pentester's Viewpoint: Approach the DNS analysis from a pentester's perspective, focusing on security implications and potential vulnerabilities.
+        Output Format Compliance: Ensure that the final output strictly adheres to the specified JSON format. Each section (DNS Records, Reverse DNS, Zone Transfer Scan) must be appropriately populated.
+        Conciseness: Keep the final output minimal. Include only crucial information relevant to a pentest report.
+        Insights to Include:
+            DNS Records: Provide information on A, AAAA, NS, MX, PTR, SOA, and TXT records.
+            Reverse DNS: Include details about the reverse DNS lookup, showcasing the relationship between IP addresses and corresponding domains.
+            Zone Transfer Scan: Indicate whether zone transfers are allowed and, if so, list the name servers associated.
 
         The output format:
         {{
-            "A": [""],
-            "AAA": [""],
-            "NS": [""],
-            "MX": [""],
-            "PTR": [""],
-            "SOA": [""],
-            "TXT": [""]
+            "DNS_Records": {{
+                "A": [""],
+                "AAAA": [""],
+                "NS": [""],
+                "MX": [""],
+                "PTR": [""],
+                "SOA": [""],
+                "TXT": [""]
+            }},
+            "Reverse_DNS": {{
+                "IP_Address": "",
+                "Domain": ""
+            }},
+            "Zone_Transfer_Scan": {{
+                "Allowed": false,
+                "Name_Servers": [""]
+            }}
         }}
 
         DNS Data to be analyzed: {analyze}
@@ -136,7 +165,8 @@ class DNS_AI_MODEL():
                 stop=None,
             )
             response = response['choices'][0]['message']['content']
-            return dns_ai_data_regex(str(response))
+            rsp = str(response)
+            return rsp
         except KeyboardInterrupt:
             print("Bye")
             quit()
@@ -463,12 +493,14 @@ def llama_runpod_api(prompt: str, lkey: str, lendpoint: str) -> Any:
 def dns_ai_data_regex(json_string: str) -> Any:
     # Define the regular expression patterns for individual values
     A_pattern = r'"A": \["(.*?)"\]'
-    AAA_pattern = r'"AAA: \["(.*?)"\]'
+    AAA_pattern = r'"AAAA": \["(.*?)"\]'
     NS_pattern = r'"NS": \["(.*?)"\]'
     MX_pattern = r'"MX": \["(.*?)"\]'
     PTR_pattern = r'"PTR": \["(.*?)"\]'
     SOA_pattern = r'"SOA": \["(.*?)"\]'
     TXT_pattern = r'"TXT": \["(.*?)"\]'
+    Reverse_DNS_pattern = r'"Reverse_DNS": \{ "IP_Address": "(.*?)", "Domain": "(.*?)" \}'
+    Zone_Transfer_Scan_pattern = r'"Zone_Transfer_Scan": \{ "Allowed": (.*?), "Name_Servers": \["(.*?)"\] \}'
 
     # Initialize variables for extracted data
     A = None
@@ -478,39 +510,61 @@ def dns_ai_data_regex(json_string: str) -> Any:
     PTR = None
     SOA = None
     TXT = None
+    Reverse_DNS_IP = None
+    Reverse_DNS_Domain = None
+    Zone_Transfer_Allowed = None
+    Zone_Transfer_Name_Servers = None
 
     # Extract individual values using patterns
     match = re.search(A_pattern, json_string)
     if match:
         A = match.group(1)
-        match = re.search(AAA_pattern, json_string)
+    match = re.search(AAA_pattern, json_string)
     if match:
         AAA = match.group(1)
-        match = re.search(NS_pattern, json_string)
+    match = re.search(NS_pattern, json_string)
     if match:
         NS = match.group(1)
-        match = re.search(MX_pattern, json_string)
+    match = re.search(MX_pattern, json_string)
     if match:
         MX = match.group(1)
-        match = re.search(PTR_pattern, json_string)
+    match = re.search(PTR_pattern, json_string)
     if match:
         PTR = match.group(1)
-        match = re.search(SOA_pattern, json_string)
+    match = re.search(SOA_pattern, json_string)
     if match:
         SOA = match.group(1)
-        match = re.search(TXT_pattern, json_string)
+    match = re.search(TXT_pattern, json_string)
     if match:
         TXT = match.group(1)
+    match = re.search(Reverse_DNS_pattern, json_string)
+    if match:
+        Reverse_DNS_IP = match.group(1)
+        Reverse_DNS_Domain = match.group(2)
+    match = re.search(Zone_Transfer_Scan_pattern, json_string)
+    if match:
+        Zone_Transfer_Allowed = bool(match.group(1))
+        Zone_Transfer_Name_Servers = match.group(2)
 
-        # Create a dictionary to store the extracted data
+    # Create a dictionary to store the extracted data
     data = {
-        "A": A,
-        "AAA": AAA,
-        "NS": NS,
-        "MX": MX,
-        "PTR": PTR,
-        "SOA": SOA,
-        "TXT": TXT
+        "DNS_Records": {
+            "A": A,
+            "AAAA": AAA,
+            "NS": NS,
+            "MX": MX,
+            "PTR": PTR,
+            "SOA": SOA,
+            "TXT": TXT
+        },
+        "Reverse_DNS": {
+            "IP_Address": Reverse_DNS_IP,
+            "Domain": Reverse_DNS_Domain
+        },
+        "Zone_Transfer_Scan": {
+            "Allowed": Zone_Transfer_Allowed,
+            "Name_Servers": [Zone_Transfer_Name_Servers] if Zone_Transfer_Name_Servers else []
+        }
     }
 
     # Convert the dictionary to JSON format

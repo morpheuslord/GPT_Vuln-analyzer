@@ -10,6 +10,7 @@ from commands.dns_recon import DNSRecon
 from commands.geo import geo_ip_recon
 from commands.port_scanner import NetworkScanner
 from commands.jwt import JWTAnalyzer
+from commands.packet_analysis import PacketAnalysis
 from commands.models import NMAP_AI_MODEL
 from commands.models import DNS_AI_MODEL
 from commands.models import JWT_AI_MODEL
@@ -20,6 +21,7 @@ from commands.assets import Assets
 console = Console()
 dns_enum = DNSRecon()
 geo_ip = geo_ip_recon()
+packet_analysis = PacketAnalysis()
 p_ai_models = NMAP_AI_MODEL()
 dns_ai_models = DNS_AI_MODEL()
 jwt_ai_models = JWT_AI_MODEL()
@@ -35,11 +37,12 @@ akey = os.getenv('OPENAI_API_KEY')
 bkey = os.getenv('BARD_API_KEY')
 lkey = os.getenv('RUNPOD_API_KEY')
 lendpoint = os.getenv('RUNPOD_ENDPOINT_ID')
-
+rloc = os.getcwd()
+oloc = f'{rloc}\\outputs\\output.json'
 parser = argparse.ArgumentParser(
     description='Python-Nmap and chatGPT intigrated Vulnerability scanner')
 parser.add_argument('--target', metavar='target', type=str,
-                    help='Target IP or hostname or JWT token')
+                    help='Target IP, hostname, JWT token or pcap file location')
 parser.add_argument('--profile', metavar='profile', type=int, default=1,
                     help='Enter Profile of scan 1-13 (Default: 1)', required=False)
 parser.add_argument('--attack', metavar='attack', type=str,
@@ -48,6 +51,7 @@ parser.add_argument('--attack', metavar='attack', type=str,
                     sub - Subdomain Enumeration using the default array.
                     dns - to perform DNS Enumeration and get openion from Chat-GPT
                     jwt - Analyze JWT tokens and the related information
+                    pcap - Pcap Packet Analysis
                     ''', required=False)
 parser.add_argument('--list', metavar='list', type=str,
                     help='''
@@ -55,6 +59,9 @@ parser.add_argument('--list', metavar='list', type=str,
                     ''',
                     default='lists/default.txt',
                     required=False)
+parser.add_argument('--output', metavar='output', type=str,
+                    help='Pcap analysis output file', default=oloc)
+parser.add_argument('--threads', metavar='threads', type=int, help='Define the number of threads for pcap processing', default=200)
 parser.add_argument('--rich_menu', metavar='rich_menu', type=str,
                     help='Shows a more clean help manu using rich only argument-input is help',
                     default=help,
@@ -75,11 +82,13 @@ attack = args.attack
 choice = args.rich_menu
 list_loc = args.list
 ai = args.ai
+output_loc = args.output
 menu = args.menu
 ai_set_args = ""
 keyset = ""
 akey_set = ""
 bkey_set = ""
+threads = args.threads
 t = ""
 profile_num = ""
 ai_set = ""
@@ -101,6 +110,8 @@ def main(target: Any) -> None:
         elif menu is True:
             Menus(
                 lkey=lkey,
+                threads=threads,
+                output_loc=output_loc,
                 lendpoint=lendpoint,
                 keyset=keyset,
                 t=t,
@@ -154,6 +165,12 @@ def main(target: Any) -> None:
                         AI=ai
                     )
                     asset_codes.print_output("JWT", output, ai)
+                case 'pcap':
+                    packet_analysis.PacketAnalyzer(
+                        cap_loc=target,
+                        save_loc=output_loc,
+                        max_workers=threads
+                    )
     except KeyboardInterrupt:
         console.print_exception("Bye")
         quit()
