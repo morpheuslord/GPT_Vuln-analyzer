@@ -3,11 +3,14 @@ import json
 import base64
 from datetime import datetime
 from typing import Optional
+from components.models import JWT_AI_MODEL
+
+AIModels = JWT_AI_MODEL()
 
 
 class JWTAnalyzer:
 
-    def analyze(self, AIModels, token, openai_api_token: Optional[str], bard_api_token: Optional[str], llama_api_token: Optional[str], llama_endpoint: Optional[str], AI: str) -> str:
+    def analyze(self, token, openai_api_token: Optional[str], bard_api_token: Optional[str], llama_api_token: Optional[str], llama_endpoint: Optional[str], AI: str) -> str:
         try:
             self.algorithm_used = ""
             self.decoded_payload = ""

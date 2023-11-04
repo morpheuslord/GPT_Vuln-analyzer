@@ -1,11 +1,12 @@
 from typing import Optional
-
+from components.models import NMAP_AI_MODEL
 import nmap
 nm = nmap.PortScanner()
+AIModels = NMAP_AI_MODEL()
 
 
 class NetworkScanner():
-    def scanner(self, AIModels, ip: Optional[str], profile: int, akey: Optional[str], bkey: Optional[str], lkey, lendpoint, AI: str) -> str:
+    def scanner(self, ip: Optional[str], profile: int, akey: Optional[str], bkey: Optional[str], lkey, lendpoint, AI: str) -> str:
         profile_arguments = {
             1: '-Pn -sV -T4 -O -F',
             2: '-Pn -T4 -A -v',

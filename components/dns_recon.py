@@ -1,12 +1,15 @@
 from typing import Any, Optional
 from rich import print
+from components.models import DNS_AI_MODEL
 import requests
+
+AIModels = DNS_AI_MODEL()
 
 
 class DNSRecon:
     analyze = ''
 
-    def dns_resolver(self, AIModels, target: str, akey: Optional[str], bkey: Optional[str], lkey, lendpoint, AI: str) -> Any:
+    def dns_resolver(self, target: str, akey: Optional[str], bkey: Optional[str], lkey, lendpoint, AI: str) -> Any:
         if target is not None:
             pass
         else:
