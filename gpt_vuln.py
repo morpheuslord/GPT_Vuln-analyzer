@@ -6,25 +6,19 @@ import cowsay
 from dotenv import load_dotenv
 from rich.console import Console
 
-from commands.dns_recon import DNSRecon
-from commands.geo import geo_ip_recon
-from commands.port_scanner import NetworkScanner
-from commands.jwt import JWTAnalyzer
-from commands.packet_analysis import PacketAnalysis
-from commands.models import NMAP_AI_MODEL
-from commands.models import DNS_AI_MODEL
-from commands.models import JWT_AI_MODEL
-from commands.subdomain import sub_enum
-from commands.menus import Menus
-from commands.assets import Assets
+from components.dns_recon import DNSRecon
+from components.geo import geo_ip_recon
+from components.port_scanner import NetworkScanner
+from components.jwt import JWTAnalyzer
+from components.packet_analysis import PacketAnalysis
+from components.subdomain import sub_enum
+from components.menus import Menus
+from components.assets import Assets
 
 console = Console()
 dns_enum = DNSRecon()
 geo_ip = geo_ip_recon()
 packet_analysis = PacketAnalysis()
-p_ai_models = NMAP_AI_MODEL()
-dns_ai_models = DNS_AI_MODEL()
-jwt_ai_models = JWT_AI_MODEL()
 port_scanner = NetworkScanner()
 jwt_analizer = JWTAnalyzer()
 sub_recon = sub_enum()
@@ -130,7 +124,6 @@ def main(target: Any) -> None:
                     asset_codes.print_output("GeoIP", str(geo_output), ai)
                 case 'nmap':
                     p1_out = port_scanner.scanner(
-                        AIModels=p_ai_models,
                         ip=target,
                         profile=int(profile),
                         akey=akey,
@@ -142,7 +135,6 @@ def main(target: Any) -> None:
                     asset_codes.print_output("Nmap", p1_out, ai)
                 case 'dns':
                     dns_output: str = dns_enum.dns_resolver(
-                        AIModels=dns_ai_models,
                         target=target,
                         akey=akey,
                         bkey=bkey,
@@ -156,7 +148,6 @@ def main(target: Any) -> None:
                     console.print(sub_output, style="bold underline")
                 case 'jwt':
                     output: str = jwt_analizer.analyze(
-                        AIModels=jwt_ai_models,
                         token=target,
                         openai_api_token=akey,
                         bard_api_token=bkey,
