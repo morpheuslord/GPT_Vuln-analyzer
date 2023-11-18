@@ -7,6 +7,6 @@ authors:
   given-names: "R"
 - family-names: "Shyam"
   given-names: "R"
-title: "GPT For vulnerability assessment"
-date-released: 2023-10-15
+title: "GPT vuln analyzer"
+date-released: 2023-03-15
 url: "https://github.com/morpheuslord/GPT_Vuln-analyzer"
