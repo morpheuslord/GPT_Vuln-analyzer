@@ -212,7 +212,7 @@ class PacketAnalysis:
             value_str = str(value)
             table.add_row(key, str(value_str))
 
-        console = Console()
-        console.print(table)
         with open(f'{save_loc}', 'w+') as file:
             file.write(str(json.dumps(values)))
+        console = Console()
+        console.print(table)
