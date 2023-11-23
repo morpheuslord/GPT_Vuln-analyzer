@@ -608,26 +608,28 @@ The GUI uses customtkinter for the running of the code. The interface is straigh
 python GVA_gui.py
 ```
 
-### main window
+### Initial window
+![init](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/6dd8bcba-b5e8-472a-b854-7cb4405e8a2b)
 
-![main](https://user-images.githubusercontent.com/70637311/228863455-993e0a21-c06c-44c7-87e6-68d758a78e2c.jpeg)
+### NMAP window
+![nmap](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/e53d03fd-dabf-4192-9426-84304d1680c8)
 
-### output_DNS
 
-![dns_output](https://user-images.githubusercontent.com/70637311/228863540-553f8560-fdf5-48f7-96e8-1f831ab3a8f2.png)
+### DNS window
+![dns](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/ceac4170-3f00-48e2-9c5f-1572fd0ce0a6)
 
-### output_nmap
 
-![nmap_output](https://user-images.githubusercontent.com/70637311/228863611-5d8380f0-28d5-4925-9ad3-62cd28a1ecd4.png)
+### GEOIP window
+![geoip](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/ca93b37b-e006-41d6-9c57-56203780e6cc)
 
-### oytput_geo
 
-![GEO_output](https://user-images.githubusercontent.com/70637311/230589239-b11c39df-b047-4fbb-bb68-61d30fe2b3c9.png)
+### PCAP window
+![pcap](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/e7b34d1f-4c36-41a0-8dc6-fd0c54b90df1)
 
-## Advantage
 
-- Can be used in developing more advanced systems completely made of the API and scanner combination
-- Has the capability to analyse DNS information and resolve multiple records in a better format.
-- Can increase the effectiveness of the final system
-- Can also perform subdomain enumeration
-- Highly productive when working with models such as GPT3
+### SUBDOMAIN window
+![subdomain](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/34ec4f81-db63-47d3-8ed2-ed8763f7d933)
+
+
+### JWT window
+![jwt](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/aaa8fab5-9692-4b29-bdfa-9701c03928b4)
