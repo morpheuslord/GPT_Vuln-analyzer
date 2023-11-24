@@ -521,3 +521,5 @@ python GVA_gui.py
 
 ### JWT window
 
+![jwt](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/aaa8fab5-9692-4b29-bdfa-9701c03928b4)
+
