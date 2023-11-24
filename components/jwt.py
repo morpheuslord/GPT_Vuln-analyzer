@@ -1,74 +1,66 @@
 import jwt
-import json
 import base64
 from datetime import datetime
-from typing import Optional
 from components.models import JWT_AI_MODEL
-
-AIModels = JWT_AI_MODEL()
 
 
 class JWTAnalyzer:
+    def __init__(self):
+        self.AI_models = JWT_AI_MODEL()
+        self.model_map = {
+            'openai': self.call_openai_model,
+            'bard': self.call_bard_model,
+            'llama': self.call_llama_model,
+            'llama-api': self.call_llama_api_model
+        }
 
-    def analyze(self, token, openai_api_token: Optional[str], bard_api_token: Optional[str], llama_api_token: Optional[str], llama_endpoint: Optional[str], AI: str) -> str:
+    @staticmethod
+    def base64_url_decode(input_str):
+        padding = '=' * (4 - (len(input_str) % 4))
+        return base64.urlsafe_b64decode(input_str + padding).decode('utf-8', 'replace')
+
+    @staticmethod
+    def decode_jwt(token):
         try:
-            self.algorithm_used = ""
-            self.decoded_payload = ""
-            self.expiration_time = ""
-            parts = token.split('.')
-            if len(parts) != 3:
-                raise ValueError("Invalid token format. Expected 3 parts.")
-
-            header = json.loads(base64.urlsafe_b64decode(parts[0] + '===').decode('utf-8', 'replace'))
-            self.algorithm_used = header.get('alg', 'Unknown Algorithm')
-            payload = json.loads(base64.urlsafe_b64decode(parts[1] + '===').decode('utf-8', 'replace'))
-            self.decoded_payload = payload
-            self.claims = {key: value for key, value in payload.items()}
-            if 'exp' in payload:
-                self.expiration_time = datetime.utcfromtimestamp(payload['exp'])
-            self.analysis_result = {
-                'Algorithm Used': self.algorithm_used,
-                'Decoded Payload': self.decoded_payload,
-                'Claims': self.claims,
-                'Expiration Time': self.expiration_time
-            }
-            str_data = str(self.analysis_result)
-            match AI:
-                case 'openai':
-                    try:
-                        if openai_api_token is not None:
-                            pass
-                        else:
-                            raise ValueError("KeyNotFound: Key Not Provided")
-                        response = AIModels.gpt_ai(str_data, openai_api_token)
-                    except KeyboardInterrupt:
-                        print("Bye")
-                        quit()
-                case 'bard':
-                    try:
-                        if bard_api_token is not None:
-                            pass
-                        else:
-                            raise ValueError("KeyNotFound: Key Not Provided")
-                        response = AIModels.BardAI(bard_api_token, str_data)
-                    except KeyboardInterrupt:
-                        print("Bye")
-                        quit()
-                case 'llama':
-                    try:
-                        response = AIModels.llama_AI(str_data, "local", llama_api_token, llama_endpoint)
-                    except KeyboardInterrupt:
-                        print("Bye")
-                        quit()
-                case 'llama-api':
-                    try:
-                        response = AIModels.Llama_AI(str_data, "runpod", llama_api_token, llama_endpoint)
-                    except KeyboardInterrupt:
-                        print("Bye")
-                        quit()
-            final_data = str(response)
-            return final_data
+            decoded = jwt.decode(token, algorithms=["HS256"], options={"verify_signature": False})
+            return decoded
         except jwt.ExpiredSignatureError:
-            self.analysis_result = {'Error': 'Token has expired.'}
+            return {'Error': 'Token has expired.'}
         except jwt.InvalidTokenError as e:
-            self.analysis_result = {'Error': f'Invalid token: {e}'}
+            return {'Error': f'Invalid token: {e}'}
+
+    def analyze(self, token, **api_tokens):
+        decoded_payload = self.decode_jwt(token)
+        if 'Error' in decoded_payload:
+            return decoded_payload
+
+        algorithm_used = decoded_payload.get('alg', 'Unknown Algorithm')
+        expiration_time = datetime.utcfromtimestamp(decoded_payload['exp']) if 'exp' in decoded_payload else ''
+
+        analysis_result = {
+            'Algorithm Used': algorithm_used,
+            'Decoded Payload': decoded_payload,
+            'Claims': decoded_payload,
+            'Expiration Time': expiration_time
+        }
+
+        return self.call_ai_model(api_tokens['AI'], str(analysis_result), **api_tokens)
+
+    def call_ai_model(self, ai_name, data, **tokens):
+        ai_function = self.model_map.get(ai_name)
+        if ai_function and tokens.get(f'{ai_name}_api_token'):
+            return ai_function(data, tokens[f'{ai_name}_api_token'], tokens.get(f'{ai_name}_endpoint'))
+        else:
+            return "Error: AI model or token not provided."
+
+    def call_openai_model(self, data, token, _):
+        return self.AI_models.gpt_ai(data, token)
+
+    def call_bard_model(self, data, token, _):
+        return self.AI_models.BardAI(token, data)
+
+    def call_llama_model(self, data, token, endpoint):
+        return self.AI_models.llama_AI(data, "local", token, endpoint)
+
+    def call_llama_api_model(self, data, token, endpoint):
+        return self.AI_models.Llama_AI(data, "runpod", token, endpoint)

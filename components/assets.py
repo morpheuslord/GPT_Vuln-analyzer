@@ -134,7 +134,11 @@ class Assets():
             case "JWT":
                 match ai:
                     case 'openai':
-                        data = json.loads(jdata)
+                        try:
+                            data = json.loads(jdata)
+                        except json.JSONDecodeError as e:
+                            print("Error decoding JSON: ", e)
+                            print("JSON data received: ", jdata)
                         table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
                         table.add_column("Variables", style="cyan")
                         table.add_column("Results", style="green")
@@ -143,7 +147,11 @@ class Assets():
                             table.add_row(str(key), str(value))
                         print(table)
                     case 'bard':
-                        data = json.loads(jdata)
+                        try:
+                            data = json.loads(jdata)
+                        except json.JSONDecodeError as e:
+                            print("Error decoding JSON: ", e)
+                            print("JSON data received: ", jdata)
                         table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
                         table.add_column("Variables", style="cyan")
                         table.add_column("Results", style="green")

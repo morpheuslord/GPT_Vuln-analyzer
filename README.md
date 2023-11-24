@@ -403,6 +403,7 @@ The speed depends on your system and the GPU and CPU configs you have. currently
 For now, the llama code and scans are handled differently. After a few tests, I found out llama needs to be trained a little to operate like how I intended it to work so it needs some time. Any suggestions on how I can do that can be added to the discussions of this repo [Discussions Link](https://github.com/morpheuslord/GPT_Vuln-analyzer/discussions). For now, the output won't be a divided list of all the data instead will be an explanation of the vulnerability or issues discovered by the AI.
 
 The prompt for the model usage looks like this:
+
 ```prompt
 [INST] <<SYS>> {user_instruction}<</SYS>> NMAP Data to be analyzed: {user_message} [/INST]
 ```
@@ -439,6 +440,7 @@ The instructions looks like this:
 Using the instruction set and the data provided via the prompt the llama AI generates its output.
 
 For the most usage I suggest you create a runpod serverless endpoint deployment of llama you can refer to this tutorial for that [tutorial](https://www.youtube.com/watch?v=Ftb4vbGUr7U). Follow the tutorial for better use.
+
 ### Output
 
 #### JWT Output:
@@ -609,27 +611,28 @@ python GVA_gui.py
 ```
 
 ### Initial window
+
 ![init](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/6dd8bcba-b5e8-472a-b854-7cb4405e8a2b)
 
 ### NMAP window
+
 ![nmap](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/e53d03fd-dabf-4192-9426-84304d1680c8)
 
-
 ### DNS window
+
 ![dns](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/ceac4170-3f00-48e2-9c5f-1572fd0ce0a6)
 
-
 ### GEOIP window
+
 ![geoip](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/ca93b37b-e006-41d6-9c57-56203780e6cc)
 
-
 ### PCAP window
+
 ![pcap](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/e7b34d1f-4c36-41a0-8dc6-fd0c54b90df1)
 
-
 ### SUBDOMAIN window
+
 ![subdomain](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/34ec4f81-db63-47d3-8ed2-ed8763f7d933)
 
-
 ### JWT window
-![jwt](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/aaa8fab5-9692-4b29-bdfa-9701c03928b4)
+
