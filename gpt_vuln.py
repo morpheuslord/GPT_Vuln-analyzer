@@ -1,171 +1,146 @@
 import argparse
 import os
-from typing import Any
-
 import cowsay
 from dotenv import load_dotenv
 from rich.console import Console
-
 from components.dns_recon import DNSRecon
 from components.geo import geo_ip_recon
 from components.port_scanner import NetworkScanner
 from components.jwt import JWTAnalyzer
 from components.packet_analysis import PacketAnalysis
-from components.subdomain import sub_enum
+from components.subdomain import SubEnum
 from components.menus import Menus
 from components.assets import Assets
 
+CURRENT_DIR = os.getcwd()
+DEFAULT_OUTPUT_LOC = os.path.join(CURRENT_DIR, 'outputs', 'output.json')
+DEFAULT_LIST_LOC = 'lists/default.txt'
+DEFAULT_THREADS = 200
+
 console = Console()
+load_dotenv()
 dns_enum = DNSRecon()
 geo_ip = geo_ip_recon()
 packet_analysis = PacketAnalysis()
 port_scanner = NetworkScanner()
-jwt_analizer = JWTAnalyzer()
-sub_recon = sub_enum()
+jwt_analyzer = JWTAnalyzer()
+sub_recon = SubEnum()
 asset_codes = Assets()
-load_dotenv()
-
-# The API Keys
-gkey = os.getenv('GEOIP_API_KEY')
-akey = os.getenv('OPENAI_API_KEY')
-bkey = os.getenv('BARD_API_KEY')
-lkey = os.getenv('RUNPOD_API_KEY')
-lendpoint = os.getenv('RUNPOD_ENDPOINT_ID')
-rloc = os.getcwd()
-oloc = f'{rloc}\\outputs\\output.json'
-parser = argparse.ArgumentParser(
-    description='Python-Nmap and chatGPT intigrated Vulnerability scanner')
-parser.add_argument('--target', metavar='target', type=str,
-                    help='Target IP, hostname, JWT token or pcap file location')
-parser.add_argument('--profile', metavar='profile', type=int, default=1,
-                    help='Enter Profile of scan 1-13 (Default: 1)', required=False)
-parser.add_argument('--attack', metavar='attack', type=str,
-                    help='''
-                    Enter Attack type nmap, dns or sub.
-                    sub - Subdomain Enumeration using the default array.
-                    dns - to perform DNS Enumeration and get openion from Chat-GPT
-                    jwt - Analyze JWT tokens and the related information
-                    pcap - Pcap Packet Analysis
-                    ''', required=False)
-parser.add_argument('--list', metavar='list', type=str,
-                    help='''
-                    The path to the subdomain list file (txt).
-                    ''',
-                    default='lists/default.txt',
-                    required=False)
-parser.add_argument('--output', metavar='output', type=str,
-                    help='Pcap analysis output file', default=oloc)
-parser.add_argument('--threads', metavar='threads', type=int, help='Define the number of threads for pcap processing', default=200)
-parser.add_argument('--rich_menu', metavar='rich_menu', type=str,
-                    help='Shows a more clean help manu using rich only argument-input is help',
-                    default=help,
-                    required=False)
-parser.add_argument('--menu', metavar='menu', type=bool,
-                    help='Terminal Interactive Menu',
-                    required=False,
-                    default=False)
-parser.add_argument('--ai', metavar='ai', type=str,
-                    help='AI options for ("openai" Default, "bard", "llama", "llama-api")',
-                    required=False,
-                    default='openai')
-args = parser.parse_args()
-
-target = args.target
-profile = args.profile
-attack = args.attack
-choice = args.rich_menu
-list_loc = args.list
-ai = args.ai
-output_loc = args.output
-menu = args.menu
-ai_set_args = ""
-keyset = ""
-akey_set = ""
-bkey_set = ""
-threads = args.threads
-t = ""
-profile_num = ""
-ai_set = ""
-llamakey = ""
-llamaendpoint = ""
 
 
-def main(target: Any) -> None:
-    if ai == "llama":
-        asset_codes.start_api_app()
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description='Python-Nmap and chatGPT integrated Vulnerability scanner')
+    parser.add_argument('--target', type=str, help='Target IP, hostname, JWT token or pcap file location')
+    parser.add_argument('--profile', type=int, default=1, help='Enter Profile of scan 1-13 (Default: 1)')
+    parser.add_argument('--attack', type=str, help='Attack type: nmap, dns, sub, jwt, pcap')
+    parser.add_argument('--list', type=str, default=DEFAULT_LIST_LOC, help='Path to the subdomain list file (txt)')
+    parser.add_argument('--output', type=str, default=DEFAULT_OUTPUT_LOC, help='Pcap analysis output file')
+    parser.add_argument('--threads', type=int, default=DEFAULT_THREADS, help='Number of threads for pcap processing')
+    parser.add_argument('--rich_menu', type=str, help='Shows a clean help menu using rich')
+    parser.add_argument('--menu', type=bool, default=False, help='Terminal Interactive Menu')
+    parser.add_argument('--ai', type=str, default='openai', help='AI options: openai, bard, llama, llama-api')
+    return parser.parse_args()
+
+
+def get_api_keys():
+    return {
+        'geoip_api_key': os.getenv('GEOIP_API_KEY'),
+        'openai_api_key': os.getenv('OPENAI_API_KEY'),
+        'bard_api_key': os.getenv('BARD_API_KEY'),
+        'runpod_api_key': os.getenv('RUNPOD_API_KEY'),
+        'runpod_endpoint_id': os.getenv('RUNPOD_ENDPOINT_ID')
+    }
+
+
+def handle_attack(attack_type, target, ai, api_keys, additional_params=None):
+    additional_params = additional_params or {}
+
+    if attack_type == 'geo':
+        output = geo_ip.geoip(api_keys['geoip_api_key'], target)
+        asset_codes.print_output(attack_type.capitalize(), str(output), ai)
+    elif attack_type == 'nmap':
+        output = port_scanner.scanner(
+            ip=target,
+            profile=additional_params.get('profile'),
+            akey=api_keys['openai_api_key'],
+            bkey=api_keys['bard_api_key'],
+            lkey=api_keys['runpod_api_key'],
+            lendpoint=api_keys['runpod_endpoint_id'],
+            AI=ai
+        )
+        asset_codes.print_output(attack_type.capitalize(), str(output), ai)
+    elif attack_type == 'dns':
+        output = dns_enum.dns_resolver(
+            target=target,
+            akey=api_keys['openai_api_key'],
+            bkey=api_keys['bard_api_key'],
+            lkey=api_keys['runpod_api_key'],
+            lendpoint=api_keys['runpod_endpoint_id'],
+            AI=ai
+        )
+        asset_codes.print_output(attack_type.capitalize(), str(output), ai)
+    elif attack_type == 'sub':
+        output = sub_recon.sub_enumerator(target, additional_params.get('list_loc'))
+        console.print(output, style="bold underline")
+        asset_codes.print_output(attack_type.capitalize(), str(output), ai)
+    elif attack_type == 'jwt':
+        output = jwt_analyzer.analyze(
+            token=target,
+            openai_api_token=api_keys['openai_api_key'],
+            bard_api_token=api_keys['bard_api_key'],
+            llama_api_token=api_keys['runpod_api_key'],
+            llama_endpoint=api_keys['runpod_endpoint_id'],
+            AI=ai
+        )
+        asset_codes.print_output("JWT", output, ai)
+    elif attack_type == 'pcap':
+        packet_analysis.PacketAnalyzer(
+            cap_loc=target,
+            save_loc=additional_params.get('output_loc'),
+            max_workers=additional_params.get('threads')
+        )
+        return "Done"
+
+
+def main() -> None:
+    args = parse_arguments()
+    api_keys = get_api_keys()
+
     cowsay.cow('GVA Usage in progress...')
-    if target is not None:
-        pass
-    else:
-        target = '127.0.0.1'
+    target = args.target or '127.0.0.1'
+
     try:
-        if choice == "help":
+        if args.rich_menu == "help":
             asset_codes.help_menu()
-        elif menu is True:
+        elif args.menu:
             Menus(
-                lkey=lkey,
-                threads=threads,
-                output_loc=output_loc,
-                lendpoint=lendpoint,
-                keyset=keyset,
-                t=t,
-                profile_num=profile_num,
-                ai_set=ai_set,
-                akey_set=akey_set,
-                bkey_set=bkey_set,
-                ai_set_args=ai_set_args,
-                llamakey=llamakey,
-                llamaendpoint=llamaendpoint
+                lkey=api_keys['runpod_api_key'],
+                threads=args.threads,
+                output_loc=args.output,
+                lendpoint=api_keys['runpod_endpoint_id'],
+                keyset="",
+                t="",
+                profile_num="",
+                ai_set="",
+                akey_set="",
+                bkey_set="",
+                ai_set_args="",
+                llamakey="",
+                llamaendpoint=""
             )
         else:
-            match attack:
-                case 'geo':
-                    geo_output: str = geo_ip_recon.geoip(gkey, target)
-                    asset_codes.print_output("GeoIP", str(geo_output), ai)
-                case 'nmap':
-                    p1_out = port_scanner.scanner(
-                        ip=target,
-                        profile=int(profile),
-                        akey=akey,
-                        bkey=bkey,
-                        lkey=lkey,
-                        lendpoint=lendpoint,
-                        AI=ai
-                    )
-                    asset_codes.print_output("Nmap", p1_out, ai)
-                case 'dns':
-                    dns_output: str = dns_enum.dns_resolver(
-                        target=target,
-                        akey=akey,
-                        bkey=bkey,
-                        lkey=lkey,
-                        lendpoint=lendpoint,
-                        AI=ai
-                    )
-                    asset_codes.print_output("DNS", dns_output, ai)
-                case 'sub':
-                    sub_output: str = sub_recon.sub_enumerator(target, list_loc)
-                    console.print(sub_output, style="bold underline")
-                case 'jwt':
-                    output: str = jwt_analizer.analyze(
-                        token=target,
-                        openai_api_token=akey,
-                        bard_api_token=bkey,
-                        llama_api_token=lkey,
-                        llama_endpoint=lendpoint,
-                        AI=ai
-                    )
-                    asset_codes.print_output("JWT", output, ai)
-                case 'pcap':
-                    packet_analysis.PacketAnalyzer(
-                        cap_loc=target,
-                        save_loc=output_loc,
-                        max_workers=threads
-                    )
+            additional_params = {
+                'profile': args.profile,
+                'list_loc': args.list,
+                'output_loc': args.output,
+                'threads': args.threads
+            }
+            handle_attack(args.attack, target, args.ai, api_keys, additional_params)
     except KeyboardInterrupt:
         console.print_exception("Bye")
         quit()
 
 
 if __name__ == "__main__":
-    main(target)
+    main()

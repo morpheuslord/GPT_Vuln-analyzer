@@ -8,6 +8,8 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 - All the packages mentioned in the requirements.txt file
 - OpenAI API
 - Bard API (MakerSuite Palm)
+- llama.cpp
+- Runpod serverless endpoint
 - HuggingFace token (with llama2 access )
 - IPGeolocation API
 - Wireshark and tshark (both added to path)
@@ -103,7 +105,7 @@ or
 pip install -r requirements.txt
 ```
 
-- run the code python3 gpt_vuln.py
+- Run the code python3 gpt_vuln.py
 
 ```bash
 # Regular Help Menu
@@ -182,7 +184,7 @@ The CLI interface has a few things to note.
 
 ### My views on Bard
 
-Its same as Openai GPT3.5 but faster. It can generate the same answer but in 2 times the speed.
+Its the same as Openai GPT3.5 but faster. It can generate the same answer but in 2 times the speed.
 
 ### OS Supported
 
@@ -386,7 +388,7 @@ The regex extraction code does the extraction and further the main function arra
 
 ## Using Bard AI
 
-For you to use Bard AI you must signup to the MakerSuit Palm API for developer access and generate your API key from there. For links and how this works you can use this video [MakerSuit](https://www.youtube.com/watch?v=Ce1AOchQMzA&t=128s)
+For you to use Bard AI you must sign up to the MakerSuit Palm API for developer access and generate your API key from there. For links and how this works you can use this video [MakerSuit](https://www.youtube.com/watch?v=Ce1AOchQMzA&t=128s)
 
 Once the API is acquired just add it to the `.env` file and you are good to go.
 
@@ -395,10 +397,51 @@ Once the API is acquired just add it to the `.env` file and you are good to go.
 Using LLama2 is one of the best offline and free options out there. It is currently under improvement I am working on a prompt that will better incorporate cybersecurity perspective into the AI.
 I have to thank **@thisserand** and his [llama2_local](https://github.com/thisserand/llama2_local) repo and also his YT video [YT_Video](https://youtu.be/WzCS8z9GqHw). They were great resources. To be frank the llama2 code is 95% his, I just yanked the code and added a Flask API functionality to it.
 
-The Accuracy of the AI offline and outside the codes test was great and had equal accuracy to openai or bard but while in code it was facing a few issues may be because of the prompting and all. I will try and fix it.
+The Accuracy of the AI offline and outside the codes test was great and had equal accuracy to openai or bard but while in code it was facing a few issues be because of the prompting and all. I will try and fix it.
 The speed depends on your system and the GPU and CPU configs you have. currently, it is using the `TheBloke/Llama-2-7B-Chat-GGML` model and can be changed via the `portscanner` and `dnsrecon` files.
 
 For now, the llama code and scans are handled differently. After a few tests, I found out llama needs to be trained a little to operate like how I intended it to work so it needs some time. Any suggestions on how I can do that can be added to the discussions of this repo [Discussions Link](https://github.com/morpheuslord/GPT_Vuln-analyzer/discussions). For now, the output won't be a divided list of all the data instead will be an explanation of the vulnerability or issues discovered by the AI.
+
+The prompt for the model usage looks like this:
+
+```prompt
+[INST] <<SYS>> {user_instruction}<</SYS>> NMAP Data to be analyzed: {user_message} [/INST]
+```
+
+The instructions looks like this:
+
+```prompt
+    Do a NMAP scan analysis on the provided NMAP scan information. The NMAP output must return in a asked format accorging to the provided output format. The data must be accurate in regards towards a pentest report.
+    The data must follow the following rules:
+    1) The NMAP scans must be done from a pentester point of view
+    2) The final output must be minimal according to the format given.
+    3) The final output must be kept to a minimal.
+    4) If a value not found in the scan just mention an empty string.
+    5) Analyze everything even the smallest of data.
+    6) Completely analyze the data provided and give a confirm answer using the output format.
+    7) mention all the data you found in the output format provided so that regex can be used on it.
+    8) avoid unnecessary explaination.
+    9) the critical score must be calculated based on the CVE if present or by the nature of the services open
+    10) the os information must contain the OS used my the target.
+    11) the open ports must include all the open ports listed in the data[tcp] and varifying if it by checking its states value.  you should not negect even one open port.
+    12) the vulnerable services can be determined via speculation of the service nature or by analyzing the CVE's found.
+    The output format:
+        critical score:
+        - Give info on the criticality
+        "os information":
+        - List out the OS information
+        "open ports and services":
+        - List open ports
+        - List open ports services
+        "vulnerable service":
+        - Based on CVEs or nature of the ports opened list the vulnerable services
+        "found cve":
+        - List the CVE's found and list the main issues.
+```
+
+Using the instruction set and the data provided via the prompt the llama AI generates its output.
+
+For the most usage I suggest you create a runpod serverless endpoint deployment of llama you can refer to this tutorial for that [tutorial](https://www.youtube.com/watch?v=Ftb4vbGUr7U). Follow the tutorial for better use.
 
 ### Output
 
@@ -561,34 +604,38 @@ Completed
 
 # Usage GUI
 
-The GUI uses customtkinter for the running of the code. The interface is straight forward the only thing required to remember is:
+The GUI uses customtkinter for the running of the code. The interface is straightforward the only thing required to remember is:
 
-- When using dns attack dont specify the profile
+- When using dns attack don't specify the profile
 
 ```bash
 python GVA_gui.py
 ```
 
-### main window
+### Initial window
 
-![main](https://user-images.githubusercontent.com/70637311/228863455-993e0a21-c06c-44c7-87e6-68d758a78e2c.jpeg)
+![init](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/6dd8bcba-b5e8-472a-b854-7cb4405e8a2b)
 
-### output_DNS
+### NMAP window
 
-![dns_output](https://user-images.githubusercontent.com/70637311/228863540-553f8560-fdf5-48f7-96e8-1f831ab3a8f2.png)
+![nmap](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/e53d03fd-dabf-4192-9426-84304d1680c8)
 
-### output_nmap
+### DNS window
 
-![nmap_output](https://user-images.githubusercontent.com/70637311/228863611-5d8380f0-28d5-4925-9ad3-62cd28a1ecd4.png)
+![dns](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/ceac4170-3f00-48e2-9c5f-1572fd0ce0a6)
 
-### oytput_geo
+### GEOIP window
 
-![GEO_output](https://user-images.githubusercontent.com/70637311/230589239-b11c39df-b047-4fbb-bb68-61d30fe2b3c9.png)
+![geoip](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/ca93b37b-e006-41d6-9c57-56203780e6cc)
 
-## Advantage
+### PCAP window
 
-- Can be used in developing a more advanced systems completly made of the API and scanner combination
-- Has the capability to analize DNS information and reslove Mustiple records it a more better format.
-- Can increase the effectiveness of the final system
-- Can also perform subdomain enumeration
-- Highly productive when working with models such as GPT3
+![pcap](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/e7b34d1f-4c36-41a0-8dc6-fd0c54b90df1)
+
+### SUBDOMAIN window
+
+![subdomain](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/34ec4f81-db63-47d3-8ed2-ed8763f7d933)
+
+### JWT window
+
+![jwt](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/aaa8fab5-9692-4b29-bdfa-9701c03928b4)

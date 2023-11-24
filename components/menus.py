@@ -4,16 +4,16 @@ from rich import print
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from commands.dns_recon import DNSRecon
-from commands.geo import geo_ip_recon
-from commands.port_scanner import NetworkScanner
-from commands.jwt import JWTAnalyzer
-from commands.packet_analysis import PacketAnalysis
-from commands.models import NMAP_AI_MODEL
-from commands.models import DNS_AI_MODEL
-from commands.models import JWT_AI_MODEL
-from commands.subdomain import sub_enum
-from commands.assets import Assets
+from components.dns_recon import DNSRecon
+from components.geo import geo_ip_recon
+from components.port_scanner import NetworkScanner
+from components.jwt import JWTAnalyzer
+from components.packet_analysis import PacketAnalysis
+from components.models import NMAP_AI_MODEL
+from components.models import DNS_AI_MODEL
+from components.models import JWT_AI_MODEL
+from components.subdomain import SubEnum
+from components.assets import Assets
 
 assets = Assets()
 dns_enum = DNSRecon()
@@ -24,7 +24,7 @@ p_ai_models = NMAP_AI_MODEL()
 dns_ai_models = DNS_AI_MODEL()
 jwt_ai_model = JWT_AI_MODEL()
 port_scanner = NetworkScanner()
-sub_recon = sub_enum()
+sub_recon = SubEnum()
 console = Console()
 
 

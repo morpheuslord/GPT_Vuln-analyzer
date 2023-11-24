@@ -110,7 +110,7 @@ class PacketAnalysis:
 
     def run_tshark_command(self, service, source, streams):
         stream_cmd = f'{self.tshark_loc} -r test.pcap -q -z follow,tcp,raw,{streams} -Y "ip.addr=={source} and tcp.port=={service}"'
-        runner = run(stream_cmd, shell=True, stdout=PIPE, stderr=STDOUT, text=True)
+        runner = run(stream_cmd, shell=True, stdout=PIPE, stderr=STDOUT, encoding='utf-8')
         output_lines = runner.stdout.splitlines()
         node_regex = re.compile(r'Node (\d+): (.+)$')
         data_regex = re.compile(r'\s+(.+)$')
@@ -157,12 +157,17 @@ class PacketAnalysis:
     def PacketAnalyzer(self, cap_loc, save_loc, max_workers):
         self.detect_tshark()
         print('Collecting Json Data')
-        raw_pcap = run(f"{self.tshark_loc} -r {cap_loc} -T json", shell=True, capture_output=True, text=True)
+        raw_pcap = run(f"{self.tshark_loc} -r {cap_loc} -T json", shell=True, capture_output=True, encoding='utf-8', text=True)
         try:
             raw_data = raw_pcap.stdout
+            if not raw_data:
+                print("Error: No data returned from tshark. Check the pcap file and tshark path.")
+                print("Error output:", raw_pcap.stderr)
+                return
             json_data = json.loads(raw_data)
         except json.JSONDecodeError as e:
             print(f"Error decoding JSON: {e}")
+            print("Error output:", raw_pcap.stderr)
             json_data = []
         print('Extracting IP details...')
         print('Extracting DNS details...')
