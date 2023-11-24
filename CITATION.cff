@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "POC GPT MODEL for vulnerability assessment"
+authors:
+- family-names: "Chiranjeevi"
+  given-names: "G"
+- family-names: "Abhishek Reddy"
+  given-names: "R"
+- family-names: "Shyam"
+  given-names: "R"
+title: "GPT vuln analyzer"
+date-released: 2023-03-15
+url: "https://github.com/morpheuslord/GPT_Vuln-analyzer"

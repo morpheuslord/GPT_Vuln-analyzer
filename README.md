@@ -407,9 +407,7 @@ The prompt for the model usage looks like this:
 ```prompt
 [INST] <<SYS>> {user_instruction}<</SYS>> NMAP Data to be analyzed: {user_message} [/INST]
 ```
-
 The instructions looks like this:
-
 ```prompt
     Do a NMAP scan analysis on the provided NMAP scan information. The NMAP output must return in a asked format accorging to the provided output format. The data must be accurate in regards towards a pentest report.
     The data must follow the following rules:
@@ -638,4 +636,3 @@ python GVA_gui.py
 
 ### JWT window
 
-![jwt](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/aaa8fab5-9692-4b29-bdfa-9701c03928b4)
