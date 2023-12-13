@@ -1,6 +1,7 @@
 import argparse
 import os
 import cowsay
+import hashlib
 from dotenv import load_dotenv
 from rich.console import Console
 from components.dns_recon import DNSRecon
@@ -11,6 +12,8 @@ from components.packet_analysis import PacketAnalysis
 from components.subdomain import SubEnum
 from components.menus import Menus
 from components.assets import Assets
+from components.passbeaker import PasswordCracker
+
 
 CURRENT_DIR = os.getcwd()
 DEFAULT_OUTPUT_LOC = os.path.join(CURRENT_DIR, 'outputs', 'output.json')
@@ -33,13 +36,24 @@ def parse_arguments():
         description='Python-Nmap and chatGPT integrated Vulnerability scanner')
     parser.add_argument('--target', type=str, help='Target IP, hostname, JWT token or pcap file location')
     parser.add_argument('--profile', type=int, default=1, help='Enter Profile of scan 1-13 (Default: 1)')
-    parser.add_argument('--attack', type=str, help='Attack type: nmap, dns, sub, jwt, pcap')
-    parser.add_argument('--list', type=str, default=DEFAULT_LIST_LOC, help='Path to the subdomain list file (txt)')
+    parser.add_argument('--attack', type=str, help='Attack type: nmap, dns, sub, jwt, pcap, passcracker')
+    parser.add_argument('--sub_list', type=str, default=DEFAULT_LIST_LOC, help='Path to the subdomain list file (txt)')
     parser.add_argument('--output', type=str, default=DEFAULT_OUTPUT_LOC, help='Pcap analysis output file')
-    parser.add_argument('--threads', type=int, default=DEFAULT_THREADS, help='Number of threads for pcap processing')
     parser.add_argument('--rich_menu', type=str, help='Shows a clean help menu using rich')
     parser.add_argument('--menu', type=bool, default=False, help='Terminal Interactive Menu')
     parser.add_argument('--ai', type=str, default='openai', help='AI options: openai, bard, llama, llama-api')
+    parser.add_argument('--password_hash', help='Password hash')
+    parser.add_argument('--wordlist_file', help='Wordlist File')
+    parser.add_argument('--algorithm', choices=hashlib.algorithms_guaranteed, required=True, help='Hash algorithm')
+    parser.add_argument('--salt', help='Salt Value')
+    parser.add_argument('--parallel', action='store_true', help='Use parallel processing')
+    parser.add_argument('--complexity', action='store_true', help='Check for password complexity')
+    parser.add_argument('--brute_force', action='store_true', help='Perform a brute force attack')
+    parser.add_argument('--min_length', type=int, default=1, help='Minimum password length for brute force attack')
+    parser.add_argument('--max_length', type=int, default=6, help='Minimum password length for brute force attack')
+    parser.add_argument('--character_set', default='abcdefghijklmnopqrstuvwxyz0123456789',
+                        help='Character set for brute force attack')
+
     return parser.parse_args()
 
 
@@ -95,12 +109,35 @@ def handle_attack(attack_type, target, ai, api_keys, additional_params=None):
         )
         asset_codes.print_output("JWT", output, ai)
     elif attack_type == 'pcap':
-        packet_analysis.PacketAnalyzer(
-            cap_loc=target,
-            save_loc=additional_params.get('output_loc'),
-            max_workers=additional_params.get('threads')
+        packet_analysis.perform_full_analysis(
+            pcap_path=target,
+            json_path=additional_params.get('output_loc'),
         )
         return "Done"
+    elif attack_type == 'passcracker':
+        hash = additional_params.get('password_hash')
+        wordlist = additional_params.get('wordlist_file')
+        salt = additional_params.get('salt')
+        parallel = additional_params.get('parallel')
+        complexity = additional_params.get('complexity')
+        min_length = additional_params.get('min_length')
+        max_length = additional_params.get('max_length')
+        character_set = additional_params.get('charecter_set')
+        brute_force = additional_params.get('brute_force')
+        algorithm = additional_params.get('algorithm')
+        Cracker = PasswordCracker(
+            password_hash=hash,
+            wordlist_file=wordlist,
+            algorithm=algorithm,
+            salt=salt,
+            parallel=parallel,
+            complexity_check=complexity
+        )
+        if brute_force:
+            Cracker.crack_passwords_with_brute_force(min_length, max_length, character_set)
+        else:
+            Cracker.crack_passwords_with_wordlist()
+        Cracker.print_statistics()
 
 
 def main() -> None:
@@ -132,9 +169,18 @@ def main() -> None:
         else:
             additional_params = {
                 'profile': args.profile,
-                'list_loc': args.list,
+                'list_loc': args.sub_list,
                 'output_loc': args.output,
-                'threads': args.threads
+                'password_hash': args.password_hash,
+                'salt': args.salt,
+                'parallel': args.parallel,
+                'complexity': args.complexity,
+                'brute_force': args.brute_force,
+                'min_length': args.min_length,
+                'max_lenght': args.max_length,
+                'character_set': args.character_set,
+                'algorithm': args.algorithm,
+                'wordlist_file': args.wordlist_file
             }
             handle_attack(args.attack, target, args.ai, api_keys, additional_params)
     except KeyboardInterrupt:

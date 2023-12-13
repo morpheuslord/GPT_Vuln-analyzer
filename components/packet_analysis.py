@@ -1,223 +1,131 @@
-from rich import print
-from subprocess import run, PIPE, STDOUT
-from concurrent.futures import ThreadPoolExecutor
-from typing import Any
+from scapy.all import rdpcap, IP, TCP, UDP, DNSQR, EAPOL, Raw, ARP
+from collections import Counter, defaultdict
 from rich.console import Console
 from rich.table import Table
 import json
 import re
-import platform
 
 
 class PacketAnalysis:
-    tshark_loc = ""
-    services = []
-    tcp_streams = []
-    sources = []
-    destinations = []
-    resolved = []
-    dns_query_names = []
-    dns_resp_names = []
-    unique_eapol_data = []
-    combined_json = []
+    def load_pcap(self, pcap_file):
+        self.packets = rdpcap(pcap_file)
+        self.analysis_results = {"Total Packets": len(self.packets)}
 
-    def detect_tshark(self) -> None:
-        try:
-            osp = platform.system()
-            match osp:
-                case 'Darwin':
-                    self.tshark_loc = "tshark"
-                case 'Linux':
-                    self.tshark_loc = "tshark"
-                case 'Windows':
-                    self.tshark_loc = '"C:\\Program Files\\Wireshark\\tshark.exe"'
-        except Exception:
-            pass
+    def detect_eapol(self):
+        eapol_packets = [pkt for pkt in self.packets if EAPOL in pkt]
+        self.analysis_results["EAPOL Packets"] = len(eapol_packets)
 
-    def extract_network_info(self, json_data):
-        services = set()
-        tcp_streams = set()
-        source_addresses = set()
-        destination_addresses = set()
-        resolved_sources = set()
-        dns_query_names = set()
-        dns_resp_names = set()
-        unique_eapol_data = set()
+    def summarize_traffic(self):
+        ip_packets = [pkt for pkt in self.packets if IP in pkt]
+        tcp_packets = [pkt for pkt in self.packets if TCP in pkt]
+        self.analysis_results["Total IP Packets"] = len(ip_packets)
+        self.analysis_results["Total TCP Packets"] = len(tcp_packets)
 
-        for entry in json_data:
-            layers = entry.get('_source', {}).get('layers', {})
+    def list_ips(self):
+        src_ips = set(pkt[IP].src for pkt in self.packets if IP in pkt)
+        dst_ips = set(pkt[IP].dst for pkt in self.packets if IP in pkt)
 
-            tcp_layer = layers.get('tcp', {})
-            if tcp_layer:
-                service = tcp_layer.get('tcp.srcport')
-                if service:
-                    services.add(service)
-            if tcp_layer:
-                tcp_stream_val = tcp_layer.get('tcp.stream')
-                if service:
-                    tcp_streams.add(tcp_stream_val)
+        self.analysis_results["Unique Source IPs"] = src_ips
+        self.analysis_results["Unique Destination IPs"] = dst_ips
 
-            ip_layer = layers.get('ip', {})
-            if ip_layer:
-                source_address = ip_layer.get('ip.src_host')
-                destination_address = ip_layer.get('ip.dst_host')
-                if source_address:
-                    source_addresses.add(source_address)
-                if destination_address:
-                    destination_addresses.add(destination_address)
+    def detect_arp_spoofing(self):
+        arp_table = {}
+        arp_spoofing_detected = False
+        for packet in self.packets:
+            if ARP in packet and packet[ARP].op == 2:  # ARP response
+                ip = packet[ARP].psrc
+                mac = packet[ARP].hwsrc
 
-            eth_layer = layers.get('eth', {})
-            if eth_layer:
-                source_mac = eth_layer.get('eth.src')
-                resolved_source_mac = eth_layer.get('eth.src_tree', {}).get('eth.src_resolved')
-                if source_mac and resolved_source_mac:
-                    resolved_sources.add(resolved_source_mac)
+                if ip not in arp_table:
+                    arp_table[ip] = set()
+                arp_table[ip].add(mac)
 
-            dns_layer = layers.get('dns', {})
-            if dns_layer:
-                queries = dns_layer.get('Queries', [])
-                if isinstance(queries, list):
-                    for query in queries:
-                        query_name = query.get('dns.qry.name')
-                        if query_name:
-                            dns_query_names.add(query_name)
-                elif isinstance(queries, dict):
-                    for query_name, query_info in queries.items():
-                        dns_query_names.add(query_info.get('dns.qry.name'))
-                answers = dns_layer.get('Answers', [])
-                if isinstance(answers, list):
-                    for answer in answers:
-                        resp_name = answer.get('dns.resp.name')
-                        if resp_name:
-                            dns_resp_names.add(resp_name)
-                elif isinstance(answers, dict):
-                    for resp_name, resp_info in answers.items():
-                        dns_resp_names.add(resp_info.get('dns.resp.name'))
+                if len(arp_table[ip]) > 1:
+                    arp_spoofing_detected = True
 
-            eapol_layer = layers.get('eapol', {})
-            if eapol_layer:
-                eapol_data = eapol_layer.get('wlan_rsna_eapol.keydes.data', "")
-                unique_eapol_data.add(eapol_data)
+        self.analysis_results["ARP Spoofing Detected"] = arp_spoofing_detected
 
-        self.services = list(services)
-        self.tcp_streams = list(tcp_streams)
-        self.source_addresses = list(source_addresses)
-        self.destination_addresses = list(destination_addresses)
-        self.resolved_sources = list(resolved_sources)
-        self.dns_query_names = list(dns_query_names)
-        self.dns_resp_names = list(dns_resp_names)
-        self.unique_eapol_data = list(unique_eapol_data)
+    def count_tcp_streams(self):
+        stream_set = set()
+        for packet in self.packets:
+            if IP in packet and TCP in packet:
+                stream_identifier = (packet[IP].src, packet[IP].dst, packet[TCP].sport, packet[TCP].dport)
+                stream_set.add(stream_identifier)
+        self.analysis_results["Total TCP Streams"] = len(stream_set)
 
-    def run_tshark_command(self, service, source, streams):
-        stream_cmd = f'{self.tshark_loc} -r test.pcap -q -z follow,tcp,raw,{streams} -Y "ip.addr=={source} and tcp.port=={service}"'
-        runner = run(stream_cmd, shell=True, stdout=PIPE, stderr=STDOUT, encoding='utf-8')
-        output_lines = runner.stdout.splitlines()
-        node_regex = re.compile(r'Node (\d+): (.+)$')
-        data_regex = re.compile(r'\s+(.+)$')
-        node_0, node_1, data = None, None, None
-        for line in output_lines:
-            node_match = node_regex.match(line)
-            data_match = data_regex.match(line)
-            if node_match:
-                node_num, node_value = node_match.groups()
-                if node_num == '0':
-                    node_0 = node_value
-                elif node_num == '1':
-                    node_1 = node_value
-            elif data_match:
-                data = data_match.group(1)
+    def list_unique_ports(self):
+        tcp_ports = set()
+        udp_ports = set()
+        for packet in self.packets:
+            if TCP in packet:
+                tcp_ports.add(packet[TCP].sport)
+                tcp_ports.add(packet[TCP].dport)
+            elif UDP in packet:
+                udp_ports.add(packet[UDP].sport)
+                udp_ports.add(packet[UDP].dport)
 
-        if node_0 is not None and node_1 is not None and data is not None:
-            return ['Source: ' f'{node_0}', 'Destination: ' f'{node_1}', 'stream: ' f'{streams}']
-        else:
-            return []
+        self.analysis_results["Unique TCP Ports"] = tcp_ports
+        self.analysis_results["Unique UDP Ports"] = udp_ports
 
-    def flatten_json(self, data: Any, separator: Any = '.') -> Any:
-        flattened_data = {}
-        for key, value in data.items():
-            if isinstance(value, dict):
-                nested_data = self.flatten_json(value, separator)
-                for nested_key, nested_value in nested_data.items():
-                    flattened_data[key + separator + nested_key] = nested_value
-            else:
-                flattened_data[key] = value
-        return flattened_data
+    def detect_mac_spoofing(self):
+        ip_mac_mapping = defaultdict(set)
+        mac_spoofing_detected = False
 
-    def stream(self, service_list, source_list, tcp_streams_list, max_workers=20):
-        results = []
+        for packet in self.packets:
+            if ARP in packet and packet[ARP].op in (1, 2):  # ARP request or reply
+                ip_address = packet[ARP].psrc
+                mac_address = packet[ARP].hwsrc
+                ip_mac_mapping[ip_address].add(mac_address)
 
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            command_params = [(service, source, streams) for service in service_list for source in source_list for streams in tcp_streams_list]
-            print("Total Streams combination: ", len(command_params))
-            print("Number of workers in progress: ", max_workers)
-            results = list(executor.map(lambda params: self.run_tshark_command(*params), command_params))
-        results = [result for result in results if result]
-        self.combined_json = results
+                if len(ip_mac_mapping[ip_address]) > 1:
+                    mac_spoofing_detected = True
 
-    def PacketAnalyzer(self, cap_loc, save_loc, max_workers):
-        self.detect_tshark()
-        print('Collecting Json Data')
-        raw_pcap = run(f"{self.tshark_loc} -r {cap_loc} -T json", shell=True, capture_output=True, encoding='utf-8', text=True)
-        try:
-            raw_data = raw_pcap.stdout
-            if not raw_data:
-                print("Error: No data returned from tshark. Check the pcap file and tshark path.")
-                print("Error output:", raw_pcap.stderr)
-                return
-            json_data = json.loads(raw_data)
-        except json.JSONDecodeError as e:
-            print(f"Error decoding JSON: {e}")
-            print("Error output:", raw_pcap.stderr)
-            json_data = []
-        print('Extracting IP details...')
-        print('Extracting DNS details...')
-        print('Extracting EAPOL details...')
-        self.extract_network_info(json_data)
-        print('Extracting TCP STREAMS details...')
-        print('TCP streams can take some time..')
-        self.stream(service_list=self.services,
-                    source_list=self.source_addresses,
-                    tcp_streams_list=self.tcp_streams,
-                    max_workers=max_workers)
-        print("Completed")
-        filtered_stream_data = self.combined_json
-        values = {
-            "PacketAnalysis": {
-                "Services": self.services,
-                "TCP Streams": self.tcp_streams,
-                "Sources Address": self.source_addresses,
-                "Destination Address": self.destination_addresses,
-                "DNS Resolved": self.resolved,
-                "DNS Query": self.dns_query_names,
-                "DNS Response": self.dns_resp_names,
-                "EAPOL Data": self.unique_eapol_data,
-                "Stream Data": filtered_stream_data
-            }
-        }
-        table_val = {
-            "PacketAnalysis": {
-                "Services": self.services,
-                "TCP Streams": self.tcp_streams,
-                "Sources Address": self.source_addresses,
-                "Destination Address": self.destination_addresses,
-                "DNS Resolved": self.resolved,
-                "DNS Query": self.dns_query_names,
-                "DNS Response": self.dns_resp_names,
-                "EAPOL Data": self.unique_eapol_data,
-                " Total Streams Data": str(len(filtered_stream_data))
-            }
-        }
-        table = Table(title="GVA Report for PCAP", show_header=True, header_style="bold magenta")
-        table.add_column("Identifiers", style="cyan")
-        table.add_column("Data", style="green")
+        self.analysis_results["MAC Spoofing Detected"] = mac_spoofing_detected
 
-        flattened_data: dict = self.flatten_json(table_val, separator='.')
+    def common_ports(self):
+        ports = [pkt[TCP].dport for pkt in self.packets if TCP in pkt]
+        port_counts = Counter(ports).most_common(5)
+        self.analysis_results["Common Ports"] = port_counts
 
-        for key, value in flattened_data.items():
-            value_str = str(value)
-            table.add_row(key, str(value_str))
+    def detect_dns_requests(self):
+        dns_requests = [pkt[DNSQR].qname.decode() for pkt in self.packets if DNSQR in pkt and UDP in pkt and pkt[UDP].dport == 53]
+        self.analysis_results["DNS Requests"] = dns_requests
 
-        with open(f'{save_loc}', 'w+') as file:
-            file.write(str(json.dumps(values)))
+    def detect_credentials(self):
+        credential_patterns = [r'username', r'password', r'passwd', r'user', r'pass']
+        credential_packets = [pkt for pkt in self.packets if TCP in pkt and Raw in pkt and any(re.search(pattern, str(pkt[Raw].load), re.IGNORECASE) for pattern in credential_patterns)]
+        self.analysis_results["Potential Credential Packets"] = len(credential_packets)
+
+    def display_results(self):
         console = Console()
+        table = Table(show_header=True, header_style="bold blue")
+        table.add_column("Metric", style="dim")
+        table.add_column("Value")
+
+        for key, value in self.analysis_results.items():
+            if isinstance(value, set):
+                value_str = ', '.join(value)
+            else:
+                value_str = str(value)
+            table.add_row(key, value_str)
+
         console.print(table)
+
+    def save_results_to_json(self, json_file):
+        with open(json_file, "w") as file:
+            # Convert sets to lists for JSON serialization
+            output_data = {k: list(v) if isinstance(v, set) else v for k, v in self.analysis_results.items()}
+            json.dump(output_data, file, indent=4)
+
+    def perform_full_analysis(self, pcap_path, json_path):
+        self.load_pcap(pcap_path)
+        self.summarize_traffic()
+        self.list_ips()
+        self.common_ports()
+        self.detect_dns_requests()
+        self.detect_credentials()
+        self.detect_arp_spoofing()
+        self.detect_mac_spoofing()
+        self.detect_eapol()
+        self.display_results()
+        self.save_results_to_json(json_path)

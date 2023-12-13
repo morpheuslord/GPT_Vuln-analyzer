@@ -8,7 +8,7 @@ from components.geo import geo_ip_recon
 from components.port_scanner import NetworkScanner
 from components.jwt import JWTAnalyzer
 from components.packet_analysis import PacketAnalysis
-from components.subdomain import sub_enum
+from components.subdomain import SubEnum
 
 list_loc = "lists//default.txt"
 load_dotenv()
@@ -23,7 +23,7 @@ geo_ip = geo_ip_recon()
 packet_analysis = PacketAnalysis()
 port_scanner = NetworkScanner()
 jwt_analyzer = JWTAnalyzer()
-sub_recon = sub_enum()
+sub_recon = SubEnum()
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -42,13 +42,12 @@ navigation_frame = customtkinter.CTkFrame(input_frame, width=100)
 navigation_frame.pack(side="left", fill="y")
 
 
-def application(attack, entry2, entry3, entry_ai, threads_val, entry5):
+def application(attack, entry2, entry3, entry_ai, entry5):
     try:
         target = entry2.get()
         profile = entry3.get() if entry3 else None
         save_loc = entry5.get() if entry5 else None
         ai_choices = entry_ai.get() if entry_ai else None
-        threads = threads_val.get() if threads_val else None
 
         if attack == 'geo':
             geo_output: str = geo_ip_recon.geoip(gkey, target)
@@ -88,10 +87,9 @@ def application(attack, entry2, entry3, entry_ai, threads_val, entry5):
             )
             output_save(output)
         elif attack == 'pcap':
-            packet_analysis.PacketAnalyzer(
-                cap_loc=target,
-                save_loc=save_loc,
-                max_workers=int(threads)
+            packet_analysis.perform_full_analysis(
+                pcap_path=target,
+                json_path=save_loc,
             )
             output_save("Done")
     except KeyboardInterrupt:
@@ -132,7 +130,6 @@ def select_frame_by_name(name):
 
     entry3 = None
     entry5 = None
-    threads_val = None
     if name == "nmap":
         entry3 = customtkinter.CTkEntry(master=frame, placeholder_text="Profile")
         entry3.pack(pady=12, padx=10)
@@ -142,15 +139,12 @@ def select_frame_by_name(name):
     elif name == "pcap":
         entry5 = customtkinter.CTkEntry(master=frame, placeholder_text="Save Location")
         entry5.pack(pady=12, padx=10)
-        threads_val = customtkinter.CTkEntry(master=frame, placeholder_text="Threads")
-        threads_val.pack(pady=12, padx=10)
 
     button = customtkinter.CTkButton(master=frame, text="Run", command=lambda: application(
         attack=name,
         entry2=entry2,
         entry3=entry3,
         entry_ai=entry_ai,
-        threads_val=threads_val,
         entry5=entry5
     ))
     button.pack(pady=12, padx=10)
