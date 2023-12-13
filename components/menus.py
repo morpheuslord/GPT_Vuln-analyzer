@@ -346,9 +346,8 @@ class Menus():
             table.add_column("Utility", style="green")
             table.add_row("1", "Set Target file location")
             table.add_row("2", "Set Output file location")
-            table.add_row("3", "Set Threads")
-            table.add_row("4", "Show options")
-            table.add_row("5", "Run Attack")
+            table.add_row("3", "Show options")
+            table.add_row("4", "Run Attack")
             table.add_row("q", "Quit")
             console.print(table)
             self.option = input("Enter your choice: ")
@@ -373,20 +372,9 @@ class Menus():
                     self.pcap_menu()
                 case "4":
                     clearscr()
-                    table1 = Table()
-                    table1.add_column("Options", style="cyan")
-                    table1.add_column("Value", style="green")
-                    table1.add_row("Target PCAP file", str(self.t))
-                    table1.add_row("Output location", str(self.output_loc))
-                    table1.add_row("Threads set", str(self.threads))
-                    print(Panel(table1))
-                    self.pcap_menu()
-                case "5":
-                    clearscr()
-                    packetanalysis.PacketAnalyzer(
-                        cap_loc=self.t,
-                        save_loc=self.output_loc,
-                        max_workers=self.threads
+                    packetanalysis.perform_full_analysis(
+                        pcap_path=self.t,
+                        json_path=self.output_loc,
                     )
                 case "q":
                     quit()

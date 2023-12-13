@@ -128,7 +128,7 @@ python gpt_vuln.py --target <IP/hostname/token> --attack dns
 python gpt_vuln.py --target <HOSTNAME> --attack sub
 
 # Specify target for Subdomain Enumeration no profile used custom list file
-python gpt_vuln.py --target <HOSTNAME> --attack sub --list <PATH to FILE>
+python gpt_vuln.py --target <HOSTNAME> --attack sub --sub_list <PATH to FILE>
 
 # Specify target for geolocation lookup
 python gpt_vuln.py --target <IP> --attack geo
@@ -144,6 +144,9 @@ python gpt_vuln.py --target <IP> --attack dns --ai llama /llama-api /bard / open
 
 # Specify the AI to be used for JWT analysis
 python gpt_vuln.py --target <token> --attack jwt --ai llama /llama-api /bard / openai <default>
+
+# Password Cracker
+python gpt_vuln.py --password_hash <HASH> --wordlist_file <FILE LOCATION> --algorithm <ALGO FROM THE HELP MENU> --parallel --complexity
 
 # Interactive step by step cli interface
 python gpt_vuln.py --menu True
@@ -600,6 +603,26 @@ Completed
 │ PacketAnalysis.EAPOL Data          │ []                                                                                                 │
 │ PacketAnalysis. Total Streams Data │ 126                                                                                                │
 └────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Password Cracker Output
+
+```
+  ________________________
+| GVA Usage in progress... |
+  ========================
+                        \
+                         \
+                           ^__^
+                           (oo)\_______
+                           (__)\       )\/\
+                               ||----w |
+                               ||     ||
+Cracking... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+╭────────────────────────────────────────────── The GVA Password Cracker  ──────────────────────────────────────────────╮      │                                                                                                                       │ │                                                                                                                       │
+│                                        Password Cracked! Password:  legion                                            │
+│                                                                                                                       │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 # Usage GUI

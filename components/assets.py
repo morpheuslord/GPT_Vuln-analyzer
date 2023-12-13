@@ -66,8 +66,6 @@ class Assets():
                       "The target of the user", "None")
         table.add_row("Domain List", "--list", "Path to text file",
                       "subdomain dictionary list", "Path")
-        table.add_row("Thread", "--thread", "INT",
-                      "Number of threads for PCAP analysis", "200 (Default)")
         table.add_row("Output", "--output", "Path to text file",
                       "Outputs the PCAP analysis", "Path")
         table.add_row("Profile", "--profile", "INT (1-13)",
@@ -262,14 +260,8 @@ class Assets():
                 console = Console()
                 console.print(table)
 
-# CTkTable Widget by Akascape
-# License: MIT
-# Author: Akash Bora
-
 
 class CTkTable(customtkinter.CTkFrame):
-    """ CTkTable Widget """
-
     def __init__(
             self,
             master: any,
