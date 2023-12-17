@@ -83,7 +83,7 @@ Menus(
 
 gui.application()
 ```
-
+`update for passcracker in the package and gui is still in progress.`
 ## Usage CLI
 
 - First Change the "OPENAI_API_KEY", "GEOIP_API_KEY" and "BARD_API_KEY" part of the code with OpenAI api key and the IPGeolocation API key in the `.env` file
