@@ -40,11 +40,11 @@ def parse_arguments():
     parser.add_argument('--sub_list', type=str, default=DEFAULT_LIST_LOC, help='Path to the subdomain list file (txt)')
     parser.add_argument('--output', type=str, default=DEFAULT_OUTPUT_LOC, help='Pcap analysis output file')
     parser.add_argument('--rich_menu', type=str, help='Shows a clean help menu using rich')
-    parser.add_argument('--menu', type=bool, default=False, help='Terminal Interactive Menu')
+    parser.add_argument('--menu', action='store_true', default=False, help='Terminal Interactive Menu')
     parser.add_argument('--ai', type=str, default='openai', help='AI options: openai, bard, llama, llama-api')
     parser.add_argument('--password_hash', help='Password hash')
     parser.add_argument('--wordlist_file', help='Wordlist File')
-    parser.add_argument('--algorithm', choices=hashlib.algorithms_guaranteed, required=True, help='Hash algorithm')
+    parser.add_argument('--algorithm', choices=hashlib.algorithms_guaranteed, help='Hash algorithm')
     parser.add_argument('--salt', help='Salt Value')
     parser.add_argument('--parallel', action='store_true', help='Use parallel processing')
     parser.add_argument('--complexity', action='store_true', help='Check for password complexity')
@@ -146,16 +146,15 @@ def main() -> None:
 
     cowsay.cow('GVA Usage in progress...')
     target = args.target or '127.0.0.1'
-
     try:
         if args.rich_menu == "help":
             asset_codes.help_menu()
-        elif args.menu:
+        elif args.menu is True:
             Menus(
-                lkey=api_keys['runpod_api_key'],
-                threads=args.threads,
-                output_loc=args.output,
-                lendpoint=api_keys['runpod_endpoint_id'],
+                lkey="",
+                threads=4,
+                output_loc="",
+                lendpoint="",
                 keyset="",
                 t="",
                 profile_num="",
@@ -164,7 +163,17 @@ def main() -> None:
                 bkey_set="",
                 ai_set_args="",
                 llamakey="",
-                llamaendpoint=""
+                llamaendpoint="",
+                password_hash="",
+                salt="",
+                wordlist_loc="",
+                algorithm="",
+                parallel_proc=True,
+                complexity=True,
+                min_length=1,
+                max_length=6,
+                char_set="abcdefghijklmnopqrstuvwxyz0123456789",
+                bforce=True
             )
         else:
             additional_params = {
@@ -180,7 +189,7 @@ def main() -> None:
                 'max_lenght': args.max_length,
                 'character_set': args.character_set,
                 'algorithm': args.algorithm,
-                'wordlist_file': args.wordlist_file
+                'wordlist_file': args.wordlist_file,
             }
             handle_attack(args.attack, target, args.ai, api_keys, additional_params)
     except KeyboardInterrupt:
