@@ -14,6 +14,7 @@ from components.models import DNS_AI_MODEL
 from components.models import JWT_AI_MODEL
 from components.subdomain import SubEnum
 from components.assets import Assets
+from components.passbeaker import PasswordCracker
 
 assets = Assets()
 dns_enum = DNSRecon()
@@ -466,7 +467,155 @@ class Menus():
         except KeyboardInterrupt:
             print(Panel("Exiting Program"))
 
-    def __init__(self, lkey, threads, output_loc, lendpoint, keyset, t, profile_num, ai_set, akey_set, bkey_set, ai_set_args, llamakey, llamaendpoint) -> None:
+    def str_to_bool(self, input_str):
+        return input_str.lower() in ('true', '1', 't', 'y', 'yes')
+
+    def hash_menu(self) -> None:
+        """
+            Password Hash: str
+            Salt: str
+            Wordlist File: str:loc
+            Algorithm: str
+            Parallel Processing: bool: True
+            Complexity: bool: True
+            Min Length: int:1
+            Max Length: int:6
+            Charecter Set: str:abcdefghijklmnopqrstuvwxyz0123456789
+            Bruteforce: bool:True
+            Attack
+            password_hash, salt, wordlist_loc, algorithm, parallel_proc, complexity, min_length, max_length, char_set, bforce
+        """
+        try:
+            self.char_set = "abcdefghijklmnopqrstuvwxyz0123456789"
+            self.min_length = 1
+            self.max_length = 6
+            table = Table()
+            table.add_column("Options", style="cyan")
+            table.add_column("Utility", style="green")
+            table.add_row("1", "Set Password Hash")
+            table.add_row("2", "Set Salt")
+            table.add_row("3", "Set Algorithm")
+            table.add_row("4", "Set Wordlist Loc")
+            table.add_row("5", "Set Parallel Proc")
+            table.add_row("6", "Set Complexity")
+            table.add_row("7", "Set Min Gen Length")
+            table.add_row("8", "Set Max Gen Length")
+            table.add_row("9", "Set Charecter Set")
+            table.add_row("10", "Set Attack Type")
+            table.add_row("11", "Show Options")
+            table.add_row("12", "Run Attack")
+            table.add_row("q", "Quit")
+            console.print(table)
+            self.option = input("Enter your choice: ")
+            match self.option:
+                case "1":
+                    clearscr()
+                    print(Panel("Set Password Hash Value"))
+                    self.password_hash = input("Enter Hash Value:  ")
+                    print(Panel(f"Hash Set: {self.password_hash}"))
+                    self.hash_menu()
+                case "2":
+                    clearscr()
+                    print(Panel("Set Salt Value"))
+                    self.salt = input("Enter Salt Value:  ")
+                    print(Panel(f"Salt Set: {self.salt}"))
+                    self.hash_menu()
+                case "3":
+                    clearscr()
+                    print(Panel("""
+                                Set Algorithm Value
+                                Select From: sha256,shake_128,sha3_224,sha1,sha224,sha512,blake2s,blake2b,md5,sha384,sha3_384,sha3_256,shake_256,sha3_512
+                                """))
+                    self.algorithm = input("Enter Algorithm Value:  ")
+                    print(Panel(f"Algorithm Set: {self.algorithm}"))
+                    self.hash_menu()
+                case "4":
+                    clearscr()
+                    print(Panel("Set Wordlist location"))
+                    self.wordlist_loc = input("Enter Wordlist location:  ")
+                    print(Panel(f"Wordlist Location Set: {self.wordlist_loc}"))
+                    self.hash_menu()
+                case "5":
+                    clearscr()
+                    print(Panel(f"Set Parallel Processing: Default value = {self.parallel_proc}"))
+                    self.parallel_proc = self.str_to_bool(input("Enter True/False:  "))
+                    print(Panel(f"Proccessing Option Set: {self.parallel_proc}"))
+                    self.hash_menu()
+                case "6":
+                    clearscr()
+                    print(Panel(f"Set Complexity: Default value = {self.complexity}"))
+                    self.complexity = self.str_to_bool(input("Enter True/False:  "))
+                    print(Panel(f"Complexity Set: {self.complexity}"))
+                    self.hash_menu()
+                case "7":
+                    clearscr()
+                    print(Panel(f"Set Min Password Gen value: Default value = {self.min_length}"))
+                    self.min_length = input("Enter Number:  ")
+                    print(Panel(f"Min value Set: {self.min_length}"))
+                    self.hash_menu()
+                case "8":
+                    clearscr()
+                    print(Panel(f"Set Max Password Gen value: Default value = {self.max_length}"))
+                    self.max_length = input("Enter Number:  ")
+                    print(Panel(f"Max Value Set: {self.max_length}"))
+                    self.hash_menu()
+                case "9":
+                    clearscr()
+                    print(Panel(f"Set Charecter Set value: Default value = {self.char_set}"))
+                    self.max_length = input("Enter Number:  ")
+                    print(Panel(f"Charecter Set: {self.max_length}"))
+                    self.hash_menu()
+                case "10":
+                    clearscr()
+                    print(Panel(f"Set Attack Type: Default value = {self.bforce}"))
+                    self.bforce = self.str_to_bool(input("Enter True/False:  "))
+                    print(Panel(f"Attack Type Set: {self.bforce}"))
+                    self.hash_menu()
+                case "11":
+                    clearscr()
+                    clearscr()
+                    table1 = Table()
+                    table1.add_column("Options", style="cyan")
+                    table1.add_column("Value", style="green")
+                    table1.add_row("Password hash", str(self.password_hash))
+                    table1.add_row("Salt", str(self.salt))
+                    table1.add_row("Algorithm", str(self.algorithm))
+                    table1.add_row("Wordlist Loc", str(self.wordlist_loc))
+                    table1.add_row("Parallel Proc", str(self.parallel_proc))
+                    table1.add_row("Complexity", str(self.complexity))
+                    table1.add_row("Min Gen Length", str(self.min_length))
+                    table1.add_row("Max Gen Length", str(self.max_length))
+                    table1.add_row("Charecter Set", str(self.char_set))
+                    table1.add_row("Attack Type", str(self.bforce))
+                    print(Panel(table1))
+                    self.hash_menu()
+                case "12":
+                    clearscr()
+                    self.parallel_proc = True if self.parallel_proc is None else self.parallel_proc
+                    self.complexity = True if self.complexity is None else self.complexity
+                    self.bforce = True if self.bforce is None else self.bforce
+                    print(self.parallel_proc)
+                    print(self.complexity)
+                    print(self.bforce)
+                    passcracker = PasswordCracker(
+                        password_hash=self.password_hash,
+                        wordlist_file=self.wordlist_loc,
+                        algorithm=self.algorithm,
+                        salt=self.salt,
+                        parallel=self.parallel_proc,
+                        complexity_check=self.complexity
+                    )
+                    if self.bforce is True:
+                        passcracker.crack_passwords_with_brute_force(self.min_length, self.max_length, self.char_set)
+                    elif self.bforce is False:
+                        passcracker.crack_passwords_with_wordlist()
+                    passcracker.print_statistics()
+                case "q":
+                    quit()
+        except KeyboardInterrupt:
+            print(Panel("Exiting Program"))
+
+    def __init__(self, lkey, threads, output_loc, lendpoint, keyset, t, profile_num, ai_set, akey_set, bkey_set, ai_set_args, llamakey, llamaendpoint, password_hash, salt, wordlist_loc, algorithm, parallel_proc, complexity, min_length, max_length, char_set, bforce) -> None:
         try:
             self.lkey = lkey
             self.threads = threads
@@ -481,6 +630,16 @@ class Menus():
             self.ai_set_args = ai_set_args
             self.llamakey = llamakey
             self.llamaendpoint = llamaendpoint
+            self.password_hash = password_hash
+            self.salt = salt
+            self.wordlist_loc = wordlist_loc
+            self.algorithm = algorithm
+            self.parallel_proc = parallel_proc
+            self.complexity = complexity
+            self.min_length = min_length
+            self.max_length = max_length
+            self.char_set = char_set
+            self.bforce = bforce
             table = Table()
             table.add_column("Options", style="cyan")
             table.add_column("Utility", style="green")
@@ -490,6 +649,7 @@ class Menus():
             table.add_row("4", "GEO-IP Enum")
             table.add_row("5", "JWT Analysis")
             table.add_row("6", "PCAP Analysis")
+            table.add_row("7", "Hash Cracker")
             table.add_row("q", "Quit")
             console.print(table)
             option = input("Enter your choice: ")
@@ -512,6 +672,9 @@ class Menus():
                 case "6":
                     clearscr()
                     self.pcap_menu()
+                case "7":
+                    clearscr()
+                    self.hash_menu()
                 case "q":
                     quit()
         except KeyboardInterrupt:

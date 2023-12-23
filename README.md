@@ -174,6 +174,7 @@ python gpt_vuln.py --menu True
 │ 4       │ GEO-IP Enum    │
 | 5       | JWT Analysis   |
 | 6       | PCAP Analysis  |
+| 6       | Hash Cracker   |
 │ q       │ Quit           │
 └─────────┴────────────────┘
 Enter your choice:
