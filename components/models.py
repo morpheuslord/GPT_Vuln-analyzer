@@ -4,6 +4,7 @@ from typing import Any
 from typing import Optional
 import openai
 import requests
+import ollama
 model_engine = "gpt-3.5-turbo-0613"
 
 
@@ -72,7 +73,6 @@ class DNS_AI_MODEL():
 
     @staticmethod
     def llama_AI(self, data: str, mode: str, lkey, lendpoint):
-        api_url = 'http://localhost:5000/api/chatbot'
 
         user_instruction = """
             Do a DNS scan analysis on the provided DNS scan information. The DNS output must return in a asked format accorging to the provided output format. The data must be accurate in regards towards a pentest report.
@@ -102,15 +102,13 @@ class DNS_AI_MODEL():
             DNS Data to be analyzed: {data}
         """
 
-        model_name = "TheBloke/Llama-2-7B-Chat-GGML"
-        file_name = "llama-2-7b-chat.ggmlv3.q4_K_M.bin"
         if mode == "local":
-            bot_response = self.chat_with_api(api_url, user_message, user_instruction, model_name, file_name)
+            loc_prompt = f"[INST] <<SYS>> {user_instruction}<</SYS>> NMAP Data to be analyzed: {user_message} [/INST]"
+            returnval = ollama.generate(model='llama2', prompt=loc_prompt)
+            bot_response = returnval['response']
         elif mode == "runpod":
             prompt = f"[INST] <<SYS>> {user_instruction}<</SYS>> NMAP Data to be analyzed: {user_message} [/INST]"
             bot_response = self.llama_runpod_api(prompt, lkey, lendpoint)
-        bot_response = self.chat_with_api(api_url, user_message, user_instruction, model_name, file_name)
-        print("test")
         if bot_response:
             return bot_response
 
@@ -154,9 +152,7 @@ class DNS_AI_MODEL():
         DNS Data to be analyzed: {analyze}
         """
         try:
-            # A structure for the request
             messages = [{"content": prompt, "role": "user"}]
-            # A structure for the request
             response = openai.ChatCompletion.create(
                 model=model_engine,
                 messages=messages,
@@ -223,8 +219,6 @@ class NMAP_AI_MODEL():
 
     @staticmethod
     def Llama_AI(data: str, mode: str, lkey: str, lendpoint: str) -> Any:
-        api_url = 'http://localhost:5000/api/chatbot'
-
         user_instruction = """
         Do a NMAP scan analysis on the provided NMAP scan information. The NMAP output must return in a asked format accorging to the provided output format. The data must be accurate in regards towards a pentest report.
         The data must follow the following rules:
@@ -256,10 +250,11 @@ class NMAP_AI_MODEL():
         user_message = f"""
             NMAP Data to be analyzed: {data}
         """
-        model_name = "TheBloke/Llama-2-7B-Chat-GGML"
-        file_name = "llama-2-7b-chat.ggmlv3.q4_K_M.bin"
+
         if mode == "local":
-            bot_response = chat_with_api(api_url, user_message, user_instruction, model_name, file_name)
+            loc_prompt = f"[INST] <<SYS>> {user_instruction}<</SYS>> NMAP Data to be analyzed: {user_message} [/INST]"
+            returnval = ollama.generate(model='llama2', prompt=loc_prompt)
+            bot_response = returnval['response']
         elif mode == "runpod":
             prompt = f"[INST] <<SYS>> {user_instruction}<</SYS>> NMAP Data to be analyzed: {user_message} [/INST]"
             bot_response = llama_runpod_api(prompt, lkey, lendpoint)

@@ -8,10 +8,9 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 - All the packages mentioned in the requirements.txt file
 - OpenAI API
 - Bard API (MakerSuite Palm)
-- llama.cpp
 - Runpod serverless endpoint
-- HuggingFace token (with llama2 access )
 - IPGeolocation API
+- Docker
 - Wireshark and tshark (both added to path)
 
 ## Usage Package
@@ -396,7 +395,7 @@ For you to use Bard AI you must sign up to the MakerSuit Palm API for developer 
 
 Once the API is acquired just add it to the `.env` file and you are good to go.
 
-## Using LLama2 AI
+## Old LLama2 Implementation
 
 Using LLama2 is one of the best offline and free options out there. It is currently under improvement I am working on a prompt that will better incorporate cybersecurity perspective into the AI.
 I have to thank **@thisserand** and his [llama2_local](https://github.com/thisserand/llama2_local) repo and also his YT video [YT_Video](https://youtu.be/WzCS8z9GqHw). They were great resources. To be frank the llama2 code is 95% his, I just yanked the code and added a Flask API functionality to it.
@@ -446,6 +445,10 @@ The instructions looks like this:
 Using the instruction set and the data provided via the prompt the llama AI generates its output.
 
 For the most usage I suggest you create a runpod serverless endpoint deployment of llama you can refer to this tutorial for that [tutorial](https://www.youtube.com/watch?v=Ftb4vbGUr7U). Follow the tutorial for better use.
+
+### Llama2 Ollama
+
+In this latest update uses ollama docker image to implement the localized llama system and also this also increases the accuracy of the output for some reason maybe due to better configuration or something. I wont go into much detail about this but I will be working on the GPU intigration part of the code for this so that we can add GPU power to the processing and make it more efficient. Thanks to @andr6 for starting the discussion, if anyone has better understanding on this implementation feel free to improvise and create a PR.
 
 ### Output
 

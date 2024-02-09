@@ -141,9 +141,10 @@ def handle_attack(attack_type, target, ai, api_keys, additional_params=None):
 
 
 def main() -> None:
+    asset_codes.run_docker_container()
     args = parse_arguments()
     api_keys = get_api_keys()
-
+    asset_codes.clearscr()
     cowsay.cow('GVA Usage in progress...')
     target = args.target or '127.0.0.1'
     try:
