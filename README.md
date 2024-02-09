@@ -327,11 +327,11 @@ The instructions looks like this:
 
 Using the instruction set and the data provided via the prompt the llama AI generates its output.
 
-For the most usage I suggest you create a runpod serverless endpoint deployment of llama you can refer to this tutorial for that [tutorial](https://www.youtube.com/watch?v=Ftb4vbGUr7U). Follow the tutorial for better use.
+For the most usage I suggest you create a runpod serverless endpoint deployment of llama you can refer to this tutorial for that [tutorial](https://www.youtube.com/watch?v=Ftb4vbGUr7U). You can follow the tutorial for better use.
 
 ### Llama2 Ollama
 
-In this latest update uses ollama docker image to implement the localized llama system and also this also increases the accuracy of the output for some reason maybe due to better configuration or something. I wont go into much detail about this but I will be working on the GPU intigration part of the code for this so that we can add GPU power to the processing and make it more efficient. Thanks to @andr6 for starting the discussion, if anyone has better understanding on this implementation feel free to improvise and create a PR.
+This latest update uses an ollama docker image to implement the localized llama system and this increases the accuracy of the output for some reason maybe due to better configuration or something. I won't go into much detail about this but I will be working on the GPU integration part of the code for this so that we can add GPU power to the processing and make it more efficient. Thanks to @andr6 for starting the discussion, if anyone has a better understanding of this implementation feel free to improvise and create a PR.
 
 ### Output
 
