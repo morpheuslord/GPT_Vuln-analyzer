@@ -3,7 +3,7 @@ import copy
 import json
 import os
 import platform
-import subprocess
+import docker
 from typing import Any
 from rich import print
 from rich.console import Console
@@ -18,7 +18,7 @@ console = Console()
 
 
 class Assets():
-    def clearscr() -> None:
+    def clearscr(self) -> None:
         try:
             osp = platform.system()
             match osp:
@@ -31,17 +31,6 @@ class Assets():
         except Exception:
             pass
 
-    def start_api_app():
-        CREATE_NEW_CONSOLE = 0x00000010
-        osp = platform.system()
-        match osp:
-            case 'Darwin':
-                subprocess.Popen(["python3", "llama_api.py"])
-            case 'Linux':
-                subprocess.Popen(["python3", "llama_api.py"])
-            case 'Windows':
-                subprocess.Popen(["python", "llama_api.py"], creationflags=CREATE_NEW_CONSOLE)
-
     def flatten_json(self, data: Any, separator: Any = '.') -> Any:
         flattened_data = {}
         for key, value in data.items():
@@ -52,6 +41,33 @@ class Assets():
             else:
                 flattened_data[key] = value
         return flattened_data
+
+    def run_docker_container(self):
+        client = docker.from_env()
+
+        image_name = "ollama/ollama"
+        container_name = "ollama"
+        volume_mapping = {"/path/to/ollama": {"bind": "/root/.ollama", "mode": "rw"}}
+        port_mapping = {"11434/tcp": 11434}
+
+        try:
+            client.images.pull(image_name)
+            container = client.containers.run(
+                image=image_name,
+                name=container_name,
+                volumes=volume_mapping,
+                ports=port_mapping,
+                detach=True,
+                auto_remove=True
+            )
+            print(f"Container '{container.id}' is running in background.")
+
+        except docker.errors.ImageNotFound:
+            print(f"Image '{image_name}' not found.")
+        except docker.errors.APIError as api_error:
+            print(f"Docker API error: {api_error}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
 
     def help_menu() -> None:
         table = Table(title="Help Menu for GVA")

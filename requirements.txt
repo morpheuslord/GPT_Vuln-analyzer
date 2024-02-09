@@ -22,5 +22,5 @@ python-dotenv==1.0.0
 transformers==4.31.0
 langchain==0.0.237
 gradio==3.37.0
-llama-cpp-python==0.1.73
 fire==0.5.0
+docker==6.1.3
