@@ -1,25 +1,31 @@
-from rich import print
-from subprocess import run, PIPE, STDOUT
-from concurrent.futures import ThreadPoolExecutor
-from typing import Any
-from rich.console import Console
-from rich.table import Table
 import json
 import re
 import platform
+from subprocess import run, PIPE, STDOUT
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any
+from rich import print
+from rich.console import Console
+from rich.table import Table
+import shlex  # For argument sanitization
+
+console = Console()
 
 
 class PacketAnalysis:
     tshark_loc = ""
     services = []
     tcp_streams = []
-    sources = []
-    destinations = []
-    resolved = []
+    source_addresses = []
+    destination_addresses = []
+    resolved_sources = []
     dns_query_names = []
     dns_resp_names = []
     unique_eapol_data = []
     combined_json = []
+
+    def __init__(self):
+        self.detect_tshark()
 
     def detect_tshark(self) -> None:
         try:
@@ -52,9 +58,8 @@ class PacketAnalysis:
                 service = tcp_layer.get('tcp.srcport')
                 if service:
                     services.add(service)
-            if tcp_layer:
                 tcp_stream_val = tcp_layer.get('tcp.stream')
-                if service:
+                if tcp_stream_val:
                     tcp_streams.add(tcp_stream_val)
 
             ip_layer = layers.get('ip', {})
@@ -109,7 +114,12 @@ class PacketAnalysis:
         self.unique_eapol_data = list(unique_eapol_data)
 
     def run_tshark_command(self, service, source, streams):
-        stream_cmd = f'{self.tshark_loc} -r test.pcap -q -z follow,tcp,raw,{streams} -Y "ip.addr=={source} and tcp.port=={service}"'
+        # Sanitize arguments to prevent command injection
+        sanitized_service = shlex.quote(str(service))
+        sanitized_source = shlex.quote(str(source))
+        sanitized_streams = shlex.quote(str(streams))
+
+        stream_cmd = f'{self.tshark_loc} -r test.pcap -q -z follow,tcp,raw,{sanitized_streams} -Y "ip.addr=={sanitized_source} and tcp.port=={sanitized_service}"'
         runner = run(stream_cmd, shell=True, stdout=PIPE, stderr=STDOUT, text=True)
         output_lines = runner.stdout.splitlines()
         node_regex = re.compile(r'Node (\d+): (.+)$')
@@ -154,26 +164,32 @@ class PacketAnalysis:
         results = [result for result in results if result]
         self.combined_json = results
 
-    def PacketAnalyzer(self, cap_loc, save_loc, max_workers):
-        self.detect_tshark()
+    def perform_full_analysis(self, pcap_path, json_path, max_workers=20):
         print('Collecting Json Data')
-        raw_pcap = run(f"{self.tshark_loc} -r {cap_loc} -T json", shell=True, capture_output=True, text=True)
+
+        # Sanitize pcap_path to prevent command injection
+        sanitized_pcap_path = shlex.quote(pcap_path)
+
+        raw_pcap = run(f"{self.tshark_loc} -r {sanitized_pcap_path} -T json", shell=True, capture_output=True, text=True)
         try:
             raw_data = raw_pcap.stdout
             json_data = json.loads(raw_data)
         except json.JSONDecodeError as e:
             print(f"Error decoding JSON: {e}")
             json_data = []
+
         print('Extracting IP details...')
         print('Extracting DNS details...')
         print('Extracting EAPOL details...')
         self.extract_network_info(json_data)
+
         print('Extracting TCP STREAMS details...')
         print('TCP streams can take some time..')
         self.stream(service_list=self.services,
                     source_list=self.source_addresses,
                     tcp_streams_list=self.tcp_streams,
                     max_workers=max_workers)
+
         print("Completed")
         filtered_stream_data = self.combined_json
         values = {
@@ -182,7 +198,7 @@ class PacketAnalysis:
                 "TCP Streams": self.tcp_streams,
                 "Sources Address": self.source_addresses,
                 "Destination Address": self.destination_addresses,
-                "DNS Resolved": self.resolved,
+                "DNS Resolved": self.resolved_sources,
                 "DNS Query": self.dns_query_names,
                 "DNS Response": self.dns_resp_names,
                 "EAPOL Data": self.unique_eapol_data,
@@ -195,7 +211,7 @@ class PacketAnalysis:
                 "TCP Streams": self.tcp_streams,
                 "Sources Address": self.source_addresses,
                 "Destination Address": self.destination_addresses,
-                "DNS Resolved": self.resolved,
+                "DNS Resolved": self.resolved_sources,
                 "DNS Query": self.dns_query_names,
                 "DNS Response": self.dns_resp_names,
                 "EAPOL Data": self.unique_eapol_data,
@@ -214,5 +230,5 @@ class PacketAnalysis:
 
         console = Console()
         console.print(table)
-        with open(f'{save_loc}', 'w+') as file:
+        with open(f'{json_path}', 'w+') as file:
             file.write(str(json.dumps(values)))
