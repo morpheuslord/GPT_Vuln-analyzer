@@ -6,16 +6,16 @@ import cowsay
 from dotenv import load_dotenv
 from rich.console import Console
 
-from components.ai_providers import AIEngine, PROVIDER_CLASSES, config_from_keys, normalize_selection
-from components.assets import Assets
-from components.dns_recon import DNSRecon
-from components.geo import geo_ip_recon
-from components.jwt import JWTAnalyzer
-from components.menus import Menus
-from components.packet_analysis import PacketAnalysis
-from components.passbeaker import PasswordCracker
-from components.port_scanner import NetworkScanner
-from components.subdomain import SubEnum
+from GVA.ai_providers import AIEngine, PROVIDER_CLASSES, config_from_keys, normalize_selection
+from GVA.assets import Assets
+from GVA.dns_recon import DNSRecon
+from GVA.geo import geo_ip_recon
+from GVA.jwt import JWTAnalyzer
+from GVA.menus import Menus
+from GVA.packet_analysis import PacketAnalysis
+from GVA.passbeaker import PasswordCracker
+from GVA.port_scanner import NetworkScanner
+from GVA.subdomain import SubEnum
 
 CURRENT_DIR = os.getcwd()
 DEFAULT_OUTPUT_LOC = os.path.join(CURRENT_DIR, 'outputs', 'output.json')

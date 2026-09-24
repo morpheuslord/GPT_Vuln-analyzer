@@ -1,0 +1,35 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments & secrets
+.env
+.venv/
+venv/
+env/
+
+# Packaging / build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# uv
+.uv/
+
+# Tooling caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Runtime output
+outputs/*.json
+
+# Editor
+.vscode/
+.idea/
+
+# Claude Code local files (never upload)
+.claude/
+MEMORY.md

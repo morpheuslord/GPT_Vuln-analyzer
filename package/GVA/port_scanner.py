@@ -3,7 +3,7 @@ from typing import Iterable, Optional
 
 from rich.console import Console
 
-from components.ai_providers import AIEngine, AnalysisReport
+from GVA.ai_providers import AIEngine, AnalysisReport
 
 console = Console()
 

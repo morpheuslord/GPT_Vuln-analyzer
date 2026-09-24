@@ -3,6 +3,7 @@ import json
 from dotenv import load_dotenv
 import customtkinter
 import os
+from components.ai_providers import AIEngine, AnalysisReport, PROVIDER_CLASSES, config_from_keys, normalize_selection
 from components.dns_recon import DNSRecon
 from components.geo import geo_ip_recon
 from components.port_scanner import NetworkScanner
@@ -13,10 +14,6 @@ from components.subdomain import SubEnum
 list_loc = "lists//default.txt"
 load_dotenv()
 gkey = os.getenv('GEOIP_API_KEY')
-akey = os.getenv('OPENAI_API_KEY')
-bkey = os.getenv('BARD_API_KEY')
-lkey = os.getenv('RUNPOD_API_KEY')
-lendpoint = os.getenv('RUNPOD_ENDPOINT_ID')
 
 dns_enum = DNSRecon()
 geo_ip = geo_ip_recon()
@@ -24,6 +21,14 @@ packet_analysis = PacketAnalysis()
 port_scanner = NetworkScanner()
 jwt_analyzer = JWTAnalyzer()
 sub_recon = SubEnum()
+engine = AIEngine(config_from_keys(
+    openai_key=os.getenv('OPENAI_API_KEY'),
+    anthropic_key=os.getenv('ANTHROPIC_API_KEY'),
+    gemini_key=os.getenv('GEMINI_API_KEY') or os.getenv('BARD_API_KEY'),
+    runpod_key=os.getenv('RUNPOD_API_KEY'),
+    runpod_endpoint=os.getenv('RUNPOD_ENDPOINT_ID'),
+))
+AI_PROVIDER_CHOICES = [*PROVIDER_CLASSES, "all"]
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -42,49 +47,30 @@ navigation_frame = customtkinter.CTkFrame(input_frame, width=100)
 navigation_frame.pack(side="left", fill="y")
 
 
-def application(attack, entry2, entry3, entry_ai, entry5):
+def application(attack, entry2, entry3, entry_ai, entry5=None):
     try:
         target = entry2.get()
         profile = entry3.get() if entry3 else None
         save_loc = entry5.get() if entry5 else None
         ai_choices = entry_ai.get() if entry_ai else None
 
+        providers = normalize_selection(ai_choices) if ai_choices else ['openai']
+
         if attack == 'geo':
-            geo_output: str = geo_ip_recon.geoip(gkey, target)
+            geo_output: str = geo_ip.geoip(gkey, target)
             output_save(str(geo_output))
         elif attack == 'nmap':
             p1_out = port_scanner.scanner(
-                ip=target,
-                profile=int(profile) if profile else None,
-                akey=akey,
-                bkey=bkey,
-                lkey=lkey,
-                lendpoint=lendpoint,
-                AI=ai_choices
-            )
+                target, int(profile) if profile else 1, engine, providers)
             output_save(p1_out)
         elif attack == 'dns':
-            dns_output: str = dns_enum.dns_resolver(
-                target=target,
-                akey=akey,
-                bkey=bkey,
-                lkey=lkey,
-                lendpoint=lendpoint,
-                AI=ai_choices
-            )
+            dns_output = dns_enum.dns_resolver(target, engine, providers)
             output_save(dns_output)
         elif attack == 'sub':
             sub_output: str = sub_recon.sub_enumerator(target, list_loc)
             output_save(sub_output)
         elif attack == 'jwt':
-            output: str = jwt_analyzer.analyze(
-                token=target,
-                openai_api_token=akey,
-                bard_api_token=bkey,
-                llama_api_token=lkey,
-                llama_endpoint=lendpoint,
-                AI=ai_choices
-            )
+            output = jwt_analyzer.analyze(target, engine, providers)
             output_save(output)
         elif attack == 'pcap':
             packet_analysis.perform_full_analysis(
@@ -96,15 +82,27 @@ def application(attack, entry2, entry3, entry_ai, entry5):
         print("Keyboard Interrupt detected ...")
 
 
-def output_save(output: str) -> None:
+def output_save(output) -> None:
+    output_textbox.delete("1.0", "end")
     if output == "Done":
-        output_data = "Status: Successful"
-        output_textbox.insert("1.0", output_data)
-    else:
-        output_textbox.delete("1.0", "end")
-        json_data = json.loads(output)
-        formatted_json = json.dumps(json_data, indent=2)
-        output_textbox.insert("1.0", formatted_json)
+        output_textbox.insert("1.0", "Status: Successful")
+        return
+    if isinstance(output, AnalysisReport):
+        # Show the consolidated (deliberated) report, or the single result.
+        display = {}
+        if output.errors:
+            display["errors"] = output.errors
+        if output.consolidated is not None:
+            display["consolidated"] = output.consolidated
+            display["individual"] = output.individual
+        elif output.individual:
+            display.update(output.individual)
+        output_textbox.insert("1.0", json.dumps(display, indent=2))
+        return
+    try:
+        output_textbox.insert("1.0", json.dumps(json.loads(output), indent=2))
+    except (json.JSONDecodeError, TypeError):
+        output_textbox.insert("1.0", str(output))
 
 
 def select_frame_by_name(name):
@@ -121,8 +119,7 @@ def select_frame_by_name(name):
     entry2.pack(pady=12, padx=10)
 
     if name in ["nmap", "dns", "jwt"]:
-        ai_choices_val = ["openai", "bard", "llama-api"]
-        entry_ai = customtkinter.CTkComboBox(master=frame, values=ai_choices_val, state="readonly")
+        entry_ai = customtkinter.CTkComboBox(master=frame, values=AI_PROVIDER_CHOICES, state="readonly")
         entry_ai.set("Select AI Input")
         entry_ai.pack(pady=12, padx=10)
     else:
@@ -169,8 +166,7 @@ label = customtkinter.CTkLabel(master=frame, text="GVA System")
 label.pack(pady=12, padx=10)
 entry2 = customtkinter.CTkEntry(master=frame, placeholder_text="Target")
 entry2.pack(pady=12, padx=10)
-ai_choices = ["openai", "bard", "llama-api"]
-entry_ai = customtkinter.CTkComboBox(master=frame, values=ai_choices, state="readonly")
+entry_ai = customtkinter.CTkComboBox(master=frame, values=AI_PROVIDER_CHOICES, state="readonly")
 entry_ai.set("Select AI Input")
 entry_ai.pack(pady=12, padx=10)
 entry3 = customtkinter.CTkEntry(master=frame, placeholder_text="Profile (Only Nmap)")

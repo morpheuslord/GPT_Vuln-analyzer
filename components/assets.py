@@ -9,10 +9,8 @@ from rich import print
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from rich.console import Group
-from rich.align import Align
-from rich import box
-from rich.markdown import Markdown
+
+from components.ai_providers import PROVIDER_CLASSES
 
 console = Console()
 
@@ -69,212 +67,80 @@ class Assets():
         except Exception as e:
             print(f"Unexpected error: {e}")
 
-    def help_menu() -> None:
+    def help_menu(self) -> None:
+        providers = ", ".join(PROVIDER_CLASSES)
         table = Table(title="Help Menu for GVA")
         table.add_column("Options", style="cyan")
         table.add_column("Input Type", style="green")
         table.add_column("Argument Input", style="green")
-        table.add_column("Discription", style="green")
+        table.add_column("Description", style="green")
         table.add_column("Other internal options", style="green")
         table.add_row("Attack", "--attack", "TXT/STRING",
-                      "The Attack the user whats to run", "sub / dns / nmap / geo/ jwt/ pcap")
+                      "The attack the user wants to run", "sub / dns / nmap / geo / jwt / pcap / passcracker")
         table.add_row("Target", "--target", "IP/HOSTNAME/TOKEN/PCAP-FILE",
                       "The target of the user", "None")
-        table.add_row("Domain List", "--list", "Path to text file",
+        table.add_row("Domain List", "--sub_list", "Path to text file",
                       "subdomain dictionary list", "Path")
         table.add_row("Output", "--output", "Path to text file",
                       "Outputs the PCAP analysis", "Path")
         table.add_row("Profile", "--profile", "INT (1-13)",
-                      "The type of Nmap Scan the user intends", "None")
-        table.add_row("AI", "--ai", "STRING",
-                      "Choose your AI of choice", "/ LLAMA (RUNPOD OR LOCAL) /bard / openai (default)")
+                      "The type of Nmap scan the user intends", "None")
+        table.add_row("AI", "--ai", "STRING (comma-separated)",
+                      "One or more AI providers, or 'all'", f"{providers}, all")
         table.add_row("menu", "--menu", "BOOL",
                       "Interactive UI menu", "True / False (Default)")
-        table.add_row("Rich Help", "--r", "STRING",
-                      "Pritty Help menu", "help")
+        table.add_row("Rich Help", "--rich_menu", "STRING",
+                      "Pretty help menu", "help")
         console.print(table)
 
-    def print_output(self, attack_type: str, jdata: str, ai: str) -> Any:
-        jdata = str(jdata)
-        match attack_type:
-            case "Nmap":
-                match ai:
-                    case 'openai':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
+    def _render_table(self, title: str, data: dict) -> None:
+        table = Table(title=title, show_header=True, header_style="bold magenta")
+        table.add_column("Variables", style="cyan")
+        table.add_column("Results", style="green")
+        for key, value in self.flatten_json(data, separator='.').items():
+            table.add_row(str(key), str(value))
+        console.print(table)
 
-                        for key, value in data.items():
-                            val = str(value)
-                            table.add_row(key, str(val))
-                        print(table)
-                    case 'bard':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
+    def _render_error(self, title: str, message: str) -> None:
+        console.print(Panel(str(message), title=f"[b red]{title}", border_style="red"))
 
-                        for key, value in data.items():
-                            val = str(value)
-                            table.add_row(key, str(val))
-                        print(table)
-                    case 'llama':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-                    case 'llama-api':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-            case "JWT":
-                match ai:
-                    case 'openai':
-                        try:
-                            data = json.loads(jdata)
-                        except json.JSONDecodeError as e:
-                            print("Error decoding JSON: ", e)
-                            print("JSON data received: ", jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
+    def _provider_label(self, key: str) -> str:
+        return PROVIDER_CLASSES[key].label if key in PROVIDER_CLASSES else key
 
-                        for key, value in data.items():
-                            table.add_row(str(key), str(value))
-                        print(table)
-                    case 'bard':
-                        try:
-                            data = json.loads(jdata)
-                        except json.JSONDecodeError as e:
-                            print("Error decoding JSON: ", e)
-                            print("JSON data received: ", jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
+    def render_analysis(self, attack_type: str, report, show_individual: bool = False) -> None:
+        """Render an :class:`AnalysisReport`.
 
-                        for key, value in data.items():
-                            table.add_row(str(key), str(value))
-                        print(table)
-                    case 'llama':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-                    case 'llama-api':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-            case "DNS":
-                match ai:
-                    case 'openai':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
+        Multiple models are reconciled into one consolidated report; that is what
+        is shown by default. Pass ``show_individual`` to also print each model's
+        own analysis. A single model just shows its result.
+        """
+        for source, message in report.errors.items():
+            self._render_error(f"GVA {attack_type} — {self._provider_label(source)}", message)
 
-                        for key, value in data.items():
-                            val = str(value)
-                            table.add_row(key, str(val))
-                        print(table)
-                    case 'bard':
-                        data = json.loads(jdata)
-                        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
-                        table.add_column("Variables", style="cyan")
-                        table.add_column("Results", style="green")
+        if report.consolidated is not None:
+            contributors = ", ".join(self._provider_label(k) for k in report.contributors)
+            summarizer = self._provider_label(report.summarizer) if report.summarizer else "?"
+            self._render_table(
+                f"GVA {attack_type} Report — Consolidated (by {summarizer} from {contributors})",
+                report.consolidated,
+            )
+            if show_individual:
+                for key, data in report.individual.items():
+                    self._render_table(f"  ↳ {attack_type} — {self._provider_label(key)}", data)
+        elif len(report.individual) == 1:
+            key, data = next(iter(report.individual.items()))
+            self._render_table(f"GVA {attack_type} Report — {self._provider_label(key)}", data)
+        elif not report.individual and not report.errors:
+            self._render_error(f"GVA {attack_type}", "No results returned.")
 
-                        for key, value in data.items():
-                            val = str(value)
-                            table.add_row(key, str(val))
-                        print(table)
-                    case 'llama':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-                    case 'llama-api':
-                        ai_out = Markdown(jdata)
-                        message_panel = Panel(
-                            Align.center(
-                                Group("\n", Align.center(ai_out)),
-                                vertical="middle",
-                            ),
-                            box=box.ROUNDED,
-                            padding=(1, 2),
-                            title="[b red]The GVA LLama2",
-                            border_style="blue",
-                        )
-                        print(message_panel)
-            case "GeoIP":
-                data = json.loads(jdata)
-                table = Table(title="GVA Report for GeoIP", show_header=True, header_style="bold magenta")
-                table.add_column("Identifiers", style="cyan")
-                table.add_column("Data", style="green")
-
-                flattened_data: dict = self.flatten_json(data, separator='.')
-
-                for key, value in flattened_data.items():
-                    value_str = str(value)
-                    table.add_row(key, value_str)
-
-                console = Console()
-                console.print(table)
-            case "PCAP":
-                data = json.loads(jdata)
-                table = Table(title="GVA Report for PCAP", show_header=True, header_style="bold magenta")
-                table.add_column("Identifiers", style="cyan")
-                table.add_column("Data", style="green")
-
-                flattened_data: dict = self.flatten_json(data, separator='.')
-
-                for key, value in flattened_data.items():
-                    value_str = str(value)
-                    table.add_row(key, str(value_str))
-
-                console = Console()
-                console.print(table)
+    def render_report(self, attack_type: str, jdata: str) -> None:
+        """Render a single non-AI report (GeoIP, PCAP)."""
+        try:
+            data = json.loads(str(jdata))
+        except (json.JSONDecodeError, TypeError):
+            self._render_error(f"GVA {attack_type} Report", jdata)
+            return
+        self._render_table(f"GVA {attack_type} Report", data)
 
 
 class CTkTable(customtkinter.CTkFrame):

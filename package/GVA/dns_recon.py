@@ -1,72 +1,34 @@
-from typing import Any, Optional
+from typing import Dict, Iterable
+
 import requests
-import dns.resolver as dns_resolver_module
-from rich.progress import track
+from rich import print
+
+from GVA.ai_providers import AIEngine
+
+HACKERTARGET = "https://api.hackertarget.com"
 
 
 class DNSRecon:
-    def dns_resolver(self, AIModels, target: str, akey: Optional[str], bkey: Optional[str], lkey, lendpoint, AI: str) -> Any:
-        if target is not None:
-            pass
-        else:
+    def gather(self, target: str) -> str:
+        """Collect DNS, reverse-DNS and zone-transfer data for ``target``."""
+        if not target:
             raise ValueError("InvalidTarget: Target Not Provided")
-        analyze = ''
-        # The DNS Records to be enumerated
-        record_types = ['A', 'AAAA', 'NS', 'CNAME', 'MX', 'PTR', 'SOA', 'TXT']
-        for record_type in track(record_types):
-            try:
-                answer = dns_resolver_module.resolve(target, record_type)
-                for server in answer:
-                    st = server.to_text()
-                    analyze += f"\n{record_type} : {st}"
-            except dns_resolver_module.NoAnswer:
-                print('No record Found')
-                pass
-            except dns_resolver_module.NXDOMAIN:
-                print('NXDOMAIN record NOT Found')
-                pass
-            except dns_resolver_module.LifetimeTimeout:
-                print("Timed out, check your internet")
-                pass
-            except requests.exceptions.InvalidHeader:
-                pass
-            except KeyboardInterrupt:
-                print("Bye")
-                quit()
+        try:
+            print("✅ Domain Name Scanned")
+            domain_scan = requests.get(f"{HACKERTARGET}/dnslookup/?q={target}", timeout=30)
+            print("✅ Reverse DNS Scanned")
+            reverse_dns = requests.get(f"{HACKERTARGET}/reversedns/?q={target}", timeout=30)
+            print("✅ Zone Transfer Scanned")
+            zone_transfer = requests.get(f"{HACKERTARGET}/zonetransfer/?q={target}", timeout=30)
+        except requests.RequestException as exc:
+            print(f"❌ DNS request error: {exc}")
+            return ""
+        return (
+            f"Domain Names:\n{domain_scan.text}\n\n"
+            f"Reverse Dns:\n{reverse_dns.text}\n\n"
+            f"Zone Transfer:\n{zone_transfer.text}\n"
+        )
 
-        response = ""
-        match AI:
-            case 'openai':
-                try:
-                    if akey is not None:
-                        # Clean up Bearer token from newline characters
-                        akey = akey.replace('\n', '')
-                    else:
-                        raise ValueError("KeyNotFound: Key Not Provided")
-                    response = AIModels.gpt_ai(akey, analyze)
-                except KeyboardInterrupt:
-                    print("Bye")
-                    quit()
-            case 'bard':
-                try:
-                    if bkey is not None:
-                        bkey = bkey.replace('\n', '')
-                    else:
-                        raise ValueError("KeyNotFound: Key Not Provided")
-                    response = AIModels.BardAI(bkey, analyze)
-                except KeyboardInterrupt:
-                    print("Bye")
-                    quit()
-            case 'llama':
-                try:
-                    response = AIModels.llama_AI(analyze, "local", lkey, lendpoint)
-                except KeyboardInterrupt:
-                    print("Bye")
-                    quit()
-            case 'llama-api':
-                try:
-                    response = AIModels.llama_AI(analyze, "runpod", lkey, lendpoint)
-                except KeyboardInterrupt:
-                    print("Bye")
-                    quit()
-        return str(response)
+    def dns_resolver(self, target: str, engine: AIEngine, providers: Iterable[str]) -> Dict[str, str]:
+        data = self.gather(target)
+        return engine.run("dns", data, providers)
