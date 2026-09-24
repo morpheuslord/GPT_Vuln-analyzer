@@ -5,13 +5,27 @@ This is a Proof Of Concept application that demostrates how AI can be used to ge
 ## Requirements
 
 - Python 3.10 or above
-- All the packages mentioned in the requirements.txt file
-- OpenAI API
-- Bard API (MakerSuite Palm)
-- Runpod serverless endpoint
-- IPGeolocation API
-- Docker
-- Wireshark and tshark (both added to path)
+- Dependencies from `pyproject.toml` (managed with `uv`) or `requirements.txt`
+- An API key for at least one AI provider: OpenAI, Anthropic, and/or Google Gemini (Ollama runs locally, no key)
+- IPGeolocation API (for `geo`)
+- The `nmap` program installed and on PATH (for the `nmap` attack)
+- Wireshark / tshark on PATH (for `pcap`)
+- Docker (only if you use the local Ollama provider)
+
+### nmap notes
+
+The `nmap` attack shells out to the system `nmap` binary via `python-nmap`, so nmap must
+be installed and runnable:
+
+- **Default profile 1 uses `-O` (OS detection), which requires root** — run with `sudo`, or
+  pick a non-privileged profile such as `--profile 11` (top 100 ports) or `--profile 13`.
+- **Immutable distros (Bazzite/Silverblue) — `libssh2.so.1: cannot open shared object file`:**
+  the system nmap is missing a shared library. Easiest fix if you use conda:
+  `conda install -c conda-forge nmap` (self-contained, takes PATH precedence, no reboot).
+  Otherwise layer it on the OS with `rpm-ostree install libssh2` (then reboot), or use
+  `brew install nmap` / a distrobox container.
+
+If nmap is missing or broken, the `nmap` attack now reports a clean error instead of crashing.
 
 ## Usage Package
 
@@ -85,33 +99,72 @@ gui.application()
 `update for passcracker in the package and gui is still in progress.`
 ## Usage CLI
 
-- First Change the "OPENAI_API_KEY", "GEOIP_API_KEY" and "BARD_API_KEY" part of the code with OpenAI api key and the IPGeolocation API key in the `.env` file
-- For the `llama-api` option or specific the llama runpod serverless endpoint deployment option requires you to enter the `serverless endpoint ID` from runpod and also your `RUNPOD API KEY`
-
-```python
-GEOIP_API_KEY = ''
-OPENAI_API_KEY = ''
-BARD_API_KEY = ''
-RUNPOD_ENDPOINT_ID = ''
-RUNPOD_API_KEY = ''
-```
-
-- second install the packages
+- Copy `.env.example` to `.env` and fill in keys for the providers you want to use. Any provider without a key is skipped automatically, so you only need the ones you use.
+- The `runpod` provider additionally needs the `serverless endpoint ID` and `RUNPOD API KEY` from RunPod.
 
 ```bash
-pip3 install -r requirements.txt
-or
-pip install -r requirements.txt
+cp .env.example .env
 ```
 
-- Run the code python3 gpt_vuln.py
+```dotenv
+GEOIP_API_KEY=
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GEMINI_API_KEY=
+RUNPOD_API_KEY=
+RUNPOD_ENDPOINT_ID=
+```
+
+The AI layer is built on [Pydantic AI](https://ai.pydantic.dev/): every provider is an
+agent that returns a **validated, structured** result. When you select more than one
+provider, each model analyses the scan **independently and concurrently**, then a
+**deliberation agent** (one of the selected models) reconciles them into a single
+consolidated report — so you get one accurate answer, not N conflicting ones.
+
+While it runs, a **live progress board** shows each model's status and timing
+(analysing → done/error) and the deliberation step, so the terminal is never blank.
+
+Supported AI providers and their default (latest, economical) models:
+
+| Provider  | Key      | Default model       | Approx. price / 1M tokens |
+|-----------|----------|---------------------|---------------------------|
+| OpenAI    | `openai` | `gpt-5.6-luna`      | $0.20 in / $1.20 out      |
+| Anthropic | `claude` | `claude-haiku-4-5`  | $1.00 in / $5.00 out      |
+| Google    | `gemini` | `gemini-3.6-flash`  | $0.75 in / $3.75 out      |
+| Ollama    | `ollama` | `llama3`            | local / free              |
+
+Any model can be changed via the `*_MODEL` variables in `.env` (see `.env.example` for alternatives).
+
+- Quickest install (system packages + uv + Python deps). Run it as your **normal
+  user** — it elevates only the system-package step with sudo:
+
+```bash
+./install.sh              # full install
+./install.sh --no-system  # skip system packages (only uv + Python deps)
+```
+
+The script auto-detects your package manager (apt, dnf, pacman, zypper, apk, brew,
+or rpm-ostree for Bazzite/Silverblue), uses sudo only when needed, installs
+[uv](https://docs.astral.sh/uv/) at user level, then runs `uv sync` and creates `.env`.
+Don't `sudo su` first: if the project sits on a user-only mount (e.g. `/run/host`,
+`/media`), root can't access it — the normal-user invocation is the reliable path.
+
+- Or install manually with uv:
+
+```bash
+uv sync
+```
+
+`pip install -r requirements.txt` still works as a fallback.
+
+- Run the code with `uv run gpt_vuln.py ...` (or `python gpt_vuln.py ...` inside an activated venv):
 
 ```bash
 # Regular Help Menu
-python gpt_vuln.py --help
+uv run gpt_vuln.py --help
 
 # Rich Help Menu
-python gpt_vuln.py --r help
+uv run gpt_vuln.py --rich_menu help
 
 # Specify target with the attack
 python gpt_vuln.py --target <IP/hostname/token> --attack dns/nmap/jwt
@@ -135,20 +188,20 @@ python gpt_vuln.py --target <IP> --attack geo
 # Specify PCAP file for packet analysis
 python gpt_vuln.py --target <PCAP FILE> --attack pcap --output <OUTPUT FILE LOCATION> --thread NUM of threads <200:default>
 
-# Specify the AI to be used for nmap
-python gpt_vuln.py --target <IP> --attack nmap --profile <1-5> --ai llama /llama-api /bard / openai <default>
+# Pick one AI provider (openai | claude | gemini | ollama)
+python gpt_vuln.py --target <IP> --attack nmap --profile <1-13> --ai openai
 
-# Specify the AI to be used for dns
-python gpt_vuln.py --target <IP> --attack dns --ai llama /llama-api /bard / openai <default>
+# Several providers -> each analyses independently, then one consolidated report
+python gpt_vuln.py --target <IP> --attack dns --ai openai,claude,gemini
 
-# Specify the AI to be used for JWT analysis
-python gpt_vuln.py --target <token> --attack jwt --ai llama /llama-api /bard / openai <default>
+# Choose which model deliberates, and also show each model's own analysis
+python gpt_vuln.py --target <IP> --attack dns --ai all --summarizer claude --show_individual
 
 # Password Cracker
 python gpt_vuln.py --password_hash <HASH> --wordlist_file <FILE LOCATION> --algorithm <ALGO FROM THE HELP MENU> --parallel --complexity
 
-# Interactive step by step cli interface
-python gpt_vuln.py --menu True
+# Interactive step by step cli interface (choose providers interactively)
+python gpt_vuln.py --menu
 ```
 
 #### CLI Interface Option

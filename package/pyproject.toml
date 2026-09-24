@@ -1,6 +1,43 @@
 [build-system]
-requires = [
-    "setuptools>=54",
-    "wheel"
-]
+requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "GVA"
+version = "2.0.0"
+description = "Vuln analyzer and other basic recon tools with multi-provider agentic AI"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Chiranjeevi G", email = "morpheuslord@protonmail.com" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pydantic-ai>=2.49",
+    "openai>=1.0",
+    "anthropic>=0.30",
+    "google-genai>=1.0",
+    "ollama>=0.1",
+    "python-nmap>=0.7",
+    "scapy>=2.5",
+    "dnspython>=2.3",
+    "requests>=2.28",
+    "pyjwt>=2.6",
+    "rich>=13.4",
+    "cowsay>=5.0",
+    "customtkinter>=5.2",
+    "python-dotenv>=1.0",
+    "docker>=6.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/morpheuslord/GPT_Vuln-analyzer"
+
+[project.scripts]
+gva = "GVA.main:main"
+
+[tool.setuptools]
+packages = ["GVA"]
