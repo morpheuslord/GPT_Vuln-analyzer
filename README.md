@@ -1,106 +1,82 @@
-# GPT_Vuln-analyzer
+# GPT_Vuln-analyzer (GVA)
 
-This is a Proof Of Concept application that demostrates how AI can be used to generate accurate results for vulnerability analysis and also allows further utilization of the already super useful ChatGPT made using openai-api, python-nmap, dnsresolver python modules and also use customtkinter and tkinter for the GUI version of the code. This project also has a CLI and a GUI interface, It is capable of doing network vulnerability analysis, DNS enumeration and also subdomain enumeration.
+![License](https://img.shields.io/badge/license-MIT-green) ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+
+GVA is an AI-assisted reconnaissance and vulnerability-analysis toolkit. It runs the
+scan (nmap, DNS, subdomains, JWT, PCAP, GeoIP), then hands the raw output to a large
+language model that returns a structured, pentester-oriented analysis. It ships with
+both a command-line interface and a desktop GUI.
+
+The AI layer is provider-agnostic: OpenAI, Anthropic Claude, Google Gemini, and local
+Ollama models are all supported. Pick one, or run several at once and let a
+deliberation agent reconcile their analyses into a single report.
+
+## Features
+
+- **Nmap analysis** — ten curated scan profiles, from a fast unprivileged triage to a
+  full-port SYN audit, with the results explained by the AI.
+- **DNS recon** — forward, reverse, and zone-transfer lookups, analysed into typed records.
+- **Subdomain enumeration** — resolve a wordlist of subdomains against a domain.
+- **JWT analysis** — decode a token and surface likely attacks and endpoints to test.
+- **PCAP analysis** — inspect a capture for traffic, ARP/MAC spoofing, and cleartext credentials.
+- **GeoIP lookup** — geolocate an IP via ipgeolocation.io.
+- **Password cracking** — wordlist and brute-force cracking with common hash algorithms.
+- **Multi-provider AI** — validated structured output via [Pydantic AI](https://ai.pydantic.dev/),
+  with concurrent analysis and a deliberation step across models.
 
 ## Requirements
 
-- Python 3.10 or above
-- Dependencies from `pyproject.toml` (managed with `uv`) or `requirements.txt`
-- An API key for at least one AI provider: OpenAI, Anthropic, and/or Google Gemini (Ollama runs locally, no key)
-- IPGeolocation API (for `geo`)
-- The `nmap` program installed and on PATH (for the `nmap` attack)
-- Wireshark / tshark on PATH (for `pcap`)
-- Docker (only if you use the local Ollama provider)
+- Python 3.10 or later
+- Dependencies from `pyproject.toml` (managed with [uv](https://docs.astral.sh/uv/)) or `requirements.txt`
+- An API key for at least one AI provider (OpenAI, Anthropic, or Google Gemini). Ollama runs locally and needs no key.
+- `nmap` on `PATH` for the nmap attack
+- Wireshark / `tshark` on `PATH` for the pcap attack
+- An [ipgeolocation.io](https://ipgeolocation.io/) key for the geo attack
+- Docker, only if you use the local Ollama provider
 
 ### nmap notes
 
-The `nmap` attack shells out to the system `nmap` binary via `python-nmap`, so nmap must
-be installed and runnable:
+The nmap attack shells out to the system `nmap` binary through `python-nmap`, so nmap
+must be installed and runnable.
 
-- **Default profile 1 uses `-O` (OS detection), which requires root** — run with `sudo`, or
-  pick a non-privileged profile such as `--profile 11` (top 100 ports) or `--profile 13`.
-- **Immutable distros (Bazzite/Silverblue) — `libssh2.so.1: cannot open shared object file`:**
-  the system nmap is missing a shared library. Easiest fix if you use conda:
-  `conda install -c conda-forge nmap` (self-contained, takes PATH precedence, no reboot).
-  Otherwise layer it on the OS with `rpm-ostree install libssh2` (then reboot), or use
-  `brew install nmap` / a distrobox container.
+- **Profiles 6–10 need root** (SYN/UDP/OS-detection flags). GVA escalates only the nmap
+  step with `sudo`, or you can pass `--sudo`. Profiles 1–5 run unprivileged; profile 1
+  is the default and works without root.
+- **Immutable distros (Bazzite/Silverblue), `libssh2.so.1: cannot open shared object file`:**
+  the system nmap is missing a shared library. If you use conda,
+  `conda install -c conda-forge nmap` is self-contained and takes PATH precedence.
+  Otherwise layer it with `rpm-ostree install libssh2` (then reboot), or use
+  `brew install nmap` or a distrobox container.
 
-If nmap is missing or broken, the `nmap` attack now reports a clean error instead of crashing.
+If nmap is missing or broken, the attack reports a clean error instead of crashing.
 
-## Usage Package
+## Installation
 
-### Import packages
+The install script sets up system packages, uv, and the Python dependencies. Run it as
+your normal user; it elevates only the system-package step with sudo.
 
 ```bash
-cd package && pip3/pip install .
+./install.sh              # full install
+./install.sh --no-system  # skip system packages (uv + Python deps only)
 ```
 
-Simple import any of the 3 packages and then add define the variables accordingly
+It auto-detects your package manager (apt, dnf, pacman, zypper, apk, brew, or
+rpm-ostree), installs uv at user level, runs `uv sync`, and creates `.env`. Do not
+`sudo su` first: if the project sits on a user-only mount (for example `/run/host` or
+`/media`), root cannot read it, so the normal-user invocation is the reliable path.
 
-```python
-from GVA.scanner import NetworkScanner
-from GVA.dns_recon import DNSRecon
-from GVA.geo import geo_ip_recon
-from GVA.jwt import JWTAnalyzer
-from GVA.menus import Menus
-from GVA.packet_analysis import PacketAnalysis
-from GVA.ai_models import NMAP_AI_MODEL
-from GVA.ai_models import DNS_AI_MODEL
-from GVA.ai_models import JWT_AI_MODEL
-from GVA.assets import Assets
-from GVA.subdomain import sub_enum
-from GVA import gui
+To install manually with uv:
 
-# The components defined
-dns_enum = DNSRecon()
-geo_ip = geo_ip_recon()
-p_ai_models = NMAP_AI_MODEL()
-dns_ai_models = DNS_AI_MODEL()
-port_scanner = NetworkScanner()
-jwt_analizer = JWTAnalyzer()
-sub_recon = sub_enum()
-asset_codes = Assets()
-packet_analysis = PacketAnalysis()
-
-# KEEP IT BLANK IF YOU HAVE NO CLUE THE MENU WILL ASK TO FILL IT ONCE ACTIVE
-lkey = "LLAMA API KEY"
-lendpoint = "LLAMA ENDPOINT"
-keyset = "AI API KEY"
-output_loc = "OUTPUT LOCATION FOR PCAP"
-threads = 200 # Default INT 200 but can be increased.
-target_ip_hostname_or_token = "TARGET IP, HOSTNAME OR TOKEN"
-profile_num = "PROFILE FOR NMAP SCAN"
-ai_set = "AI OF CHOICE"
-akey_set = "OPENAI API KEY"
-bkey_set = "BARD API KEY"
-ai_set_args = ""  # Keep it blank at any cost
-llamakey = "LLAMA RUNPOD API KEY"
-llamaendpoint = "LLAMA RUNPOD ENDPOINT"
-
-Menus(
-    lamma_key=lkey,
-    llama_api_endpoint=lendpoint,
-    initial_keyset=keyset,
-    threads=threads,
-    output_loc=output_loc,
-    target=target_ip_hostname,
-    profile_num=profile_num,
-    ai_set=ai_set,
-    openai_akey_set=akey_set,
-    bard_key_set=bkey_set,
-    ai_set_args=ai_set_args,
-    llama_runpod_key=llamakey,
-    llama_endpoint=llamaendpoint
-)
-
-
-gui.application()
+```bash
+uv sync
 ```
-`update for passcracker in the package and gui is still in progress.`
-## Usage CLI
 
-- Copy `.env.example` to `.env` and fill in keys for the providers you want to use. Any provider without a key is skipped automatically, so you only need the ones you use.
-- The `runpod` provider additionally needs the `serverless endpoint ID` and `RUNPOD API KEY` from RunPod.
+`pip install -r requirements.txt` also works as a fallback.
+
+### Configuration
+
+Copy the example environment file and fill in keys for the providers you want. Any
+provider without a key is skipped automatically.
 
 ```bash
 cp .env.example .env
@@ -111,495 +87,264 @@ GEOIP_API_KEY=
 OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
 GEMINI_API_KEY=
-RUNPOD_API_KEY=
-RUNPOD_ENDPOINT_ID=
 ```
 
-The AI layer is built on [Pydantic AI](https://ai.pydantic.dev/): every provider is an
-agent that returns a **validated, structured** result. When you select more than one
-provider, each model analyses the scan **independently and concurrently**, then a
-**deliberation agent** (one of the selected models) reconciles them into a single
-consolidated report — so you get one accurate answer, not N conflicting ones.
+## AI providers
 
-While it runs, a **live progress board** shows each model's status and timing
-(analysing → done/error) and the deliberation step, so the terminal is never blank.
+Every provider is a Pydantic AI agent that returns a validated, structured result.
+Select more than one and each model analyses the scan independently and concurrently;
+a deliberation agent (one of the selected models) then reconciles them into a single
+consolidated report. A live progress board shows each model's status, timing, and the
+deliberation step while it runs.
 
-Supported AI providers and their default (latest, economical) models:
+| Provider  | Key      | Default model      | Approx. price / 1M tokens |
+|-----------|----------|--------------------|---------------------------|
+| OpenAI    | `openai` | `gpt-5.6-luna`     | $0.20 in / $1.20 out      |
+| Anthropic | `claude` | `claude-haiku-4-5` | $1.00 in / $5.00 out      |
+| Google    | `gemini` | `gemini-3.6-flash` | $0.75 in / $3.75 out      |
+| Ollama    | `ollama` | `llama3`           | local / free              |
 
-| Provider  | Key      | Default model       | Approx. price / 1M tokens |
-|-----------|----------|---------------------|---------------------------|
-| OpenAI    | `openai` | `gpt-5.6-luna`      | $0.20 in / $1.20 out      |
-| Anthropic | `claude` | `claude-haiku-4-5`  | $1.00 in / $5.00 out      |
-| Google    | `gemini` | `gemini-3.6-flash`  | $0.75 in / $3.75 out      |
-| Ollama    | `ollama` | `llama3`            | local / free              |
+Override any model with the matching `*_MODEL` variable in `.env`. See `.env.example`
+for alternatives. Ollama uses a local Docker image and is started automatically when
+selected.
 
-Any model can be changed via the `*_MODEL` variables in `.env` (see `.env.example` for alternatives).
+## Usage (CLI)
 
-- Quickest install (system packages + uv + Python deps). Run it as your **normal
-  user** — it elevates only the system-package step with sudo:
-
-```bash
-./install.sh              # full install
-./install.sh --no-system  # skip system packages (only uv + Python deps)
-```
-
-The script auto-detects your package manager (apt, dnf, pacman, zypper, apk, brew,
-or rpm-ostree for Bazzite/Silverblue), uses sudo only when needed, installs
-[uv](https://docs.astral.sh/uv/) at user level, then runs `uv sync` and creates `.env`.
-Don't `sudo su` first: if the project sits on a user-only mount (e.g. `/run/host`,
-`/media`), root can't access it — the normal-user invocation is the reliable path.
-
-- Or install manually with uv:
+Run with `uv run gpt_vuln.py ...`, or `python gpt_vuln.py ...` inside an activated venv.
 
 ```bash
-uv sync
-```
-
-`pip install -r requirements.txt` still works as a fallback.
-
-- Run the code with `uv run gpt_vuln.py ...` (or `python gpt_vuln.py ...` inside an activated venv):
-
-```bash
-# Regular Help Menu
+# Help
 uv run gpt_vuln.py --help
-
-# Rich Help Menu
 uv run gpt_vuln.py --rich_menu help
 
-# Specify target with the attack
-python gpt_vuln.py --target <IP/hostname/token> --attack dns/nmap/jwt
+# Nmap scan (default profile 1), analysed by OpenAI
+python gpt_vuln.py --target scanme.nmap.org --attack nmap --ai openai
 
-# Specify target and profile for nmap
-python gpt_vuln.py --target <IP/hostname/token> --attack nmap --profile <1-13>
-(Default:1)
+# Choose a scan profile (see the profile table below, or --list_profiles)
+python gpt_vuln.py --target scanme.nmap.org --attack nmap --profile 2
+python gpt_vuln.py --list_profiles
 
-# Specify target for DNS no profile needed
-python gpt_vuln.py --target <IP/hostname/token> --attack dns
+# DNS recon (no profile needed)
+python gpt_vuln.py --target example.com --attack dns
 
-# Specify target for Subdomain Enumeration no profile used default list file
-python gpt_vuln.py --target <HOSTNAME> --attack sub
+# Subdomain enumeration (default or custom wordlist)
+python gpt_vuln.py --target example.com --attack sub
+python gpt_vuln.py --target example.com --attack sub --sub_list path/to/list.txt
 
-# Specify target for Subdomain Enumeration no profile used custom list file
-python gpt_vuln.py --target <HOSTNAME> --attack sub --sub_list <PATH to FILE>
+# GeoIP lookup
+python gpt_vuln.py --target 8.8.8.8 --attack geo
 
-# Specify target for geolocation lookup
-python gpt_vuln.py --target <IP> --attack geo
+# JWT analysis
+python gpt_vuln.py --target <token> --attack jwt
 
-# Specify PCAP file for packet analysis
-python gpt_vuln.py --target <PCAP FILE> --attack pcap --output <OUTPUT FILE LOCATION> --thread NUM of threads <200:default>
+# PCAP analysis
+python gpt_vuln.py --target capture.pcap --attack pcap --output outputs/output.json
 
-# Pick one AI provider (openai | claude | gemini | ollama)
-python gpt_vuln.py --target <IP> --attack nmap --profile <1-13> --ai openai
-
-# Several providers -> each analyses independently, then one consolidated report
-python gpt_vuln.py --target <IP> --attack dns --ai openai,claude,gemini
+# Several providers: each analyses independently, then one consolidated report
+python gpt_vuln.py --target example.com --attack dns --ai openai,claude,gemini
 
 # Choose which model deliberates, and also show each model's own analysis
-python gpt_vuln.py --target <IP> --attack dns --ai all --summarizer claude --show_individual
+python gpt_vuln.py --target example.com --attack dns --ai all --summarizer claude --show_individual
 
-# Password Cracker
-python gpt_vuln.py --password_hash <HASH> --wordlist_file <FILE LOCATION> --algorithm <ALGO FROM THE HELP MENU> --parallel --complexity
+# Password cracking
+python gpt_vuln.py --password_hash <hash> --wordlist_file words.txt --algorithm md5 --parallel
 
-# Interactive step by step cli interface (choose providers interactively)
+# Interactive step-by-step menu
 python gpt_vuln.py --menu
 ```
 
-#### CLI Interface Option
+### Interactive menu
 
-```bash
-  ________________________
-| GVA Usage in progress... |
-  ========================
-                        \
-                         \
-                           ^__^
-                           (oo)\_______
-                           (__)\       )\/\
-                               ||----w |
-                               ||     ||
+`--menu` launches a guided interface that prompts for the target, options, and AI
+providers for each attack.
+
+```text
 ┏━━━━━━━━━┳━━━━━━━━━━━━━━━━┓
-┃ Options ┃ Utility        ┃
+┃ Option  ┃ Action         ┃
 ┡━━━━━━━━━╇━━━━━━━━━━━━━━━━┩
-│ 1       │ Nmap Enum      │
-│ 2       │ DNS Enum       │
-│ 3       │ Subdomain Enum │
-│ 4       │ GEO-IP Enum    │
-| 5       | JWT Analysis   |
-| 6       | PCAP Analysis  |
-| 6       | Hash Cracker   |
+│ 1       │ Nmap scan      │
+│ 2       │ DNS recon      │
+│ 3       │ Subdomain enum │
+│ 4       │ GeoIP lookup   │
+│ 5       │ JWT analysis   │
+│ 6       │ PCAP analysis  │
+│ 7       │ Hash cracker   │
 │ q       │ Quit           │
 └─────────┴────────────────┘
-Enter your choice:
 ```
 
-The CLI interface has a few things to note.
+## Nmap scan profiles
 
-- The API keys must be provided manually.
-- The ones defined in the `.env` files work with the args options
-- The process is similar but more organized.
+Profiles 1–5 run unprivileged (TCP connect scans, no root). Profile 1 is the default.
+Profiles 6–10 use SYN/UDP/OS-detection flags that need root; GVA escalates just the
+nmap step with `sudo` when you pick one. Run `python gpt_vuln.py --list_profiles` to
+see this table in your terminal.
 
-### My views on Bard
+| #  | Name          | Root | What it does                                              | Nmap command                                                                                   |
+|----|---------------|:----:|----------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| 1  | Quick         |  no  | Top 100 TCP ports with service versions (fast triage).   | `-Pn -sT -sV -T4 --top-ports 100`                                                              |
+| 2  | Standard      |  no  | Top 1000 ports with versions and default NSE scripts.    | `-Pn -sT -sV -sC -T4 --top-ports 1000`                                                         |
+| 3  | Full TCP      |  no  | Every TCP port (1–65535) with versions.                  | `-Pn -sT -sV -p- -T4`                                                                           |
+| 4  | Web services  |  no  | HTTP/S-focused scan of common web ports.                 | `-Pn -sT -sV -T4 -p 80,443,8080,8443,8000,8888,3000,5000 --script=http-title,http-headers,...` |
+| 5  | Vulnerability |  no  | NSE vulnerability scripts over versioned services.       | `-Pn -sT -sV -T4 --script=vuln`                                                                 |
+| 6  | Stealth SYN   | yes  | Half-open SYN scan of the top 1000 ports.                | `-Pn -sS -sV -T4 --top-ports 1000`                                                             |
+| 7  | OS & service  | yes  | SYN scan with OS fingerprinting and service detection.   | `-Pn -sS -sV -O -T4`                                                                            |
+| 8  | Aggressive    | yes  | OS, versions, default scripts, and traceroute.           | `-Pn -A -T4`                                                                                    |
+| 9  | UDP top       | yes  | Top 50 UDP services (DNS, SNMP, NTP, and so on).         | `-Pn -sU -sV -T4 --top-ports 50`                                                              |
+| 10 | Deep audit    | yes  | Full-port SYN scan with OS detection and vuln scripts.   | `-Pn -sS -sV -O -p- -T4 --script=default,vuln`                                                  |
 
-Its the same as Openai GPT3.5 but faster. It can generate the same answer but in 2 times the speed.
+The profile selects the nmap arguments. nmap runs, the open-port data is pulled from
+the scan result, and that data is handed to the AI engine for analysis. If a scan
+completes but finds no open ports, GVA says so clearly instead of returning a blank
+analysis, so an empty result never looks like a silent failure.
 
-### OS Supported
+## Usage (GUI)
 
-| Preview                                                                                                              | Code | Name      | Working Status | OpenAI Status | Bard Status | LLama2 Status     |
-| -------------------------------------------------------------------------------------------------------------------- | ---- | --------- | -------------- | ------------- | ----------- | ----------------- |
-| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/LIN.png "LIN (48x48)") | LIN  | GNU/Linux | ✅             | ✅            | ✅          | ❌ [did not test] |
-| ![](https://raw.githubusercontent.com/EgoistDeveloper/operating-system-logos/master/src/48x48/WIN.png "WIN (48x48)") | WIN  | Windows   | ✅             | ✅            | ✅          | ✅                |
+The desktop GUI is built with customtkinter.
 
-## Understanding the code
-
-Profiles:
-
-| Parameter | Return data | Description                                          | Nmap Command                                          |
-| :-------- | :---------- | :--------------------------------------------------- | :---------------------------------------------------- |
-| `p1`      | `json`      | Effective Scan                                       | `-Pn -sV -T4 -O -F`                                   |
-| `p2`      | `json`      | Simple Scan                                          | `-Pn -T4 -A -v`                                       |
-| `p3`      | `json`      | Low Power Scan                                       | `-Pn -sS -sU -T4 -A -v`                               |
-| `p4`      | `json`      | Partial Intense Scan                                 | `-Pn -p- -T4 -A -v`                                   |
-| `p5`      | `json`      | Complete Intense Scan                                | `-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln` |
-| `p6`      | `json`      | Comprehensive Service Version Detection              | `-Pn -sV -p- -A`                                      |
-| `p7`      | `json`      | Aggressive Scan with OS Detection                    | `-Pn -sS -sV -O -T4 -A`                               |
-| `p8`      | `json`      | Script Scan for Common Vulnerabilities               | `-Pn -sC`                                             |
-| `p9`      | `json`      | Intense Scan, All TCP Ports                          | `-Pn -p 1-65535 -T4 -A -v`                            |
-| `p10`     | `json`      | UDP Scan                                             | `-Pn -sU -T4`                                         |
-| `p11`     | `json`      | Service and Version Detection for Top Ports          | `-Pn -sV --top-ports 100`                             |
-| `p12`     | `json`      | Aggressive Scan with NSE Scripts for Vulnerabilities | `-Pn -sS -sV -T4 --script=default,discovery,vuln`     |
-| `p13`     | `json`      | Fast Scan for Common Ports                           | `-Pn -F`                                              |
-
-The profile is the type of scan that will be executed by the nmap subprocess. The Ip or target will be provided via argparse. At first, the custom nmap scan is run which has all the crucial arguments for the scan to continue. Next, the scan data is extracted from the huge pile of data driven by nmap. the "scan" object has a list of sub-data under "tcp" each labelled according to the ports opened. once the data is extracted the data is sent to the openai API Davinci model via a prompt. the prompt specifically asks for a JSON output and the data also to be used in a certain manner.
-
-The entire structure of request that has to be sent to the openai API is designed in the completion section of the Program.
-
-```python
-class NetworkScanner():
-    profile_arguments = {
-        1: '-Pn -sV -T4 -O -F',
-        2: '-Pn -T4 -A -v',
-        3: '-Pn -sS -sU -T4 -A -v',
-        4: '-Pn -p- -T4 -A -v',
-        5: '-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln',
-        6: '-Pn -sV -p- -A',
-        7: '-Pn -sS -sV -O -T4 -A',
-        8: '-Pn -sC',
-        9: '-Pn -p 1-65535 -T4 -A -v',
-        10: '-Pn -sU -T4',
-        11: '-Pn -sV --top-ports 100',
-        12: '-Pn -sS -sV -T4 --script=default,discovery,vuln',
-        13: '-Pn -F'
-    }
-
-    def scanner(self, ip: Optional[str], profile: int, akey: Optional[str],
-                bkey: Optional[str], lkey, lendpoint, AI: str) -> str:
-        nm.scan(ip, arguments=self.profile_arguments.get(profile))
-        json_data = nm.analyse_nmap_xml_scan()
-        analyze = json_data["scan"]
-
-        try:
-            ai_methods = {
-                'openai': lambda: AIModels.GPT_AI(akey, analyze),
-                'bard': lambda: AIModels.BardAI(bkey, analyze),
-                'llama': lambda: AIModels.Llama_AI(analyze, "local", lkey, lendpoint),
-                'llama-api': lambda: AIModels.Llama_AI(analyze, "runpod", lkey, lendpoint)
-            }
-
-            if AI in ai_methods and (akey or bkey):
-                response = ai_methods[AI]()
-            else:
-                raise ValueError("Invalid AI type or missing keys")
-
-        except KeyboardInterrupt:
-            print("Bye")
-            quit()
-
-        return str(response)
-
-
+```bash
+uv run python GVA_gui.py
 ```
 
-# Regex
+Pick a scan from the left sidebar, fill in the target, and run. Each scan shows only
+the fields it needs:
 
-We use Regex to extract only the important information from the custom prompt provided this reduces the total amount of unwanted
-data
+- **Target** for every scan (IP, hostname, domain, token, or capture-file path).
+- **AI provider** dropdown for the nmap, DNS, and JWT scans (choose one, or `all`).
+- **Nmap profile** dropdown for nmap scans, with a description under it and a note when
+  a profile needs root.
+- **Wordlist** or **output path** for the subdomain and PCAP scans.
 
-The AI code defines an output format and commands the AI to follow a few pre-determined rules to increase accuracy.
-The regex extraction code does the extraction and further the main function arranges them into tables.
+The sidebar also lists the AI providers with a status dot, so you can see at a glance
+which keys are configured. Scans run on a background thread, so the window stays
+responsive, and results render into a console-style panel with Copy and Clear buttons.
+A status bar reports progress and any errors.
 
-## Using Bard AI
+## Example output
 
-For you to use Bard AI you must sign up to the MakerSuit Palm API for developer access and generate your API key from there. For links and how this works you can use this video [MakerSuit](https://www.youtube.com/watch?v=Ce1AOchQMzA&t=128s)
+<details>
+<summary>Nmap</summary>
 
-Once the API is acquired just add it to the `.env` file and you are good to go.
-
-## Old LLama2 Implementation
-
-Using LLama2 is one of the best offline and free options out there. It is currently under improvement I am working on a prompt that will better incorporate cybersecurity perspective into the AI.
-I have to thank **@thisserand** and his [llama2_local](https://github.com/thisserand/llama2_local) repo and also his YT video [YT_Video](https://youtu.be/WzCS8z9GqHw). They were great resources. To be frank the llama2 code is 95% his, I just yanked the code and added a Flask API functionality to it.
-
-The Accuracy of the AI offline and outside the codes test was great and had equal accuracy to openai or bard but while in code it was facing a few issues be because of the prompting and all. I will try and fix it.
-The speed depends on your system and the GPU and CPU configs you have. currently, it is using the `TheBloke/Llama-2-7B-Chat-GGML` model and can be changed via the `portscanner` and `dnsrecon` files.
-
-For now, the llama code and scans are handled differently. After a few tests, I found out llama needs to be trained a little to operate like how I intended it to work so it needs some time. Any suggestions on how I can do that can be added to the discussions of this repo [Discussions Link](https://github.com/morpheuslord/GPT_Vuln-analyzer/discussions). For now, the output won't be a divided list of all the data instead will be an explanation of the vulnerability or issues discovered by the AI.
-
-The prompt for the model usage looks like this:
-
-```prompt
-[INST] <<SYS>> {user_instruction}<</SYS>> NMAP Data to be analyzed: {user_message} [/INST]
-```
-The instructions looks like this:
-```prompt
-    Do a NMAP scan analysis on the provided NMAP scan information. The NMAP output must return in a asked format accorging to the provided output format. The data must be accurate in regards towards a pentest report.
-    The data must follow the following rules:
-    1) The NMAP scans must be done from a pentester point of view
-    2) The final output must be minimal according to the format given.
-    3) The final output must be kept to a minimal.
-    4) If a value not found in the scan just mention an empty string.
-    5) Analyze everything even the smallest of data.
-    6) Completely analyze the data provided and give a confirm answer using the output format.
-    7) mention all the data you found in the output format provided so that regex can be used on it.
-    8) avoid unnecessary explaination.
-    9) the critical score must be calculated based on the CVE if present or by the nature of the services open
-    10) the os information must contain the OS used my the target.
-    11) the open ports must include all the open ports listed in the data[tcp] and varifying if it by checking its states value.  you should not negect even one open port.
-    12) the vulnerable services can be determined via speculation of the service nature or by analyzing the CVE's found.
-    The output format:
-        critical score:
-        - Give info on the criticality
-        "os information":
-        - List out the OS information
-        "open ports and services":
-        - List open ports
-        - List open ports services
-        "vulnerable service":
-        - Based on CVEs or nature of the ports opened list the vulnerable services
-        "found cve":
-        - List the CVE's found and list the main issues.
-```
-
-Using the instruction set and the data provided via the prompt the llama AI generates its output.
-
-For the most usage I suggest you create a runpod serverless endpoint deployment of llama you can refer to this tutorial for that [tutorial](https://www.youtube.com/watch?v=Ftb4vbGUr7U). You can follow the tutorial for better use.
-
-### Llama2 Ollama
-
-This latest update uses an ollama docker image to implement the localized llama system and this increases the accuracy of the output for some reason maybe due to better configuration or something. I won't go into much detail about this but I will be working on the GPU integration part of the code for this so that we can add GPU power to the processing and make it more efficient. Thanks to @andr6 for starting the discussion, if anyone has a better understanding of this implementation feel free to improvise and create a PR.
-
-### Output
-
-#### JWT Output:
-
-```
-                                            GVA Report for JWT
-┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Variables           ┃ Results                                                                          ┃
-┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ Algorithm Used      │ HS256                                                                            │
-│ Header              │ eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9                                         │
-│ Payload             │ eyJzdWIiOiAiMTIzNDU2Nzg5MCIsICJuYW1lIjogIkpvaG4gRG9lIiwgImlhdCI6IDE1MTYyMzkwMjJ9 │
-│ Signature           │                                                                                  │
-│ PossibleAttacks     │ None identified                                                                  │
-│ VulnerableEndpoints │ Unable to determine without additional information                               │
-└─────────────────────┴──────────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Nmap output:
-
-##### OpenAI and Bard:
-
-```table
+```text
 ┏━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Elements           ┃ Results                                             ┃
 ┡━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
 │ critical score     │ High                                                │
-│ os information     │ Microsoft Windows 11 21H2                           │
-│ open ports         │ 80, 22, 445, 902, 912                               │
-│ open services      │ http, ssh, microsoft-ds, vmware-auth, vmware-auth   │
-│ vulnerable service │ OpenSSH                                             │
-│ found cve          │ CVE-2023-28531                                      │
+│ os information      │ Microsoft Windows 11 21H2                           │
+│ open ports          │ 80, 22, 445, 902, 912                               │
+│ open services       │ http, ssh, microsoft-ds, vmware-auth                │
+│ vulnerable service  │ OpenSSH                                             │
+│ found cve           │ CVE-2023-28531                                      │
 └────────────────────┴─────────────────────────────────────────────────────┘
 ```
 
-##### LLama2
+</details>
 
-```table
-╭───────────────────────────────────────────── The GVA LLama2 ──────────────────────────────────────────────╮
-│                                                                                                           │
-│                                                                                                           │
-│                                                                                                           │
-│  Based on the provided NMAP data, I have conducted a thorough analysis of the target system's open ports  │
-│  and services, vulnerabilities, and operating system information. Here is my findings: Critical Score:    │
-│  The critical score for this target system is 7 out of 10. The system has several open ports that could   │
-│  potentially be exploited, including port 80 (HTTP), port 135 (RPC), and port 445 (Microsoft DS). While   │
-│  These ports are not necessarily vulnerable, they do indicate that the system is running services that    │
-│  could be targeted by attackers. Additionally, the system has an outdated version of Microsoft IIS        │
-│  running on port 80, which could be a potential vulnerability. OS Information: The target system is       │
-│  running Microsoft Windows 10 1607. Open Ports and Services: The target system has the following open     │
-│  ports:                                                                                                   │
-│                                                                                                           │
-│   • Port 80: HTTP (Microsoft IIS httpd)                                                                   │
-│   • Port 135: RPC (Microsoft Windows RPC)                                                                 │
-│   • Port 445: Microsoft DS                                                                                │
-│   • Port 8000: Splunkd httpd All of these ports are currently open and have a state of "open".            │
-│     Vulnerable Services: Based on the CVEs found in the NMAP data, there are several potential            │
-│     vulnerabilities in the target system's services. These include:                                       │
-│   • CVE-2019-1489: An elevation of privilege vulnerability in Microsoft IIS that could be exploited by    │
-│     an attacker to gain control of the system. This vulnerability is related to the outdated version of   │
-│     Microsoft IIS running on port 80.                                                                     │
-│   • CVE-2017-0143: A remote code execution vulnerability in Microsoft Windows RPC that could be           │
-│     exploited by an attacker to execute arbitrary code on the target system. This vulnerability is        │
-│     related to the outdated version of Microsoft Windows RPC running on port 135.                         │
-│   • CVE-2020-1362: A remote code execution vulnerability in Microsoft DS that could be exploited by an    │
-│     attacker to execute arbitrary code on the target system. This vulnerability is related to the         │
-│     outdated version of Microsoft DS running on port 445. Found CVEs: The following C                     │
-│                                                                                                           │
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+<details>
+<summary>DNS</summary>
+
+```text
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Elements ┃ Results                                                         ┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ A        │ 172.67.147.95, 104.21.41.132                                    │
+│ NS       │ mia.ns.cloudflare.com, paul.ns.cloudflare.com                   │
+│ MX       │ 10 aspmx.l.google.com, 20 alt1.aspmx.l.google.com               │
+│ SOA      │ mia.ns.cloudflare.com dns.cloudflare.com                        │
+│ TXT      │ include:_spf.atlassian.net                                      │
+└──────────┴─────────────────────────────────────────────────────────────────┘
 ```
 
-#### DNS Output:
+</details>
 
-target is jainuniversity.ac.in
+<details>
+<summary>JWT</summary>
 
-```table
-┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Elements ┃ Results                                                                                                           ┃
-┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ A        │ 172.67.147.95", "104.21.41.132                                                                                    │
-│ AAA      │                                                                                                                   │
-│ NS       │ mia.ns.cloudflare.com.","paul.ns.cloudflare.com.                                                                  │
-│ MX       │ 30 aspmx5.googlemail.com.","30 aspmx4.googlemail.com.","20 alt2.aspmx.l.google.com.","30                          │
-│          │ aspmx3.googlemail.com.","30 aspmx2.googlemail.com.","20 alt1.aspmx.l.google.com.","10 aspmx.l.google.com.         │
-│ PTR      │                                                                                                                   │
-│ SOA      │ mia.ns.cloudflare.com. dns.cloudflare.com. 2309618668 10000 2400 604800 3600                                      │
-│ TXT      │ atlassian-sending-domain-verification=5b358ce4-5ad3-404d-b4b4-005bf933603b","include:_spf.atlassian.net           │
-└──────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```text
+┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Variables           ┃ Results                                            ┃
+┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Algorithm Used      │ HS256                                              │
+│ PossibleAttacks     │ alg:none downgrade, weak HMAC secret brute force   │
+│ VulnerableEndpoints │ any endpoint trusting the token signature          │
+└─────────────────────┴──────────────────────────────────────────────────────┘
 ```
 
-#### GEO Location output:
+</details>
 
-```table
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Identifiers                 ┃ Data                                                                    ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ ip                          │ █████████████                                                           │
-│ continent_code              │ AS                                                                      │
-│ continent_name              │ Asia                                                                    │
-│ country_code2               │ IN                                                                      │
-│ country_code3               │ IND                                                                     │
-│ country_name                │ India                                                                   │
-│ country_capital             │ New Delhi                                                               │
-│ state_prov                  │ Haryana                                                                 │
-│ state_code                  │ IN-HR                                                                   │
-│ district                    │                                                                         │
-│ city                        │ Gurugram                                                                │
-│ zipcode                     │ 122003                                                                  │
-│ latitude                    │ 28.44324                                                                │
-│ longitude                   │ 77.05501                                                                │
-│ is_eu                       │ False                                                                   │
-│ calling_code                │ +91                                                                     │
-│ country_tld                 │ .in                                                                     │
-│ languages                   │ en-IN,hi,bn,te,mr,ta,ur,gu,kn,ml,or,pa,as,bh,sat,ks,ne,sd,kok,doi,mni,… │
-│ country_flag                │ https://ipgeolocation.io/static/flags/in_64.png                         │
-│ geoname_id                  │ 9148991                                                                 │
-│ isp                         │ Bharti Airtel Limited                                                   │
-│ connection_type             │                                                                         │
-│ organization                │ Bharti Airtel Limited                                                   │
-│ currency.code               │ INR                                                                     │
-│ currency.name               │ Indian Rupee                                                            │
-│ currency.symbol             │ ₹                                                                       │
-│ time_zone.name              │ Asia/Kolkata                                                            │
-│ time_zone.offset            │ 5.5                                                                     │
-│ time_zone.current_time      │ 2023-07-11 17:08:35.057+0530                                            │
-│ time_zone.current_time_unix │ 1689075515.057                                                          │
-│ time_zone.is_dst            │ False                                                                   │
-│ time_zone.dst_savings       │ 0                                                                       │
-└─────────────────────────────┴─────────────────────────────────────────────────────────────────────────┘
+<details>
+<summary>GeoIP</summary>
+
+```text
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Identifiers      ┃ Data                          ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ ip               │ 8.8.8.8                       │
+│ continent_name   │ North America                 │
+│ country_name     │ United States                 │
+│ state_prov       │ California                    │
+│ city             │ Mountain View                 │
+│ zipcode          │ 94043                         │
+│ latitude         │ 37.42240                      │
+│ longitude        │ -122.08421                    │
+│ isp              │ Google LLC                    │
+│ organization     │ Google LLC                    │
+│ time_zone.name   │ America/Los_Angeles           │
+│ currency.code    │ USD                           │
+└──────────────────┴─────────────────────────────────┘
 ```
 
-#### PCAP OUTPUT
+</details>
 
-```
-Collecting Json Data
-Extracting IP details...
-Extracting DNS details...
-Extracting EAPOL details...
-Extracting TCP STREAMS details...
-TCP streams can take some time..
-Total Streams combination:  252
-Number of workers in progress:  250
-Completed
-                                                            GVA Report for PCAP
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Identifiers                        ┃ Data                                                                                               ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ PacketAnalysis.Services            │ ['49943', '49958', '49934', '49944', '49931', '443', '49957']                                      │
-│ PacketAnalysis.TCP Streams         │ ['1', '4', '5', '2', '0', '3']                                                                     │
-│ PacketAnalysis.Sources Address     │ ['█████████████', '1.1.1.1', '█████████████', '█████████████', '█████████████', '█████████████']   │
-│ PacketAnalysis.Destination Address │ ['█████████████', '1.1.1.1', '█████████████', '█████████████', '█████████████', '█████████████']   │
-│ PacketAnalysis.DNS Resolved        │ []                                                                                                 │
-│ PacketAnalysis.DNS Query           │ ['oneclient.sfx.ms']                                                                               │
-│ PacketAnalysis.DNS Response        │ ['oneclient.sfx.ms.edgekey.net', 'e9659.dspg.akamaiedge.net', 'oneclient.sfx.ms']                  │
-│ PacketAnalysis.EAPOL Data          │ []                                                                                                 │
-│ PacketAnalysis. Total Streams Data │ 126                                                                                                │
-└────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────┘
-```
+## Python package (GVA)
 
-#### Password Cracker Output
-
-```
-  ________________________
-| GVA Usage in progress... |
-  ========================
-                        \
-                         \
-                           ^__^
-                           (oo)\_______
-                           (__)\       )\/\
-                               ||----w |
-                               ||     ||
-Cracking... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
-╭────────────────────────────────────────────── The GVA Password Cracker  ──────────────────────────────────────────────╮      │                                                                                                                       │ │                                                                                                                       │
-│                                        Password Cracked! Password:  legion                                            │
-│                                                                                                                       │
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-```
-
-# Usage GUI
-
-The GUI uses customtkinter for the running of the code. The interface is straightforward the only thing required to remember is:
-
-- When using dns attack don't specify the profile
+The `package/` directory publishes the toolkit as the importable `GVA` package.
 
 ```bash
-python GVA_gui.py
+cd package && pip install .
 ```
 
-### Initial window
+```python
+from GVA.ai_providers import AIEngine, config_from_keys
+from GVA.port_scanner import NetworkScanner
+from GVA.dns_recon import DNSRecon
+from GVA.jwt import JWTAnalyzer
+from GVA.subdomain import SubEnum
+from GVA import gui
 
-![init](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/6dd8bcba-b5e8-472a-b854-7cb4405e8a2b)
+# Build the AI engine from whichever provider keys you have.
+engine = AIEngine(config_from_keys(
+    openai_key="...",
+    anthropic_key="...",
+    gemini_key="...",
+))
 
-### NMAP window
+# Run a scan and read the consolidated report.
+scanner = NetworkScanner()
+report = scanner.scanner("scanme.nmap.org", profile=1, engine=engine, providers=["openai"])
+print(report.primary)
 
-![nmap](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/e53d03fd-dabf-4192-9426-84304d1680c8)
+# DNS and JWT follow the same pattern.
+dns = DNSRecon().dns_resolver("example.com", engine, ["openai"])
+subs = SubEnum().sub_enumerator("example.com", "lists/default.txt")
 
-### DNS window
+# Or launch the GUI.
+gui.launch()
+```
 
-![dns](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/ceac4170-3f00-48e2-9c5f-1572fd0ce0a6)
+Installing the package also provides the `gva` console command, equivalent to running
+`gpt_vuln.py`.
 
-### GEOIP window
+## Contributing
 
-![geoip](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/ca93b37b-e006-41d6-9c57-56203780e6cc)
+Issues and pull requests are welcome. See `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md`.
+For security reports, see `SECURITY.md`.
 
-### PCAP window
+## Disclaimer
 
-![pcap](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/e7b34d1f-4c36-41a0-8dc6-fd0c54b90df1)
+GVA is for authorized security testing and education only. Scan and analyse systems
+you own or have explicit permission to test.
 
-### SUBDOMAIN window
+## License
 
-![subdomain](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/34ec4f81-db63-47d3-8ed2-ed8763f7d933)
-
-### JWT window
-
-![jwt](https://github.com/morpheuslord/GPT_Vuln-analyzer/assets/70637311/aaa8fab5-9692-4b29-bdfa-9701c03928b4)
-
+MIT. See `LICENSE`.

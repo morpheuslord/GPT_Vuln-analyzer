@@ -16,7 +16,7 @@ from components.geo import geo_ip_recon
 from components.jwt import JWTAnalyzer
 from components.packet_analysis import PacketAnalysis
 from components.passbeaker import PasswordCracker
-from components.port_scanner import NetworkScanner
+from components.port_scanner import NetworkScanner, profile_choices
 from components.subdomain import SubEnum
 
 console = Console()
@@ -112,7 +112,15 @@ class Menus:
 
     def nmap_menu(self) -> None:
         target = Prompt.ask("Target IP/hostname", default="127.0.0.1")
-        profile = IntPrompt.ask("Nmap profile (1-13)", default=1)
+        table = Table(title="Nmap scan profiles")
+        table.add_column("#", style="cyan", justify="right")
+        table.add_column("Name", style="green")
+        table.add_column("Root", justify="center")
+        table.add_column("What it does")
+        for p in profile_choices():
+            table.add_row(str(p.number), p.name, "yes" if p.needs_root else "—", p.description)
+        console.print(table)
+        profile = IntPrompt.ask("Nmap profile (1-10)", default=1)
         providers = self._select_providers()
         report = self.scanner.scanner(target, profile, self.engine, providers)
         self.assets.render_analysis("Nmap", report)
