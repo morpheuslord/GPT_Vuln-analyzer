@@ -14,7 +14,7 @@ from components.jwt import JWTAnalyzer
 from components.menus import Menus
 from components.packet_analysis import PacketAnalysis
 from components.passbeaker import PasswordCracker
-from components.port_scanner import NetworkScanner
+from components.port_scanner import NetworkScanner, profile_choices
 from components.subdomain import SubEnum
 
 CURRENT_DIR = os.getcwd()
@@ -40,7 +40,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description='Nmap and multi-provider LLM integrated vulnerability scanner')
     parser.add_argument('--target', type=str, help='Target IP, hostname, JWT token or pcap file location')
-    parser.add_argument('--profile', type=int, default=1, help='Enter Profile of scan 1-13 (Default: 1)')
+    parser.add_argument('--profile', type=int, default=1, help='Nmap scan profile 1-10 (Default: 1; see --list_profiles)')
+    parser.add_argument('--list_profiles', action='store_true', help='List the available nmap scan profiles and exit')
     parser.add_argument('--sudo', action='store_true',
                         help='Force running nmap under sudo (auto-enabled for privileged profiles)')
     parser.add_argument('--attack', type=str, help='Attack type: nmap, dns, sub, jwt, pcap, geo, passcracker')
@@ -67,6 +68,19 @@ def parse_arguments():
                         help='Character set for brute force attack')
 
     return parser.parse_args()
+
+
+def list_profiles() -> None:
+    from rich.table import Table
+    table = Table(title="Nmap scan profiles", header_style="bold")
+    table.add_column("#", style="cyan", justify="right")
+    table.add_column("Name", style="green")
+    table.add_column("Root", justify="center")
+    table.add_column("What it does")
+    table.add_column("Nmap args", style="dim")
+    for p in profile_choices():
+        table.add_row(str(p.number), p.name, "yes" if p.needs_root else "—", p.description, p.args)
+    console.print(table)
 
 
 def build_engine(summarizer=None):
@@ -126,6 +140,9 @@ def handle_attack(args, engine, providers) -> None:
 
 def main() -> None:
     args = parse_arguments()
+    if args.list_profiles:
+        list_profiles()
+        return
     asset_codes.clearscr()
     cowsay.cow('GVA Usage in progress...')
 
