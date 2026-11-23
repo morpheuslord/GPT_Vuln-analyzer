@@ -19,7 +19,7 @@ deliberation agent reconcile their analyses into a single report.
 - **Subdomain enumeration** — resolve a wordlist of subdomains against a domain.
 - **JWT analysis** — decode a token and surface likely attacks and endpoints to test.
 - **PCAP analysis** — inspect a capture for traffic, ARP/MAC spoofing, and cleartext credentials.
-- **GeoIP lookup** — geolocate an IP via ipgeolocation.io.
+- **GeoIP lookup** — geolocate an IP via ipgeolocation.io, or [InternetData](https://internetdata.io) without a key.
 - **Password cracking** — wordlist and brute-force cracking with common hash algorithms.
 - **Multi-provider AI** — validated structured output via [Pydantic AI](https://ai.pydantic.dev/),
   with concurrent analysis and a deliberation step across models.
@@ -31,7 +31,9 @@ deliberation agent reconcile their analyses into a single report.
 - An API key for at least one AI provider (OpenAI, Anthropic, or Google Gemini). Ollama runs locally and needs no key.
 - `nmap` on `PATH` for the nmap attack
 - Wireshark / `tshark` on `PATH` for the pcap attack
-- An [ipgeolocation.io](https://ipgeolocation.io/) key for the geo attack
+- An [ipgeolocation.io](https://ipgeolocation.io/) key for the geo attack, optional: without one it uses
+  [InternetData](https://internetdata.io), which needs no key ([terms](https://internetdata.io/terms#no-key),
+  [privacy](https://internetdata.io/privacy))
 - Docker, only if you use the local Ollama provider
 
 ### nmap notes

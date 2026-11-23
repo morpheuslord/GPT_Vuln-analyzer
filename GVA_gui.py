@@ -105,7 +105,7 @@ ATTACKS = {
     },
     "geo": {
         "title": "GeoIP Recon",
-        "blurb": "Look up where an IP address is, via ipgeolocation.io.",
+        "blurb": "Look up where an IP address is, via ipgeolocation.io, or InternetData without a key.",
         "target": ("IP address", "8.8.8.8"),
         "ai": False,
         "extra": None,
