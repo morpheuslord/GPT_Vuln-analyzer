@@ -144,7 +144,9 @@ class Menus:
         console.print(output, style="bold underline")
 
     def geo_menu(self) -> None:
-        key = os.getenv("GEOIP_API_KEY") or Prompt.ask("GeoIP API key", password=True)
+        key = os.getenv("GEOIP_API_KEY") or Prompt.ask(
+            "ipgeolocation.io API key (blank for InternetData, no key)", password=True, default="", show_default=False
+        )
         target = Prompt.ask("Target IP")
         output = self.geo.geoip(key, target)
         self.assets.render_report("GeoIP", str(output))
